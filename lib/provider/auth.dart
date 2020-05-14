@@ -33,34 +33,22 @@ class AuthProvider with ChangeNotifier {
       headers: {"Authorization": token},
     );
     res = Result.fromJson(json.decode(response.body));
-   
-    print('cleared');
     notifyListeners();
-    print('new user' + res.user.id.toString());
     return res;
   }
 
   Future<bool> updateUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    
-    String token = prefs.getString('token');
-  
+    String token = prefs.getString('token');  
     var response = await http.put(ME, headers: {
       "Authorization": token
     }, body: {
       "address": adddress.text,
-      
     });
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
     if (response.statusCode == 200) {
-     
       return true;
     } else {
       print('failed');
-      print(res.user.pincode);
-      print(res.user.email.runtimeType);
-
       return false;
     }
   }

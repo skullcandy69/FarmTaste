@@ -27,7 +27,7 @@ class ProductCategoryData {
   String slug;
   String createdAt;
   String updatedAt;
-  Null deletedAt;
+  String deletedAt;
 
   ProductCategoryData(
       {this.id,
@@ -89,7 +89,7 @@ class ProductSubCategoryData {
   String imageUrl;
   String createdAt;
   String updatedAt;
-  Null deletedAt;
+  String deletedAt;
 
   ProductSubCategoryData(
       {this.id,
@@ -160,7 +160,7 @@ class ProductData {
   String slug;
   String createdAt;
   String updatedAt;
-  Null deletedAt;
+  String deletedAt;
   List<Rate> rate;
 
   ProductData(

@@ -33,6 +33,7 @@ class _ExistingCustomerState extends State<ExistingCustomer> {
       print('failed');
     }
   }
+
   @override
   void dispose() {
     super.dispose();
@@ -65,20 +66,9 @@ class _ExistingCustomerState extends State<ExistingCustomer> {
                   ),
                   Container(
                     height: 250,
-                    child: Image.network(
-                      'https://ozstaff.com/images/login.gif',
-                      loadingBuilder: (BuildContext context, Widget child,
-                          ImageChunkEvent loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes
-                                : null,
-                          ),
-                        );
-                      },
+                    child: Image.asset(
+                      'images/login.gif',
+
                       // ,scale: 2,
                     ),
                   ),
@@ -128,13 +118,12 @@ class _ExistingCustomerState extends State<ExistingCustomer> {
                     child: ArgonTimerButton(
                       height: 50,
                       width: MediaQuery.of(context).size.width * 0.25,
-                      onTap: (startTimer,btnState) async {
+                      onTap: (startTimer, btnState) async {
                         if (btnState == ButtonState.Idle) {
                           startTimer(1);
                         }
                         if (widget.signup == true) {
                           if (await authprovider.genOtpSignup()) {
-                          
                             changeScreenRepacement(
                                 context,
                                 OtpPin(

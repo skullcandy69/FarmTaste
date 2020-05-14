@@ -18,20 +18,22 @@ class Result {
     return data;
   }
 }
-
 class User {
   int id;
   String name;
   String email;
   String mobileNo;
-  Null alternateNo;
+  dynamic alternateNo;
   int wallet;
   int cityId;
   int locationId;
-  Null areaId;
-  Null pincode;
+  dynamic areaId;
+  dynamic pincode;
   String address;
-  Null landmark;
+  dynamic landmark;
+  dynamic state;
+  String referralCode;
+  dynamic referredBy;
   String createdAt;
   String updatedAt;
 
@@ -48,6 +50,9 @@ class User {
       this.pincode,
       this.address,
       this.landmark,
+      this.state,
+      this.referralCode,
+      this.referredBy,
       this.createdAt,
       this.updatedAt});
 
@@ -64,6 +69,9 @@ class User {
     pincode = json['pincode'];
     address = json['address'];
     landmark = json['landmark'];
+    state = json['state'];
+    referralCode = json['referral_code'];
+    referredBy = json['referred_by'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
@@ -82,6 +90,9 @@ class User {
     data['pincode'] = this.pincode;
     data['address'] = this.address;
     data['landmark'] = this.landmark;
+    data['state'] = this.state;
+    data['referral_code'] = this.referralCode;
+    data['referred_by'] = this.referredBy;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;

@@ -24,7 +24,6 @@ class _CityState extends State<City> {
         appBar: AppBar(
           title: Text(
             'Select City',
-            style: TextStyle(color: black),
           ),
           backgroundColor: pcolor,
         ),
@@ -40,7 +39,7 @@ class _CityState extends State<City> {
                 itemCount: snapshot.data.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisSpacing: 10,
-                    // mainAxisSpacing: 10,
+                    mainAxisSpacing: 10,
                     crossAxisCount: 2),
                 itemBuilder: (BuildContext context, int index) {
                   return ClipRRect(
@@ -99,104 +98,7 @@ class _CityState extends State<City> {
           },
         )
 
-        // body: SafeArea(
-        //     child: Container(
-
-        // child: Column(
-        //   children: <Widget>[
-
-        //     SizedBox(
-        //       height: 50,
-        //     ),
-        //     Row(
-        //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //       children: <Widget>[
-        //         GestureDetector(
-        //           onTap: ()=>changeScreen(context, District()),
-        //                           child: Container(
-        //             height: 170,
-        //             width: 150,
-        //             decoration: BoxDecoration(
-        //                 color: white,
-        //                 borderRadius: BorderRadius.all(Radius.circular(20))),
-        //             child: Column(
-        //               children: <Widget>[
-        //                 Padding(
-        //                   padding: const EdgeInsets.all(8.0),
-        //                   child: Image.network(
-        //                       'https://cdn.dribbble.com/users/569653/screenshots/2540009/landmark-india-gate.png'),
-        //                 ),
-        //                 Text('DELHI')
-        //               ],
-        //             ),
-        //           ),
-        //         ),
-        //         Container(
-        //           height: 170,
-        //           width: 150,
-        //           decoration: BoxDecoration(
-        //               color: white,
-        //               borderRadius: BorderRadius.all(Radius.circular(20))),
-        //           child: Column(
-        //             children: <Widget>[
-        //               Padding(
-        //                 padding: const EdgeInsets.all(8.0),
-        //                 child: Image.network(
-        //                     'https://cdn.clipart.email/71d068d4036585afaccfad0df9185131_gate-way-of-india-clipart_800-600.jpeg'),
-        //               ),
-        //               Text('MUMBAI')
-        //             ],
-        //           ),
-        //         ),
-        //       ],
-        //     ),
-        //     SizedBox(
-        //       height: 20,
-        //     ),
-        //     Row(
-        //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //       children: <Widget>[
-        //         Container(
-        //           height: 170,
-        //           width: 150,
-        //           decoration: BoxDecoration(
-        //               color: white,
-        //               borderRadius: BorderRadius.all(Radius.circular(20))),
-        //           child: Column(
-        //             children: <Widget>[
-
-        //               Padding(
-        //                 padding: const EdgeInsets.all(8.0),
-        //                 child: Image.network(
-        //                     'https://cdn.dribbble.com/users/1563378/screenshots/3425902/charminar_2x_1x.png'),
-        //               ),
-        //               Text('PUNE')
-        //             ],
-        //           ),
-        //         ),
-        //         Container(
-        //           height: 170,
-        //           width: 150,
-        //           decoration: BoxDecoration(
-        //               color: white,
-        //               borderRadius: BorderRadius.all(Radius.circular(20))),
-        //           child: Column(
-        //             children: <Widget>[
-        //               Padding(
-        //                 padding: const EdgeInsets.all(8.0),
-        //                 child: Image.network(
-        //                     'https://clip.cookdiary.net/sites/default/files/wallpaper/fort-clipart/295609/fort-clipart-animated-295609-6389771.jpg'),
-        //               ),
-        //               Text('BANGALORE')
-        //             ],
-        //           ),
-        //         ),
-        //       ],
-        //     ),
-        //   ],
-        // ),
-        // )
-        // ),
+       
         );
   }
 }

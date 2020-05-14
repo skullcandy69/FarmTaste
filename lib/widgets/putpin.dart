@@ -1,4 +1,5 @@
 import 'package:argon_buttons_flutter/argon_buttons_flutter.dart';
+import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:grocery/helpers/navigation.dart';
@@ -20,6 +21,24 @@ class OtpPin extends StatefulWidget {
 
 class OtpPinState extends State<OtpPin> {
   final FocusNode _pinPutFocusNode = FocusNode();
+
+  error() {
+    return EasyDialog(
+        topImage: NetworkImage(
+            'https://previews.123rf.com/images/imagecatalogue/imagecatalogue1610/imagecatalogue161016122/64582913-access-denied-text-rubber-seal-stamp-watermark-tag-inside-rectangular-banner-with-grunge-design-and-.jpg'),
+        height: 260,
+        closeButton: true,
+        title: Text('Wrong Otp',style: TextStyle(fontWeight: FontWeight.bold,fontSize:25 )),
+        contentList: [
+          Container(
+            width: MediaQuery.of(context).size.width,
+            color: green,
+            height: 50,
+            child: FlatButton(
+                onPressed: () => Navigator.pop(context), child: Text('Retry')),
+          )
+        ]).show(context);
+  }
 
   Widget onlySelectedBorderPinPut(TextEditingController otp) {
     BoxDecoration pinPutDecoration = BoxDecoration(
@@ -120,6 +139,7 @@ class OtpPinState extends State<OtpPin> {
                     changeScreenRepacement(context, HomePage());
                   } else {
                     stopLoading();
+                    error();
                   }
                 } else if (widget.signup == false) {
                   if (await authprovider.inputotp()) {
@@ -128,6 +148,7 @@ class OtpPinState extends State<OtpPin> {
                     changeScreenRepacement(context, HomePage());
                   } else {
                     stopLoading();
+                    error();
                   }
                 } else {
                   // final snackBar = new SnackBar(

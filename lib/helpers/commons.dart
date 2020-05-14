@@ -40,7 +40,7 @@ const CITIES = BASE_URL + "/cities"; //(get request to see all cities)
 const AREA =
     BASE_URL + "/locations/"; //(get request for all locations of a city)
 const ALLAREA = BASE_URL +
-    "/areas/+locationId"; //(get request for all areas of a particaular location)
+    "/areas/"; //(get request for all areas of a particaular location)
 
 
 // IV) PRODUCT RELATED =>
@@ -64,11 +64,24 @@ const DELETEPRODUCATCAT=BASE_URL+ "/productCategories/+categoryId" ;// (delete c
 const DELETESUBPRODCAT=BASE_URL+ "/productSubCategories/+subCategoryId" ;// (delete subCategory)
 const DELETEPRODUCT=BASE_URL+ "/products/+productId" ;// (delete product)
 
+const SEARCHPRODUCTS = BASE_URL+"/products?query=";
 
 //CART
 
-const ADDTOCART= BASE_URL+"/add-to-cart"; //(post request to add products to cart) (body: { product_id: number, no_of_units: number })
+const ADDTOCART= BASE_URL+"/add-to-cart"; 
+const REMOVEFROMCART= BASE_URL+"/add-to-cart/";//(put request to add products to cart, remove product from cart, update cart) (body: { product_id: number, no_of_units: number })
 const MYCART=BASE_URL+ "/my-cart"; //(get request to view products of my cart) 
-const UPDATECARTITEM=BASE_URL+ "/cart-item/";// (put request to update no_of_units of cart) (body: { no_of_units: number})
-const DELETECARTITEMS =BASE_URL+"/cart-item/";// (delete request to delete an item from my cart)
 const EMPTYCART = BASE_URL+ "/empty-cart" ;//(delete request to empty my cart)
+
+
+
+//orders
+const ORDERS =BASE_URL+"/orders";
+const UPDATEORDERS =BASE_URL+"/orders/";
+const HISTORY = BASE_URL + "/history";
+
+//coupon
+const COUPON = BASE_URL+"/coupons";
+const COUNTER=BASE_URL+"/product-counter"+"/";
+const APPLYCOUPON= BASE_URL+"/apply-coupon"+"/";
+const REMOVECOUPON= BASE_URL+"/remove-coupon";

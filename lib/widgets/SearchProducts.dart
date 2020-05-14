@@ -1,158 +1,138 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
-import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/models/CartModel.dart';
 import 'package:grocery/models/products.dart';
 import 'package:grocery/provider/addcart.dart';
 import 'package:grocery/widgets/Loader.dart';
-import 'package:grocery/widgets/SearchProducts.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:http/http.dart' as http;
 
-class ProductDetails extends StatefulWidget {
-  final int id;
-  final String title;
-  final String head;
-  final List<ProductSubCategoryData> productsubcat;
-  ProductDetails({this.id, this.title, this.head, this.productsubcat});
+class SearchProduct extends StatefulWidget {
   @override
-  _ProductDetailsState createState() => _ProductDetailsState();
+  _SearchProductState createState() => _SearchProductState();
 }
 
-final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+class _SearchProductState extends State<SearchProduct> {
+  Future<List<ProductData>> _getAllPosts() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token');
+    var response = await http
+        .get(SEARCHPRODUCTS + search, headers: {"Authorization": token});
+    Products products = Products.fromJson(json.decode(response.body));
+    return products.data;
+  }
 
-Future<List<ProductData>> productcatlist(String id) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String token = prefs.getString('token');
-  var response =
-      await http.get(GETSUBPRODUCATCAT + id, headers: {"Authorization": token});
-  print('products');
-  Products products = Products.fromJson(json.decode(response.body));
-  print('products:' + products.data[1].title);
-  return products.data;
-}
-
-class _ProductDetailsState extends State<ProductDetails> {
-  bool add = false;
+  String search = '';
+  bool s = false;
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: widget.productsubcat.length,
-      initialIndex: widget.id,
-      child: Scaffold(
-          key: _scaffoldKey,
-          appBar: AppBar(
-            backgroundColor: pcolor,  
-            actions: <Widget>[
-              IconButton( 
-                  icon: Icon(Icons.search),     
-                  onPressed: () {
-                    changeScreen(context, SearchProduct());
-                  })
-            ],
-            title: Text(widget.head.toUpperCase()),
-            bottom: TabBar(
-              isScrollable: true,
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicatorWeight: 5,
-              indicatorColor: white,
-              tabs: List<Widget>.generate(widget.productsubcat.length,
-                  (int index) {
-                return new Tab(
-                    text: widget.productsubcat[index].title.toUpperCase());
-              }),
+    return Scaffold(
+        body: SafeArea(
+            child: SingleChildScrollView(
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  height: 50,
+                  width: MediaQuery.of(context).size.width * .95,
+                  decoration: BoxDecoration(
+                      color: white,
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: TextField(
+                    onTap: () {
+                      setState(() {
+                        s = true;
+                      });
+                    },
+                    onChanged: (val) {
+                      setState(() {
+                        search = val;
+                      });
+                    },
+                    autofocus: true,
+                    decoration: InputDecoration(
+                        prefixIcon: IconButton(
+                            icon: Icon(
+                              Icons.arrow_back_ios,
+                              color: grey,
+                            ),
+                            onPressed: () => Navigator.of(context).pop()),
+                        suffixIcon: s == true
+                            ? IconButton(
+                                icon: Icon(Icons.cancel),
+                                onPressed: () => Navigator.pop(context))
+                            : null,
+                        hintText: 'Search for Products',
+                        border: InputBorder.none),
+                  ),
+                ),
+              ],
             ),
           ),
-          body: TabBarView(
-              children: List<Widget>.generate(widget.productsubcat.length,
-                  (int index) {
-            return FutureBuilder(
-                future:
-                    productcatlist(widget.productsubcat[index].id.toString()),
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if (snapshot.data == null) {
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 16.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: <Widget>[
-                          Expanded(
-                            child: Shimmer.fromColors(
-                              baseColor: Colors.lightGreen[100],
-                              highlightColor: Colors.grey[100],
-                              // enabled: _enabled,
-                              child: ListView.builder(
-                                itemBuilder: (_, __) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 60.0,
-                                        height: 60.0,
-                                        color: Colors.white,
-                                      ),
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 8.0),
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            Container(
-                                              width: double.infinity,
-                                              height: 8.0,
-                                              color: Colors.white,
-                                            ),
-                                            const Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 2.0),
-                                            ),
-                                            Container(
-                                              width: double.infinity,
-                                              height: 8.0,
-                                              color: Colors.white,
-                                            ),
-                                            const Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 2.0),
-                                            ),
-                                            Container(
-                                              width: 40.0,
-                                              height: 8.0,
-                                              color: Colors.white,
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    ],
+          FutureBuilder(
+              future: _getAllPosts(),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (!snapshot.hasData) {
+                  return Container(
+                    child: Center(
+                      child: Loader(),
+                    ),
+                  );
+                } else {
+                  return Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            height: 40,
+                            // color: Colors.black12,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 10.0, right: 10),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Text(
+                                    "Search result : " +
+                                        snapshot.data.length.toString() +
+                                        " items",
+                                    style: TextStyle(
+                                        color: black,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w500),
                                   ),
-                                ),
-                                itemCount: 6,
+                                ],
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    );
-                  } else {
-                    return  _listofitems(snapshot.data, context, add);
-                  }
-                });
-          }))),
-    );
+                      SizedBox(
+                        height: 20,
+                      ),
+                      _listofitems(snapshot.data, context, true)
+                    ],
+                  );
+                }
+              })
+        ],
+      ),
+    )));
   }
+}
 
-  _listofitems(List<ProductData> item, BuildContext context, bool add) {
-    return ListView.builder(
+_listofitems(List<ProductData> item, BuildContext context, bool add) {
+  return Container(
+    height: MediaQuery.of(context).size.height * .7,
+    child: ListView.builder(
       padding: EdgeInsets.all(10),
       itemCount: item.length,
       itemBuilder: (BuildContext context, int index) {
@@ -160,8 +140,8 @@ class _ProductDetailsState extends State<ProductDetails> {
           pro: item[index],
         );
       },
-    );
-  }
+    ),
+  );
 }
 
 class DetailScreen extends StatefulWidget {
@@ -173,7 +153,7 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
-  Future<void>getCount() async {
+   Future<void>getCount() async {
      SharedPreferences pref = await SharedPreferences.getInstance();
   String token = pref.getString('token');
   var response = await http.get(COUNTER+widget.pro.id.toString(), headers: {"Authorization": token});
@@ -194,7 +174,7 @@ class _DetailScreenState extends State<DetailScreen> {
       child: Padding(
         padding: const EdgeInsets.all(5.0),
         child: Container(
-          height: 80,
+          height: 120,
           child: Row(
             children: <Widget>[
               Expanded(
@@ -202,7 +182,7 @@ class _DetailScreenState extends State<DetailScreen> {
                   // mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(5),
                       child: Container(
                         height: 80,
                         width: 80,

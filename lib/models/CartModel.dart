@@ -1,169 +1,161 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:grocery/models/products.dart';
+import 'dart:convert';
 
 CartItem cartItemFromJson(String str) => CartItem.fromJson(json.decode(str));
 
 String cartItemToJson(CartItem data) => json.encode(data.toJson());
-
 class CartItem {
-    List<CartData> data;
+  CartData data;
 
-    CartItem({
-        this.data,
-    });
+  CartItem({this.data});
 
-    factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
-        data: List<CartData>.from(json["data"].map((x) => CartData.fromJson(x))),
-    );
+  CartItem.fromJson(Map<String, dynamic> json) {
+    data = json['data'] != null ? new CartData.fromJson(json['data']) : null;
+  }
 
-    Map<String, dynamic> toJson() => {
-        "data": List<dynamic>.from(data.map((x) => x.toJson())),
-    };
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.data != null) {
+      data['data'] = this.data.toJson();
+    }
+    return data;
+  }
 }
 
 class CartData {
-    int id;
-    int productId;
-    int userId;
-    double rate;
-    int noOfUnits;
-    DateTime createdAt;
-    DateTime updatedAt;
-    CartProduct product;
+  int id;
+  List<CartProducts> products;
+  int userId;
+  dynamic amount;
+  dynamic baseAmount;
+  dynamic deliveryCharge;
+  dynamic discount;
+  String couponCode;
+  int couponId;
+  String createdAt;
+  String updatedAt;
+  String deletedAt;
 
-    CartData({
-        this.id,
-        this.productId,
-        this.userId,
-        this.rate,
-        this.noOfUnits,
-        this.createdAt,
-        this.updatedAt,
-        this.product,
-    });
+  CartData(
+      {this.id,
+      this.products,
+      this.userId,
+      this.amount,
+      this.baseAmount,
+      this.deliveryCharge,
+      this.discount,
+      this.couponCode,
+      this.couponId,
+      this.createdAt,
+      this.updatedAt,
+      this.deletedAt});
 
-    factory CartData.fromJson(Map<String, dynamic> json) => CartData(
-        id: json["id"],
-        productId: json["product_id"],
-        userId: json["user_id"],
-        rate: json["rate"].toDouble(),
-        noOfUnits: json["no_of_units"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-        product: CartProduct.fromJson(json["product"]),
-    );
+  CartData.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    if (json['products'] != null) {
+      products = new List<CartProducts>();
+      json['products'].forEach((v) {
+        products.add(new CartProducts.fromJson(v));
+      });
+    }
+    userId = json['user_id'];
+    amount = json['amount'];
+    baseAmount = json['base_amount'];
+    deliveryCharge = json['delivery_charge'];
+    discount = json['discount'];
+    couponCode = json['coupon_code'];
+    couponId = json['coupon_id'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    deletedAt = json['deleted_at'];
+  }
 
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "product_id": productId,
-        "user_id": userId,
-        "rate": rate,
-        "no_of_units": noOfUnits,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "product": product.toJson(),
-    };
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    if (this.products != null) {
+      data['products'] = this.products.map((v) => v.toJson()).toList();
+    }
+    data['user_id'] = this.userId;
+    data['amount'] = this.amount;
+    data['base_amount'] = this.baseAmount;
+    data['delivery_charge'] = this.deliveryCharge;
+    data['discount'] = this.discount;
+    data['coupon_code'] = this.couponCode;
+    data['coupon_id'] = this.couponId;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    data['deleted_at'] = this.deletedAt;
+    return data;
+  }
 }
 
-class CartProduct {
-    String type;
-    int id;
-    String title;
-    int subCategoryId;
-    String imageUrl;
-    bool isUnderGst;
-    double gstRate;
-    List<Rate> rate;
+class CartProducts {
+  int productId;
+  int noOfUnits;
+  dynamic baseRate;
+  dynamic rate;
+  String title;
+  String imageUrl;
 
-    CartProduct({
-        this.type,
-        this.id,
-        this.title,
-        this.subCategoryId,
-        this.imageUrl,
-        this.isUnderGst,
-        this.gstRate,
-        this.rate,
-    });
+  CartProducts(
+      {this.productId,
+      this.noOfUnits,
+      this.baseRate,
+      this.rate,
+      this.title,
+      this.imageUrl});
 
-    factory CartProduct.fromJson(Map<String, dynamic> json) => CartProduct(
-        type: json["__type"],
-        id: json["id"],
-        title: json["title"],
-        subCategoryId: json["sub_category_id"],
-        imageUrl: json["image_url"],
-        isUnderGst: json["is_under_gst"],
-        gstRate: json["gst_rate"] == null ? null : json["gst_rate"].toDouble(),
-        rate: List<Rate>.from(json["rate"].map((x) => Rate.fromJson(x))),
-    );
+  CartProducts.fromJson(Map<String, dynamic> json) {
+    productId = json['product_id'];
+    noOfUnits = json['no_of_units'];
+    baseRate = json['base_rate'];
+    rate = json['rate'];
+    title = json['title'];
+    imageUrl = json['image_url'];
+  }
 
-    Map<String, dynamic> toJson() => {
-        "__type": type,
-        "id": id,
-        "title": title,
-        "sub_category_id": subCategoryId,
-        "image_url": imageUrl,
-        "is_under_gst": isUnderGst,
-        "gst_rate": gstRate == null ? null : gstRate,
-        "rate": List<dynamic>.from(rate.map((x) => x.toJson())),
-    };
-}
-
-class Rate {
-    String type;
-    int id;
-    int baseAmount;
-    int discountedAmount;
-
-    Rate({
-        this.type,
-        this.id,
-        this.baseAmount,
-        this.discountedAmount,
-    });
-
-    factory Rate.fromJson(Map<String, dynamic> json) => Rate(
-        type: json["__type"],
-        id: json["id"],
-        baseAmount: json["base_amount"],
-        discountedAmount: json["discounted_amount"] == null ? null : json["discounted_amount"],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "__type":type,
-        "id": id,
-        "base_amount": baseAmount,
-        "discounted_amount": discountedAmount == null ? null : discountedAmount,
-    };
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['product_id'] = this.productId;
+    data['no_of_units'] = this.noOfUnits;
+    data['base_rate'] = this.baseRate;
+    data['rate'] = this.rate;
+    data['title'] = this.title;
+    data['image_url'] = this.imageUrl;
+    return data;
+  }
 }
 
 
 
-
-
-class CartItemCounter{
+class CartItemCounter {
   ProductData product;
   int counter;
-  
-  ProductData get getid =>product;
+
+  ProductData get getid => product;
   int get getcounter => counter;
-  inccount(int c){
-    this.counter+=c;
+  inccount(int c) {
+    this.counter += c;
     return counter;
   }
-  CartItemCounter({this.product,this.counter});
+
+  CartItemCounter({this.product, this.counter});
 }
 
 class ProductModel extends ChangeNotifier {
   List<CartItemCounter> productlist = [];
-  int countitem=0;
+  int countitem = 0;
   removeItem(int index) {
-    productlist.length > 0 ??productlist.removeAt(index);
+    productlist.length > 0 ?? productlist.removeAt(index);
     notifyListeners();
   }
 
-
+  clearList(){
+    productlist.clear();
+    notifyListeners();
+  }
 
   totalprice() {
     int tprice = 0;
@@ -179,12 +171,12 @@ class ProductModel extends ChangeNotifier {
     return tprice;
   }
 
-  addTaskInList(ProductData pro,int counter) {
-    CartItemCounter taskModel = CartItemCounter(product: pro,counter: counter);
+  addTaskInList(ProductData pro, int counter) {
+    CartItemCounter taskModel = CartItemCounter(product: pro, counter: counter);
     print(taskModel.inccount(counter));
     productlist.add(taskModel);
-    countitem+=1;
-    
+    countitem += 1;
+
     notifyListeners();
     //code to do
   }

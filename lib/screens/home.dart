@@ -1,23 +1,26 @@
 import 'dart:convert';
-import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/models/CartModel.dart';
 import 'package:grocery/models/user_model.dart';
 import 'package:grocery/provider/auth.dart';
+import 'package:grocery/screens/Coupons.dart';
+import 'package:grocery/screens/Refer.dart';
 import 'package:grocery/screens/login.dart';
 import 'package:grocery/screens/profile.dart';
 import 'package:grocery/screens/wallet.dart';
 import 'package:grocery/widgets/Productcategory.dart';
+import 'package:grocery/widgets/SearchProducts.dart';
+import 'package:grocery/widgets/UserDetails.dart';
 import 'package:grocery/widgets/address.dart';
 import 'package:grocery/widgets/calendar.dart';
 import 'package:grocery/widgets/card.dart';
 import 'package:grocery/widgets/delivery_status.dart';
 import 'package:grocery/screens/shoppingCart.dart';
+import 'package:grocery/widgets/helpDialog.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -50,19 +53,23 @@ class _HomePageState extends State<HomePage> {
     return Consumer<ProductModel>(builder: (context, pro, child) {
       return Scaffold(
           appBar: AppBar(
-            title: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                  color: white,
-                  borderRadius: BorderRadius.all(Radius.circular(10))),
-              child: TextField(
-                decoration: InputDecoration(
-                    icon: Icon(
-                      Icons.search,
-                      color: grey,
-                    ),
-                    hintText: 'Search for Products',
-                    border: InputBorder.none),
+            title: GestureDetector(
+              onTap: ()=>changeScreen(context,SearchProduct()),
+                          child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                    color: white,
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                child: TextField(
+                  decoration: InputDecoration(
+                    enabled: false,
+                      icon: Icon(
+                        Icons.search,
+                        color: grey,
+                      ),
+                      hintText: 'Search for Products',
+                      border: InputBorder.none),
+                ),
               ),
             ),
             backgroundColor: pcolor,
@@ -81,39 +88,39 @@ class _HomePageState extends State<HomePage> {
                   children: <Widget>[
                     IconButton(
                         icon: Icon(
-                          Icons.shopping_basket,
+                          Icons.shopping_cart,
                           color: white,
                           size: 30,
                         ),
                         onPressed: () async {
                           changeScreen(context, ShoppingCart());
                         }),
-                    // Positioned(
-                    //   bottom: 5,
-                    //   left: 5,
-                    //   child: Container(
-                    //     height: 15,
-                    //     width: 18,
-                    //     decoration: BoxDecoration(
-                    //         color: white,
-                    //         borderRadius: BorderRadius.circular(20),
-                    //         boxShadow: [
-                    //           BoxShadow(
-                    //               color: grey,
-                    //               offset: Offset(2, 2),
-                    //               blurRadius: 3)
-                    //         ]),
-                    //     child: Center(
-                    //       child: Text(
-                    //         pro.productlist.length.toString(),
-                    //         style: TextStyle(
-                    //             fontSize: 10,
-                    //             color: red,
-                    //             fontWeight: FontWeight.w600),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // )
+                    Positioned(
+                      bottom: 5,
+                      left: 5,
+                      child: Container(
+                        height: 15,
+                        width: 18,
+                        decoration: BoxDecoration(
+                            color: white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: grey,
+                                  offset: Offset(2, 2),
+                                  blurRadius: 3)
+                            ]),
+                        child: Center(
+                          child: Text(
+                            pro.productlist.length.toString(),
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: red,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -152,6 +159,7 @@ class _HomePageState extends State<HomePage> {
                 ListTile(
                   leading: Icon(Icons.add_photo_alternate),
                   title: Text('Plan'),
+                 
                 ),
                 ListTile(
                   leading: Icon(Icons.account_balance_wallet),
@@ -190,15 +198,14 @@ class _HomePageState extends State<HomePage> {
                 ListTile(
                   leading: Icon(Icons.local_offer),
                   title: Text('Offers'),
+                  onTap: ()=>changeScreen(context,Coupon(amount: 0,)),
                 ),
                 ListTile(
                   leading: Icon(Icons.grain),
                   title: Text('Refer and Earn'),
+                  onTap: ()=>changeScreen(context, ReferAndEarn(res:res)),
                 ),
-                // ListTile(
-                //   leading: Icon(Icons.live_help),
-                //   title: Text('Help'),
-                // ),
+               
                 ListTile(
                   onTap: () async {
                     print('good bye');
@@ -222,7 +229,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () => _basicContentEasyDialog(context),
+            onPressed: () => basicContentEasyDialog(context,'Hello'),
             backgroundColor: blue,
             child: Text('help??'),
           ));
@@ -230,46 +237,3 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-void _basicContentEasyDialog(BuildContext context) {
-  EasyDialog(
-      title: Text(
-        "REACH US THROUGH",
-        style: TextStyle(fontWeight: FontWeight.bold),
-        textScaleFactor: 1.2,
-      ),
-      topImage: NetworkImage(
-          'https://farmtaste.herokuapp.com/public/uploads/extras/artboard.png'),
-      height: 350,
-      closeButton: true,
-      contentList: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            ListTile(
-                leading: Container(
-                    height: 45, child: Image.asset('images/call.png')),
-                title: Text('Call Us'),
-                trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () => launch("tel://8750185501")),
-            ListTile(
-              onTap: () => launch("mailto:farmtaste@gmail.com"),
-              leading:
-                  Container(height: 45, child: Image.asset('images/email.png')),
-              title: Text('Mail Us'),
-              trailing: Icon(Icons.arrow_forward_ios),
-            ),
-            ListTile(
-              leading: Container(
-                width: 45,
-                child: Image.asset('images/whatsapp.png'),
-              ),
-              title: Text('WhatsApp'),
-              trailing: Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                launch('https://wa.me/918750185501?text=hello');
-              },
-            ),
-          ],
-        )
-      ]).show(context);
-}
