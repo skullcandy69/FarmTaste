@@ -1,3 +1,5 @@
+import 'package:equatable/equatable.dart';
+
 class ProductsCategories {
   List<ProductCategoryData> data;
 
@@ -149,18 +151,19 @@ class Products {
   }
 }
 
-class ProductData {
+class ProductData extends Equatable{
   String sType;
   int id;
   String title;
   int subCategoryId;
   String imageUrl;
   bool isUnderGst;
+  String baseQuantity;
   dynamic gstRate;
   String slug;
   String createdAt;
   String updatedAt;
-  String deletedAt;
+  dynamic deletedAt;
   List<Rate> rate;
 
   ProductData(
@@ -170,6 +173,7 @@ class ProductData {
       this.subCategoryId,
       this.imageUrl,
       this.isUnderGst,
+      this.baseQuantity,
       this.gstRate,
       this.slug,
       this.createdAt,
@@ -184,6 +188,7 @@ class ProductData {
     subCategoryId = json['sub_category_id'];
     imageUrl = json['image_url'];
     isUnderGst = json['is_under_gst'];
+    baseQuantity = json['base_quantity'];
     gstRate = json['gst_rate'];
     slug = json['slug'];
     createdAt = json['created_at'];
@@ -205,6 +210,7 @@ class ProductData {
     data['sub_category_id'] = this.subCategoryId;
     data['image_url'] = this.imageUrl;
     data['is_under_gst'] = this.isUnderGst;
+    data['base_quantity'] = this.baseQuantity;
     data['gst_rate'] = this.gstRate;
     data['slug'] = this.slug;
     data['created_at'] = this.createdAt;
@@ -215,6 +221,10 @@ class ProductData {
     }
     return data;
   }
+
+  @override
+  // TODO: implement props
+  List<Object> get props => [id];
 }
 
 class Rate {

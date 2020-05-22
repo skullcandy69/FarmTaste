@@ -60,10 +60,9 @@ class AuthProvider with ChangeNotifier {
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
     if (response.statusCode == 200 &&
-        json.decode(response.body) == "OTP Generated, Kindly Login") {
+        json.decode(response.body)['data'] == "OTP Generated, Kindly Login") {
       _status = status.Authenticating;
       notifyListeners();
-
       return true;
     } else {
       print('failed');

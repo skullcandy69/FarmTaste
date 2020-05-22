@@ -25,10 +25,12 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   Razorpay _razorpay;
+  bool isLoading = true;
   @override
   void initState() {
     super.initState();
-
+    getUser();
+    netamountpay = widget.totalamount;
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
@@ -42,22 +44,46 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   String cartid;
-  dynamic amount;
-  void openCheckout(method, wallet, res) async {
-    // amount = useWallet(widget.totalamount,res.user.wallet);
-    // wallet ? (widget.totalamount - res.user.wallet) : widget.totalamount;
+  dynamic walletamount;
+  dynamic netamountpay;
+  uwallet(Result res, bool val) {
+    if (val) {
+      if (res.user.wallet >= widget.totalamount) {
+        setState(() {
+          walletamount = res.user.wallet - widget.totalamount;
+          netamountpay = 0;
+        });
+      } else if (res.user.wallet < widget.totalamount) {
+        setState(() {
+          walletamount = 0;
+          netamountpay = widget.totalamount - res.user.wallet;
+        });
+      }
+    } else {
+      setState(() {
+        walletamount = res.user.wallet;
+        netamountpay = widget.totalamount;
+      });
+    }
+    print(netamountpay);
+    print(walletamount);
+  }
+
+
+  void openCheckout(paymethod, method, wallet, res) async {
+    print(widget.amount);
     cartid = await createOrder(
         widget.cart.id, method, widget.amount, res.user.address);
     var options = {
       'key': 'rzp_test_9xPUvXMTVSbgW5',
-      'amount': widget.totalamount * 100,
+      'amount': (netamountpay * 100).toInt(),
       'name': 'farmtaste',
       'description': 'Order Payment',
       'prefill': {
         "name": res.user.name,
         'contact': res.user.mobileNo,
         'email': res.user.email,
-        'method': method
+        'method': paymethod
       },
       "image":
           'https://merriam-webster.com/assets/mw/images/article/art-wap-landing-mp-lg/meanwhile-2453-cc63cdb89c527209296a3ec7ffd9ee59@1x.jpg',
@@ -81,6 +107,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
     print(cartid);
+    await http.put(UPDATEORDERS + cartid,
+        headers: {"Authorization": token}, body: {"payment_status": "success"});
+    Provider.of<ProductModel>(context, listen: false).clearList();
     EasyDialog(
         topImage: NetworkImage(
             'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1'),
@@ -95,18 +124,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
             color: green,
             height: 50,
             child: FlatButton(
-                onPressed: () =>
-                    changeScreenRepacement(context, ShoppingCart()),
+                onPressed: () async {
+                  await http.put(ME,
+                      headers: {"Authorization": token},
+                      body: {"wallet": walletamount.toString()});
+                  await http
+                      .delete(EMPTYCART, headers: {"Authorization": token});
+                  changeScreenRepacement(context, ShoppingCart());
+                },
                 child: Text(
                   'Continue Shopping',
                   style: TextStyle(color: white, fontWeight: FontWeight.bold),
                 )),
           )
         ]).show(context);
-    await http.put(UPDATEORDERS + cartid,
-        headers: {"Authorization": token}, body: {"payment_status": "success"});
-    // await http.put(ME, headers: {"Authorization": token}, body: {"wallet": ""});
-    await http.delete(EMPTYCART, headers: {"Authorization": token});
   }
 
   void _handlePaymentError(PaymentFailureResponse response) async {
@@ -141,16 +172,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   bool useWallet = false;
-  Future<Result> getUser() async {
+  Result res;
+  void getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
     var response = await http.get(
       ME,
       headers: {"Authorization": token},
     );
-    Result res = Result.fromJson(json.decode(response.body));
-    print('new user' + res.user.address);
-    return res;
+    Result result = Result.fromJson(json.decode(response.body));
+    print('new user' + result.user.address);
+    setState(() {
+      res = result;
+      isLoading = false;
+    });
   }
 
   @override
@@ -161,197 +196,286 @@ class _PaymentScreenState extends State<PaymentScreen> {
           title: Text('Payments'),
           backgroundColor: pcolor,
         ),
-        body: FutureBuilder(
-            future: getUser(),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.data == null) {
-                return Container(
-                  child: Center(
-                    child: Loader(),
+        body: isLoading
+            ? Container(
+                child: Center(
+                  child: Loader(),
+                ),
+              )
+            : Column(
+                children: <Widget>[
+                  Bannerpayment(
+                    status: true,
                   ),
-                );
-              } else {
-                return Column(
-                  children: <Widget>[
-                    Bannerpayment(
-                      status: true,
-                    ),
-                    // Padding(
-                    //   padding:
-                    //       const EdgeInsets.only(top: 8.0, left: 15, right: 8),
-                    //   child: Row(
-                    //     children: <Widget>[
-                    //       Text(
-                    //         snapshot.data.user.name ?? 'Null',
-                    //         style: TextStyle(
-                    //             fontWeight: FontWeight.bold, fontSize: 20),
-                    //       )
-                    //     ],
-                    //   ),
-                    // ),
-                    // ListTile(
-                    //     leading: Text(
-                    //       "+91 " + snapshot.data.user.mobileNo ?? 'Null',
-                    //       overflow: TextOverflow.ellipsis,
-                    //       style: TextStyle(
-                    //           fontWeight: FontWeight.w300, fontSize: 15),
-                    //     ),
-                    //     trailing: Text(
-                    //       snapshot.data.user.email ?? 'Null',
-                    //       style: TextStyle(
-                    //           fontWeight: FontWeight.w300, fontSize: 15),
-                    //     )),
-                    // Divider(
-                    //   thickness: 5,
-                    // ),
-                    // Padding(
-                    //   padding: const EdgeInsets.only(left: 15, right: 8),
-                    //   child: Row(
-                    //     children: <Widget>[
-                    //       Text(
-                    //         'Saved Address',
-                    //         style: TextStyle(
-                    //           fontSize: 18,
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
-                    // Padding(
-                    //   padding: const EdgeInsets.all(8.0),
-                    //   child: Container(
-                    //     height: 100,
-                    //     decoration: BoxDecoration(
-                    //         border: Border.all(),
-                    //         borderRadius: BorderRadius.circular(20)),
-                    //     child: Column(
-                    //       children: <Widget>[
-                    //         ListTile(
-                    //           leading: Icon(
-                    //             Icons.radio_button_checked,
-                    //             color: green,
-                    //           ),
-                    //           title: Text('Home'),
-                    //           subtitle: Text(
-                    //             snapshot.data.user.address ?? 'Null',
-                    //           ),
-                    //           trailing: Icon(
-                    //             Icons.edit,
-                    //           ),
-                    //           isThreeLine: true,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    Row(
-                      children: <Widget>[
-                        Checkbox(
-                            value: useWallet,
-                            onChanged: (val) {
-                              setState(() {
-                                useWallet = val;
-                              });
-                            }),
-                        Text(
-                            'Use Wallet amount (₹ ${snapshot.data.user.wallet} )')
-                      ],
-                    ),
-                    ListTile(
-                      leading: Text(
-                        'Cash on delivery(COD)',
-                        style: TextStyle(
-                          fontSize: 15,
-                        ),
+                  Row(
+                    children: <Widget>[
+                      Checkbox(
+                          value: useWallet,
+                          onChanged: (val) {
+                            uwallet(res, val);
+                            setState(() {
+                              useWallet = val;
+                            });
+                          }),
+                      Text('Use Wallet amount (₹ ${res.user.wallet} )')
+                    ],
+                  ),
+                  ListTile(
+                    leading: Text(
+                      'Cash on delivery(COD)',
+                      style: TextStyle(
+                        fontSize: 15,
                       ),
-                      trailing: Icon(Icons.arrow_forward_ios),
-                      onTap: () async {
-                        authprovider.clearList();
-                        EasyDialog(
-                            topImage: NetworkImage(
-                              'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1',
-                            ),
-                            height: 320,
-                            closeButton: false,
-                            title: Text('Order Successful',
-                                style: TextStyle(fontSize: 25)),
-                            description: Text(
-                                'We have recieved your order please \n  check order history in your wallet\n'),
-                            contentList: [
-                              Container(
-                                width: MediaQuery.of(context).size.width,
-                                color: green,
-                                height: 50,
-                                child: FlatButton(
-                                    onPressed: () async {
-                                      await createOrder(
-                                          widget.cart.id,
-                                          'cod',
-                                          widget.amount,
-                                          snapshot.data.user.address);
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios),
+                    onTap: () async {
+                      authprovider.clearList();
+                      EasyDialog(
+                          topImage: NetworkImage(
+                            'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1',
+                          ),
+                          height: 320,
+                          closeButton: false,
+                          title: Text('Order Successful',
+                              style: TextStyle(fontSize: 25)),
+                          description: Text(
+                              'We have recieved your order please \n  check order history in your wallet\n'),
+                          contentList: [
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              color: green,
+                              height: 50,
+                              child: FlatButton(
+                                  onPressed: () async {
+                                    await createOrder(widget.cart.id, 'cod',
+                                        widget.amount, res.user.address);
 
-                                      await http.delete(EMPTYCART,
-                                          headers: {"Authorization": token});
-                                      changeScreenRepacement(
-                                          context, ShoppingCart());
-                                    },
-                                    child: Text(
-                                      'Continue Shopping',
-                                      style: TextStyle(
-                                          color: white,
-                                          fontWeight: FontWeight.bold),
-                                    )),
+                                    await http.delete(EMPTYCART,
+                                        headers: {"Authorization": token});
+                                    changeScreenRepacement(
+                                        context, ShoppingCart());
+                                  },
+                                  child: Text(
+                                    'Continue Shopping',
+                                    style: TextStyle(
+                                        color: white,
+                                        fontWeight: FontWeight.bold),
+                                  )),
+                            )
+                          ]).show(context);
+                    },
+                  ),
+                  ListTile(
+                    leading: Text(
+                      'Pay with UPI',
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios),
+                    onTap: () =>
+                        openCheckout('upi', 'razor_pay', useWallet, res),
+                  ),
+                  ListTile(
+                    leading: Text(
+                      'NetBanking',
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios),
+                    onTap: () =>
+                        openCheckout('netbanking', 'razor_pay', useWallet, res),
+                  ),
+                  ListTile(
+                    leading: Text(
+                      'Debit Card',
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios),
+                    onTap: () =>
+                        openCheckout('debitcard', 'razor_pay', useWallet, res),
+                  ),
+                  ListTile(
+                    leading: Text(
+                      'Wallets',
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios),
+                    onTap: () =>
+                        openCheckout('wallets', 'razor_pay', useWallet, res),
+                  ),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Text(
+                                'Price Details',
+                                style: TextStyle(
+                                  color: grey,
+                                  fontSize: 12,
+                                ),
                               )
-                            ]).show(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Text(
-                        'Pay with UPI',
-                        style: TextStyle(
-                          fontSize: 15,
-                        ),
+                            ],
+                          ),
+                          Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                "List Price",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                ),
+                              ),
+                              Text(
+                                "₹" + widget.cart.baseAmount.toString(),
+                                style: TextStyle(
+                                    color: grey,
+                                    decoration: TextDecoration.lineThrough),
+                              )
+                            ],
+                          ),
+                          // SizedBox(
+                          //   height: 10,
+                          // ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Selling Price',
+                                style: TextStyle(fontSize: 15),
+                              ),
+                              Text("₹" + widget.cart.amount.toString())
+                            ],
+                          ),
+                          // SizedBox(
+                          //   height: 10,
+                          // ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Delivery Charge',
+                                style: TextStyle(fontSize: 15),
+                              ),
+                              Text(
+                                  "+ ₹" + widget.cart.deliveryCharge.toString())
+                            ],
+                          ),
+                          // SizedBox(
+                          //   height: 10,
+                          // ),
+                          widget.cart.couponCode == null
+                              ? Container()
+                              : Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Text(
+                                      'Coupon Discount',
+                                      style: TextStyle(fontSize: 15),
+                                    ),
+                                    Text(
+                                        "- ₹" + widget.cart.discount.toString())
+                                  ],
+                                ),
+                          // SizedBox(
+                          //   height: 10,
+                          // ),
+                          Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text('Payable amount'),
+                              Text("₹" + netamountpay.toStringAsFixed(2)),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                        ],
                       ),
-                      trailing: Icon(Icons.arrow_forward_ios),
-                      onTap: () =>
-                          openCheckout('razor_pay', useWallet, snapshot.data),
                     ),
-                    ListTile(
-                      leading: Text(
-                        'NetBanking',
-                        style: TextStyle(
-                          fontSize: 15,
-                        ),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios),
-                      onTap: () =>
-                          openCheckout('razor_pay', useWallet, snapshot.data),
-                    ),
-                    ListTile(
-                      leading: Text(
-                        'Debit Card',
-                        style: TextStyle(
-                          fontSize: 15,
-                        ),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios),
-                      onTap: () =>
-                          openCheckout('razor_pay', useWallet, snapshot.data),
-                    ),
-                    ListTile(
-                      leading: Text(
-                        'Wallets',
-                        style: TextStyle(
-                          fontSize: 15,
-                        ),
-                      ),
-                      trailing: Icon(Icons.arrow_forward_ios),
-                      onTap: () =>
-                          openCheckout('razor_pay', useWallet, snapshot.data),
-                    ),
-                  ],
-                );
-              }
-            }));
+                  ),
+                  netamountpay == 0
+                      ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              FlatButton(
+                                color: green,
+                                child: Text(
+                                  'Place Order',
+                                  style: TextStyle(color: white),
+                                ),
+                                onPressed: () async {
+                                  authprovider.clearList();
+                                  cartid = await createOrder(widget.cart.id,
+                                      'cod', widget.amount, res.user.address);
+                                  await http.put(
+                                      UPDATEORDERS + cartid.toString(),
+                                      headers: {"Authorization": token},
+                                      body: {"payment_status": "success"});
+                                  EasyDialog(
+                                      topImage: NetworkImage(
+                                        'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1',
+                                      ),
+                                      height: 320,
+                                      closeButton: false,
+                                      title: Text('Order Successful',
+                                          style: TextStyle(fontSize: 25)),
+                                      description: Text(
+                                          'We have recieved your order please \n  check order history in your wallet\n'),
+                                      contentList: [
+                                        Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          color: green,
+                                          height: 50,
+                                          child: FlatButton(
+                                              onPressed: () async {
+                                                print(walletamount);
+                                                await http.put(UPDATEWALLET,
+                                                    headers: {
+                                                      "Authorization": token
+                                                    },
+                                                    body: {
+                                                      "amount": walletamount
+                                                          .toString()
+                                                    });
+
+                                                await http.delete(EMPTYCART,
+                                                    headers: {
+                                                      "Authorization": token
+                                                    });
+                                                changeScreenRepacement(
+                                                    context, ShoppingCart());
+                                              },
+                                              child: Text(
+                                                'Continue Shopping',
+                                                style: TextStyle(
+                                                    color: white,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              )),
+                                        )
+                                      ]).show(context);
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+                      : Container()
+                ],
+              ));
   }
 }

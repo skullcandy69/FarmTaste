@@ -73,8 +73,6 @@ const REMOVEFROMCART= BASE_URL+"/add-to-cart/";//(put request to add products to
 const MYCART=BASE_URL+ "/my-cart"; //(get request to view products of my cart) 
 const EMPTYCART = BASE_URL+ "/empty-cart" ;//(delete request to empty my cart)
 
-
-
 //orders
 const ORDERS =BASE_URL+"/orders";
 const UPDATEORDERS =BASE_URL+"/orders/";
@@ -85,3 +83,9 @@ const COUPON = BASE_URL+"/coupons";
 const COUNTER=BASE_URL+"/product-counter"+"/";
 const APPLYCOUPON= BASE_URL+"/apply-coupon"+"/";
 const REMOVECOUPON= BASE_URL+"/remove-coupon";
+const UPDATEWALLET = BASE_URL + "/update-wallet";
+
+//recurring order
+const RECURRINGORDER = BASE_URL + "/add-to-subscription";
+const GETSUBS = BASE_URL + "/my-subscriptions";
+

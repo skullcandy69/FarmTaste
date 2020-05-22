@@ -12,7 +12,6 @@ Future<List<ProductCategoryData>> productcatlist() async {
   var response = await http.get(GETPRODUCT);
   ProductsCategories productsCategories =
       ProductsCategories.fromJson(json.decode(response.body));
-  
   return productsCategories.data;
 }
 

@@ -101,7 +101,17 @@ class _ReferAndEarnState extends State<ReferAndEarn> {
               flex: 2,
               child: InkWell(
                 onTap: () {
-                  share(widget.res.user.referralCode);
+                  Clipboard.setData(ClipboardData(
+                      text: widget.res.user.referralCode == null
+                          ? ''
+                          : widget.res.user.referralCode));
+                  key.currentState.showSnackBar(SnackBar(
+                    content: Text(
+                      "Copied to Clipboard!!",
+                      style: TextStyle(color: blue),
+                    ),
+                    backgroundColor: white,
+                  ));
                 },
                 child: Container(
                   height: 50,
@@ -122,29 +132,21 @@ class _ReferAndEarnState extends State<ReferAndEarn> {
               ),
             ),
             Expanded(
-              flex: 3,
-              child: GestureDetector(
-                child: Text(
-                  'Tap To Copy',
-                  style: TextStyle(
-                    color: blue,
-                  ),
-                ),
-                onTap: () {
-                  Clipboard.setData(ClipboardData(
-                      text: widget.res.user.referralCode == null
-                          ? ''
-                          : widget.res.user.referralCode));
-                  key.currentState.showSnackBar(SnackBar(
-                    content: Text(
-                      "Copied to Clipboard!!",
-                      style: TextStyle(color: blue),
+                flex: 3,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Image.asset(
+                      'images/whatsapp.png',
+                      scale: 15,
                     ),
-                    backgroundColor: white,
-                  ));
-                },
-              ),
-            )
+                    IconButton(
+                      icon: Icon(Icons.share),
+                      onPressed: () => share(widget.res.user.referralCode),
+                    ),
+                    
+                  ],
+                ))
           ],
         ));
   }

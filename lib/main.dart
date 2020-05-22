@@ -26,6 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+     Provider.of<ProductModel>(context, listen: false).fetchProducts();
     Timer(Duration(seconds: 3), () =>changeScreenRepacement(context, SController()));
   }
 

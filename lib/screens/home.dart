@@ -9,12 +9,11 @@ import 'package:grocery/screens/Coupons.dart';
 import 'package:grocery/screens/Refer.dart';
 import 'package:grocery/screens/login.dart';
 import 'package:grocery/screens/profile.dart';
+import 'package:grocery/screens/subscriptionScreen.dart';
 import 'package:grocery/screens/wallet.dart';
 import 'package:grocery/widgets/Productcategory.dart';
 import 'package:grocery/widgets/SearchProducts.dart';
-import 'package:grocery/widgets/UserDetails.dart';
 import 'package:grocery/widgets/address.dart';
-import 'package:grocery/widgets/calendar.dart';
 import 'package:grocery/widgets/card.dart';
 import 'package:grocery/widgets/delivery_status.dart';
 import 'package:grocery/screens/shoppingCart.dart';
@@ -44,6 +43,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     read();
+   
     // authProvider.getUser();
   }
 
@@ -150,16 +150,11 @@ class _HomePageState extends State<HomePage> {
                     onTap: () => changeScreen(context, ProfilePage(res)),
                   ),
                 ),
-                ListTile(
-                  leading: Icon(Icons.calendar_today),
-                  title: Text('Calendar'),
-                  onTap: () => changeScreen(
-                      context, MyCalendar(title: 'Table Calendar')),
-                ),
+               
                 ListTile(
                   leading: Icon(Icons.add_photo_alternate),
                   title: Text('Plan'),
-                 
+                 onTap: ()=>changeScreen(context, SubscriptionScreen()),
                 ),
                 ListTile(
                   leading: Icon(Icons.account_balance_wallet),
@@ -230,7 +225,7 @@ class _HomePageState extends State<HomePage> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () => basicContentEasyDialog(context,'Hello'),
-            backgroundColor: blue,
+            backgroundColor:pcolor,
             child: Text('help??'),
           ));
     });

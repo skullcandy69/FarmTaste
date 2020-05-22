@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class Coupon extends StatefulWidget {
-  final int amount;
+  final dynamic amount;
 
   const Coupon({Key key, this.amount}) : super(key: key);
 

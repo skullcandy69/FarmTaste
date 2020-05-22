@@ -91,7 +91,7 @@ class _SearchProductState extends State<SearchProduct> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Container(
-                            height: 40,
+                            height: 20,
                             // color: Colors.black12,
                             child: Padding(
                               padding:
@@ -115,9 +115,6 @@ class _SearchProductState extends State<SearchProduct> {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: 20,
-                      ),
                       _listofitems(snapshot.data, context, true)
                     ],
                   );
@@ -131,7 +128,7 @@ class _SearchProductState extends State<SearchProduct> {
 
 _listofitems(List<ProductData> item, BuildContext context, bool add) {
   return Container(
-    height: MediaQuery.of(context).size.height * .7,
+    height: MediaQuery.of(context).size.height * .82,
     child: ListView.builder(
       padding: EdgeInsets.all(10),
       itemCount: item.length,
@@ -153,184 +150,198 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
-   Future<void>getCount() async {
-     SharedPreferences pref = await SharedPreferences.getInstance();
-  String token = pref.getString('token');
-  var response = await http.get(COUNTER+widget.pro.id.toString(), headers: {"Authorization": token});
-    setState(() {
-      _itemcounter= int.parse(response.body);
-    });
-    
-    }
-  int _itemcounter=0;
+  int _itemcounter;
   @override
   void initState() {
     super.initState();
-    getCount();
+    setState(() {
+      _itemcounter = Provider.of<ProductModel>(context, listen: false)
+          .getQuanity(widget.pro.id);
+    });
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       child: Padding(
         padding: const EdgeInsets.all(5.0),
         child: Container(
-          height: 120,
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: Container(
-                        height: 80,
-                        width: 80,
-                        child: Image.network(widget.pro.imageUrl) == null
-                            ? CircularProgressIndicator()
-                            : Image.network(
-                                widget.pro.imageUrl,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (BuildContext context,
-                                    Widget child,
-                                    ImageChunkEvent loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Center(child: Loader());
-                                },
-                              ),
+          height: 80,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 5.0,
+                color: Colors.grey[350],
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Row(
+                    // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: Container(
+                          height: 80,
+                          width: 80,
+                          child: Image.network(widget.pro.imageUrl) == null
+                              ? CircularProgressIndicator()
+                              : Image.network(
+                                  widget.pro.imageUrl,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (BuildContext context,
+                                      Widget child,
+                                      ImageChunkEvent loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(child: Loader());
+                                  },
+                                ),
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.all(12.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              widget.pro.title.toString().toUpperCase(),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            RichText(
-                              text: TextSpan(
-                                children: <TextSpan>[
-                                  TextSpan(
-                                    text: widget.pro.rate[0].discountedAmount !=
-                                            null
-                                        ? "₹${widget.pro.rate[0].discountedAmount.toString()}\t"
-                                        : "₹${widget.pro.rate[0].baseAmount.toString()}\t",
-                                    style: TextStyle(
-                                      color: black,
-                                    ),
-                                  ),
-                                  TextSpan(
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.all(12.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                widget.pro.title.toString().toUpperCase(),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                widget.pro.baseQuantity.toString(),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                  children: <TextSpan>[
+                                    TextSpan(
                                       text: widget.pro.rate[0]
                                                   .discountedAmount !=
                                               null
-                                          ? "₹${widget.pro.rate[0].baseAmount.toString()}"
-                                          : '',
+                                          ? "₹${widget.pro.rate[0].discountedAmount.toString()}\t"
+                                          : "₹${widget.pro.rate[0].baseAmount.toString()}\t",
                                       style: TextStyle(
-                                          color: grey,
-                                          decoration:
-                                              TextDecoration.lineThrough)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _itemcounter = 0;
-                            });
-                          },
-                          child: Container(
-                              // color: white,
-                              decoration: BoxDecoration(
-                                  color: white,
-                                  borderRadius: BorderRadius.circular(50)),
-                              child: Icon(
-                                Icons.replay,
-                                color: blue,
-                              )),
-                        ),
-                        Container(
-                          height: 25,
-                          width: 65,
-                          decoration: BoxDecoration(
-                              color: white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: blue)),
-                          child: Center(
-                              child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              _itemcounter == 0
-                                  ? Container()
-                                  : InkWell(
-                                      onTap: () async {
-                                        setState(() {
-                                          _itemcounter--;
-                                        });
-                                        Provider.of<ProductModel>(context,
-                                                listen: false)
-                                            .removeItem(widget.pro.id);
-                                        await addToCart(
-                                            widget.pro.id, _itemcounter);
-                                      },
-                                      child: Icon(
-                                        Icons.remove,
-                                        color: blue,
+                                        color: black,
                                       ),
                                     ),
-                              _itemcounter == 0
-                                  ? Text(
-                                      'ADD',
-                                      style: TextStyle(color: blue),
-                                    )
-                                  : Text(
-                                      _itemcounter.toString(),
-                                      style: TextStyle(color: blue),
-                                    ),
-                              InkWell(
-                                onTap: () async {
-                                  setState(() {
-                                    _itemcounter++;
-                                  });
-                                  Provider.of<ProductModel>(context,
-                                          listen: false)
-                                      .addTaskInList(widget.pro, _itemcounter);
-
-                                  if (await addToCart(
-                                      widget.pro.id, _itemcounter)) {
-                                    // _scaffoldKey.currentState.showSnackBar(
-                                    //     new SnackBar(
-                                    //         content: new Text(
-                                    //             'Added ${widget.pro.title} to cart')));
-                                  }
-                                },
-                                child: Icon(
-                                  Icons.add,
-                                  color: blue,
+                                    TextSpan(
+                                        text: widget.pro.rate[0]
+                                                    .discountedAmount !=
+                                                null
+                                            ? "₹${widget.pro.rate[0].baseAmount.toString()}"
+                                            : '',
+                                        style: TextStyle(
+                                            color: grey,
+                                            decoration:
+                                                TextDecoration.lineThrough)),
+                                  ],
                                 ),
                               ),
                             ],
-                          )),
-                        )
-                      ],
-                    )
-                  ],
+                          ),
+                        ),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: () {
+                              Provider.of<ProductModel>(context, listen: false)
+                                  .removeProduct(widget.pro);
+                              setState(() {
+                                _itemcounter = 0;
+                                deletCartItem(widget.pro.id.toString());
+                              });
+                            },
+                            child: Container(
+                                // color: white,
+                                decoration: BoxDecoration(
+                                    color: white,
+                                    borderRadius: BorderRadius.circular(50)),
+                                child: Icon(
+                                  Icons.replay,
+                                  color: blue,
+                                )),
+                          ),
+                          Container(
+                            height: 30,
+                            width: 75,
+                            decoration: BoxDecoration(
+                                color: white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: blue)),
+                            child: Center(
+                                child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: <Widget>[
+                                _itemcounter == 0
+                                    ? Container()
+                                    : InkWell(
+                                        onTap: () async {
+                                          setState(() {
+                                            _itemcounter--;
+                                          });
+                                          Provider.of<ProductModel>(context,
+                                                  listen: false)
+                                              .removeItem(widget.pro);
+                                          await addToCart(
+                                              widget.pro.id, _itemcounter);
+                                        },
+                                        child: Icon(
+                                          Icons.remove,
+                                          color: blue,
+                                        ),
+                                      ),
+                                _itemcounter == 0
+                                    ? Text(
+                                        'ADD',
+                                        style: TextStyle(color: blue),
+                                      )
+                                    : Text(
+                                        _itemcounter.toString(),
+                                        style: TextStyle(color: blue),
+                                      ),
+                                InkWell(
+                                  onTap: () async {
+                                    setState(() {
+                                      _itemcounter++;
+                                    });
+                                    Provider.of<ProductModel>(context,
+                                            listen: false)
+                                        .addTaskInList(widget.pro);
+
+                                    if (await addToCart(
+                                        widget.pro.id, _itemcounter)) {
+                                      // _scaffoldKey.currentState.showSnackBar(
+                                      //     new SnackBar(
+                                      //         content: new Text(
+                                      //             'Added ${widget.pro.title} to cart')));
+                                    }
+                                  },
+                                  child: Icon(
+                                    Icons.add,
+                                    color: blue,
+                                  ),
+                                ),
+                              ],
+                            )),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

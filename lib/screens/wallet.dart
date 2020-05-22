@@ -245,9 +245,9 @@ class TransactionWidget extends StatelessWidget {
     String transactionName;
     IconData transactionIconData;
     Color color;
-    switch (transaction.paymentStatus) {
+    switch (transaction.orderStatus) {
       case 'success':
-        transactionName = "Paid";
+        transactionName = "Completed";
         transactionIconData = Icons.check_circle_outline;
         color = green;
         break;

@@ -7,7 +7,6 @@ import 'package:grocery/models/user_model.dart';
 import 'package:grocery/payments/paymentScreen.dart';
 import 'package:grocery/widgets/Loader.dart';
 import 'package:grocery/widgets/paymentbanner.dart';
-import 'package:searchable_dropdown/searchable_dropdown.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -23,7 +22,7 @@ class Checkout extends StatefulWidget {
 
 class _CheckoutState extends State<Checkout> {
   String token;
-  
+
   Future<Result> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
@@ -37,6 +36,11 @@ class _CheckoutState extends State<Checkout> {
       headers: {"Authorization": token},
     );
     AreaModel area = AreaModel.fromJson(json.decode(arearesponse.body));
+    for (var i in area.data) {
+      if (i.id == res.user.areaId) {
+        selectedValue = i;
+      }
+    }
     setState(() {
       areaList = area.data;
       name = res.user.name;
@@ -60,7 +64,6 @@ class _CheckoutState extends State<Checkout> {
     setState(() {
       user = getUser();
     });
-    
   }
 
   String name = '';
@@ -73,8 +76,6 @@ class _CheckoutState extends State<Checkout> {
 
   final _formKey = GlobalKey<FormState>();
   AreaData selectedValue;
-  
-
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +97,9 @@ class _CheckoutState extends State<Checkout> {
                     key: _formKey,
                     child: Column(
                       children: <Widget>[
-                        Bannerpayment(status: false,),
+                        Bannerpayment(
+                          status: false,
+                        ),
                         TextFormField(
                           initialValue: name,
                           decoration: InputDecoration(
@@ -236,25 +239,39 @@ class _CheckoutState extends State<Checkout> {
                             left: 10.0,
                             right: 10,
                           ),
-                          child: SearchableDropdown.single(
-                            items: areaList.map((AreaData user) {
+                          child: Row(
+                            children: <Widget>[
+                              Text('Area*'),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 10.0,
+                            right: 10,
+                          ),
+                          child: DropdownButtonFormField(
+                            autovalidate: true,
+                            items: areaList.map((AreaData area) {
                               return DropdownMenuItem<AreaData>(
-                                  value: user,
-                                  child: Text(user.title.toUpperCase(),
+                                  value: area,
+                                  child: Text(area.title.toUpperCase(),
                                       style: TextStyle(fontSize: 15)));
                             }).toList(),
                             value: selectedValue,
-                            hint: "Select Area",
-                            label: Text(
-                              'Area*',
-                              style: TextStyle(color: grey),
-                            ),
-                            searchHint: "Select Area",
-                            displayClearIcon: false,
+                            
+                            // hint: "Select Area",
+                            // label: Text(
+                            //   'Area*',
+                            //   style: TextStyle(color: grey),
+                            // ),
+                            // searchHint: "Select Area",
+                            // displayClearIcon: false,
                             onChanged: (value) {
                               setState(() {
                                 selectedValue = value;
-                               areaid = selectedValue.id.toString();
+                                print('changed' + selectedValue.title);
+                                areaid = selectedValue.id.toString();
                               });
                             },
                             validator: (value) {
@@ -263,59 +280,49 @@ class _CheckoutState extends State<Checkout> {
                               }
                               return null;
                             },
-                            displayItem: (item, selected) {
-                              return (Row(children: [
-                                selected
-                                    ? Icon(
-                                        Icons.radio_button_checked,
-                                        color: Colors.green,
-                                      )
-                                    : Icon(
-                                        Icons.radio_button_unchecked,
-                                        color: Colors.grey,
-                                      ),
-                                SizedBox(width: 7),
-                                Expanded(
-                                  child: item,
-                                ),
-                              ]));
-                            },
+
                             isExpanded: true,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        SizedBox(
+                          width: 200,
+                          child: FlatButton(
+                            color: green,
+                            onPressed: () async {
+                              print(areaid);
+                              if (_formKey.currentState.validate()) {
+                                print('hell');
+                                var response = await http.put(ME, headers: {
+                                  "Authorization": token
+                                }, body: {
+                                  "name": name,
+                                  "email": email,
+                                  "address": address,
+                                  "alternate_no": mobno,
+                                  "pincode": pincode,
+                                  "landmark": landmark,
+                                  "area_id": areaid
+                                });
+                                if (response.statusCode == 200) {
+                                  changeScreenRepacement(
+                                      context,
+                                      PaymentScreen(
+                                          cart: widget.cart,
+                                          totalamount: widget.totalamount,
+                                          amount: widget.amount));
+                                }
+                              }
+                            },
+                            child: Text('Proceed'),
+                            textColor: white,
+                            splashColor: Colors.green[100],
                           ),
                         ),
                       ],
                     ))),
-      ),
-      floatingActionButton: FlatButton(
-        color: green,
-        onPressed: () async {
-          print(areaid);
-          if (_formKey.currentState.validate()) {
-            print('hell');
-            var response = await http.put(ME, headers: {
-              "Authorization": token
-            }, body: {
-              "name": name,
-              "email": email,
-              "address": address,
-              "alternate_no": mobno,
-              "pincode": pincode,
-              "landmark": landmark,
-              "area_id": areaid
-            });
-            if (response.statusCode == 200) {
-              changeScreenRepacement(
-                  context,
-                  PaymentScreen(
-                      cart: widget.cart,
-                      totalamount: widget.totalamount,
-                      amount: widget.amount));
-            }
-          }
-        },
-        child: Text('Proceed'),
-        textColor: white,
-        splashColor: Colors.green[100],
       ),
     );
   }

@@ -80,13 +80,9 @@ class _ExistingCustomerState extends State<ExistingCustomer> {
                     height: 30,
                   ),
                   Container(
-                    height: 50,
-                    width: MediaQuery.of(context).size.width * .9,
-                    decoration: BoxDecoration(
-                        color: white,
-                        border: Border.all(color: blue, width: 2),
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    width: 350,
                     child: TextFormField(
+                      maxLength: 10,
                       controller: authprovider.mobno,
                       keyboardType: TextInputType.phone,
                       validator: (value) {
@@ -97,13 +93,13 @@ class _ExistingCustomerState extends State<ExistingCustomer> {
                       },
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue),
+                            borderSide: BorderSide(color: Colors.blue),borderRadius: BorderRadius.circular(10)
                           ),
                           icon: Padding(
                             padding: const EdgeInsets.only(left: 8),
                             child: Icon(
                               Icons.phone_android,
-                              color: blue,
+                             
                             ),
                           ),
                           hintText: '10 digit Mobile Number',
