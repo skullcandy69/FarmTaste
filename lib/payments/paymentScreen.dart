@@ -12,6 +12,7 @@ import 'package:grocery/widgets/paymentbanner.dart';
 import 'package:provider/provider.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -42,7 +43,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
     super.dispose();
     _razorpay.clear();
   }
-
+final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   String cartid;
   dynamic walletamount;
   dynamic netamountpay;
@@ -409,10 +411,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ? Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              FlatButton(
+                              RoundedLoadingButton(
                                 color: green,
+                                controller: _btnController,
                                 child: Text(
                                   'Place Order',
                                   style: TextStyle(color: white),
@@ -421,10 +424,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   authprovider.clearList();
                                   cartid = await createOrder(widget.cart.id,
                                       'cod', widget.amount, res.user.address);
-                                  await http.put(
+                               await http.put(
                                       UPDATEORDERS + cartid.toString(),
                                       headers: {"Authorization": token},
                                       body: {"payment_status": "success"});
+                                    _btnController.success();
                                   EasyDialog(
                                       topImage: NetworkImage(
                                         'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1',
@@ -452,7 +456,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                                       "amount": walletamount
                                                           .toString()
                                                     });
-
                                                 await http.delete(EMPTYCART,
                                                     headers: {
                                                       "Authorization": token

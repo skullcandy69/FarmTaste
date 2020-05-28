@@ -39,7 +39,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> updateUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token');  
+    String token = prefs.getString('token');
     var response = await http.put(ME, headers: {
       "Authorization": token
     }, body: {
@@ -53,7 +53,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> genOtplogin() async {
+  Future<String> genOtplogin() async {
     _status = status.Authenticating;
     notifyListeners();
     var response = await http.post(OTP, body: {"mobile_no": mobno.text.trim()});
@@ -61,29 +61,23 @@ class AuthProvider with ChangeNotifier {
     print('Response body: ${response.body}');
     if (response.statusCode == 200 &&
         json.decode(response.body)['data'] == "OTP Generated, Kindly Login") {
-      _status = status.Authenticating;
-      notifyListeners();
-      return true;
+      return json.decode(response.body)['otp'];
     } else {
-      print('failed');
-      return false;
+      return 'Kindly Register First';
     }
   }
 
-  Future<bool> genOtpSignup() async {
+  Future<String> genOtpSignup() async {
     _status = status.Authenticating;
     notifyListeners();
     var response = await http.post(OTP, body: {"mobile_no": mobno.text.trim()});
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
     if (response.statusCode == 200 &&
-        json.decode(response.body) == "OTP Generated, Kindly Register") {
-      _status = status.Authenticating;
-      notifyListeners();
-      return true;
+        json.decode(response.body)['data'] == "OTP Generated, Kindly Register") {
+      return json.decode(response.body)['otp'];
     } else {
-      print('failed');
-      return false;
+      return 'Already Registered, Please Login';
     }
   }
 
@@ -148,7 +142,7 @@ class AuthProvider with ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // Result res = Result.fromJson(json.decode(prefs.getString('response')));
     // print(res.token);
-      String token =prefs.getString('token');
+    String token = prefs.getString('token');
     if (token == null) {
       _status = status.Unauthenticated;
     } else {

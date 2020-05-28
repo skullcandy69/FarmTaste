@@ -88,4 +88,5 @@ const UPDATEWALLET = BASE_URL + "/update-wallet";
 //recurring order
 const RECURRINGORDER = BASE_URL + "/add-to-subscription";
 const GETSUBS = BASE_URL + "/my-subscriptions";
-
+const UPCOMINGITEM =BASE_URL +"/items-on-the-way";
+const GETIMAGES= BASE_URL +"/cover-images";

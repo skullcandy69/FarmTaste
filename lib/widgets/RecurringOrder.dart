@@ -1,8 +1,10 @@
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
+import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/models/products.dart';
 import 'package:grocery/provider/addcart.dart';
+import 'package:grocery/screens/wallet.dart';
 import 'package:grocery/widgets/Loader.dart';
 import 'package:intl/intl.dart';
 
@@ -16,10 +18,12 @@ class RecurringOrder extends StatefulWidget {
 class _RecurringOrderState extends State<RecurringOrder> {
   int _itemcounter = 1;
   DatePickerController _controller = DatePickerController();
-  DateTime _startDate = DateTime.now();
+  DateTime _startDate = DateTime.now().add(Duration(days: 1));
   DateTime _endDate = DateTime.now().add(Duration(days: 6));
   String frequency = 'daily';
   DateTime _initialendDate = DateTime.now().add(Duration(days: 6));
+
+  String message = '';
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -27,7 +31,7 @@ class _RecurringOrderState extends State<RecurringOrder> {
         children: <Widget>[
           Container(
             child: Padding(
-              padding: const EdgeInsets.all(5.0),
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
               child: Container(
                 height: 80,
                 child: Row(
@@ -40,8 +44,7 @@ class _RecurringOrderState extends State<RecurringOrder> {
                             child: Container(
                               height: 80,
                               width: 80,
-                              child: Image.network(widget.pro.imageUrl) ==
-                                      null
+                              child: Image.network(widget.pro.imageUrl) == null
                                   ? CircularProgressIndicator()
                                   : Image.network(
                                       widget.pro.imageUrl,
@@ -282,6 +285,28 @@ class _RecurringOrderState extends State<RecurringOrder> {
               },
             ),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                message,
+                style: TextStyle(color: red),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              message == "Insufficient Wallet Funds !"
+                  ? InkWell(
+                      onTap: () => changeScreen(context, Wallet()),
+                      child: Text(
+                        "Add money to wallet?",
+                        style: TextStyle(color: blue),
+                      ))
+                  : Container(),
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -301,7 +326,13 @@ class _RecurringOrderState extends State<RecurringOrder> {
                   child: FlatButton(
                       color: Colors.green[50],
                       onPressed: () async {
-                        if (await recurringOrder(
+                        print(DateFormat('yyyy-MM-dd')
+                            .format(_startDate)
+                            .toString());
+                        print(
+                          DateFormat('yyyy-MM-dd').format(_endDate).toString(),
+                        );
+                        String s = await recurringOrder(
                             widget.pro.id.toString(),
                             _itemcounter.toString(),
                             DateFormat('yyyy-MM-dd')
@@ -310,7 +341,11 @@ class _RecurringOrderState extends State<RecurringOrder> {
                             DateFormat('yyyy-MM-dd')
                                 .format(_endDate)
                                 .toString(),
-                            frequency)) {
+                            frequency);
+                        setState(() {
+                          message = s;
+                        });
+                        if (message == "Success") {
                           Navigator.pop(context);
                         }
                       },

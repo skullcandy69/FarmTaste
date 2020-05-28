@@ -37,8 +37,9 @@ class Categories extends StatelessWidget {
             return Container(
               height: 120,
               // width: 120,
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: ListView.builder(
                 itemCount: snapshot.data.length,
                 scrollDirection: Axis.horizontal,
@@ -49,16 +50,30 @@ class Categories extends StatelessWidget {
                       onTap: () => changeScreen(
                           context,
                           ProductDetails(
-                            head:title,
-                            id:index,
-                            title: snapshot.data[index].title,
-                            productsubcat:snapshot.data
-                          )),
+                              head: title,
+                              id: index,
+                              title: snapshot.data[index].title,
+                              productsubcat: snapshot.data)),
                       child: Column(
                         children: <Widget>[
                           Container(
                             height: 80,
                             width: 120,
+                            decoration: BoxDecoration(
+                              color: white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.green[100],
+                                  blurRadius: 5.0, 
+                                 
+                                  offset: Offset(
+                                    -3.0,
+                                    3.0, 
+                                  ),
+                                )
+                              ],
+                            ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: Image.network(

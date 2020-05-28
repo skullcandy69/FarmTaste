@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/screens/showOrders.dart';
@@ -8,6 +9,8 @@ import 'package:grocery/models/History.dart';
 import 'package:grocery/provider/auth.dart';
 import 'package:grocery/widgets/Loader.dart';
 import 'package:provider/provider.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -49,10 +52,6 @@ class _WalletState extends State<Wallet> {
                             height: 10,
                           ),
                           transactionList(),
-                          // SizedBox(
-                          //   height: 10,
-                          // ),
-                          // bottomCarouselBar(),
                         ],
                       ),
                     ),
@@ -61,22 +60,6 @@ class _WalletState extends State<Wallet> {
               })),
     );
   }
-
-  // bool shouldRefresh(ScrollNotification notification) {
-  //   return !widget.isRefreshing;
-  // }
-
-  // Future<Null> _handleRefresh() async {
-  //   if (widget.isRefreshing) {
-  //     await new Future.delayed(new Duration(seconds: 3));
-  //     return null;
-  //   } else {
-  //     widget.onRefresh();
-  //   }
-  //   await new Future.delayed(new Duration(seconds: 3));
-
-  //   return null;
-  // }
 
   Widget walletDetails(user) {
     return Padding(
@@ -109,7 +92,7 @@ class _WalletState extends State<Wallet> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(user.name,
+                      Text(user.name ?? '',
                           style: TextStyle(fontSize: 20, color: Colors.black)),
                       Text(
                         "Available Balance",
@@ -127,6 +110,20 @@ class _WalletState extends State<Wallet> {
                         user.mobileNo,
                         style: TextStyle(color: Colors.black),
                       ),
+                      InkWell(
+                        onTap: () {
+                          print('00');
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return RequestMoneyDialog(user);
+                              });
+                        },
+                        child: Text(
+                          "Add money to wallet",
+                          style: TextStyle(color: blue),
+                        ),
+                      )
                     ],
                   ),
                 ],
@@ -368,6 +365,154 @@ class TransactionWidget extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class RequestMoneyDialog extends StatefulWidget {
+  final dynamic user;
+
+  const RequestMoneyDialog(this.user);
+  @override
+  _RequestMoneyDialogState createState() => _RequestMoneyDialogState();
+}
+
+class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
+  bool isRequesting = false;
+  Razorpay _razorpay;
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
+  TextEditingController textEditingController =
+      TextEditingController(text: '100');
+  final _formkey = GlobalKey<FormState>();
+  @override
+  void initState() {
+    super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handlePaymentWallet);
+  }
+
+  String token;
+  String message = '';
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token');
+    print((widget.user.wallet + int.parse(textEditingController.text))
+        .toString()
+        .runtimeType);
+    await http.put(ME, headers: {
+      "Authorization": token
+    }, body: {
+      "wallet": (widget.user.wallet + int.parse(textEditingController.text))
+          .toString()
+    });
+    _btnController.success();
+    Timer(Duration(seconds: 2), () => Navigator.pop(context));
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) async {
+    print('fail ' + response.message);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token');
+    setState(() {
+      if(response.message=="Payment Cancelled")
+      message = "Invalid Amount";
+    });
+    _btnController.reset();
+  }
+
+  void _handlePaymentWallet(ExternalWalletResponse response) {
+    print('wallet ' + response.walletName);
+  }
+
+  void openCheckout() async {
+    var options = {
+      'key': 'rzp_test_9xPUvXMTVSbgW5',
+      'amount': (int.parse(textEditingController.text) * 100).toInt(),
+      'name': 'farmtaste',
+      'description': 'Order Payment',
+      'prefill': {
+        "name": widget.user.name,
+        'contact': widget.user.mobileNo,
+        'email': widget.user.email,
+      },
+      "image":
+          'https://merriam-webster.com/assets/mw/images/article/art-wap-landing-mp-lg/meanwhile-2453-cc63cdb89c527209296a3ec7ffd9ee59@1x.jpg',
+      'external': {
+        'wallet': ['paytm']
+      },
+      "currency": "INR",
+      "payment_capture": 1,
+      "theme": {"color": "#32cd32"}
+    };
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SimpleDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      title: Center(child: Text('REQUEST MONEY')),
+      children: <Widget>[
+        Padding(
+          padding:
+              const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 5),
+          child: Form(
+            key: _formkey,
+            child: new TextFormField(
+              controller: textEditingController,
+              validator: (String value) {
+                if (value.trim().isEmpty) {
+                  return 'Required';
+                } else if (int.parse(value) < 100) {
+                  return 'Minimum amount 100';
+                }
+                return null;
+              },
+              decoration: new InputDecoration(
+                  icon: Icon(Icons.monetization_on),
+                  labelText: "AMOUNT",
+                  hintText: "0",
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.red, width: 5.0),
+                  )),
+              keyboardType: TextInputType.number,
+            ),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[Text(message, style: TextStyle(color: red))],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: SizedBox(
+            width: 100,
+            child: RoundedLoadingButton(
+              controller: _btnController,
+              onPressed: () {
+                if (_formkey.currentState.validate()) {
+                  openCheckout();
+                } else {
+                  _btnController.reset();
+                }
+              },
+              child: Text(
+                'ADD TO WALLET',
+                style: TextStyle(color: white),
+              ),
+              color: green,
+            ),
+          ),
+        )
+      ],
     );
   }
 }

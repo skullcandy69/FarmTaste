@@ -161,10 +161,8 @@ class ProductModel extends ChangeNotifier {
     CartItem cartItem = CartItem.fromJson(json.decode(response.body));
     productlist.clear();
     for (int i = 0; i < cartItem.extra.length; i++) {
-      for (int j = 0; j < cartItem.data.products[i].noOfUnits; j++) {
-        productlist.add(cartItem.extra[i]);
+     productlist.add(cartItem.extra[i]);
         notifyListeners();
-      }
     }
   }
 

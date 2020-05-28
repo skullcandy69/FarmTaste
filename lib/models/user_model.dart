@@ -19,23 +19,23 @@ class Result {
   }
 }
 class User {
-  int id;
-  String name;
-  String email;
-  String mobileNo;
+  dynamic id;
+  dynamic name;
+  dynamic email;
+  dynamic mobileNo;
   dynamic alternateNo;
-  int wallet;
-  int cityId;
-  int locationId;
+  dynamic wallet;
+  dynamic cityId;
+  dynamic locationId;
   dynamic areaId;
   dynamic pincode;
-  String address;
+  dynamic address;
   dynamic landmark;
   dynamic state;
-  String referralCode;
+  dynamic referralCode;
   dynamic referredBy;
-  String createdAt;
-  String updatedAt;
+  dynamic createdAt;
+  dynamic updatedAt;
 
   User(
       {this.id,

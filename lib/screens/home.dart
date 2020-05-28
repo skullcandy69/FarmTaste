@@ -4,7 +4,6 @@ import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/models/CartModel.dart';
 import 'package:grocery/models/user_model.dart';
-import 'package:grocery/provider/auth.dart';
 import 'package:grocery/screens/Coupons.dart';
 import 'package:grocery/screens/Refer.dart';
 import 'package:grocery/screens/login.dart';
@@ -20,8 +19,9 @@ import 'package:grocery/screens/shoppingCart.dart';
 import 'package:grocery/widgets/helpDialog.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart'as http;
 class HomePage extends StatefulWidget {
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -34,22 +34,31 @@ class _HomePageState extends State<HomePage> {
     print('response');
     setState(() {
       res = Result.fromJson(json.decode(prefs.getString('response')));
+      
       mob = res.user.mobileNo;
       print(res.token);
     });
   }
-
+   itemCount() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String token = pref.getString('token');
+    var response = await http.get(UPCOMINGITEM,headers:{'authorization':token});
+    setState(() {
+      count= json.decode(response.body)['count'];
+      date = DateTime.parse(json.decode(response.body)['date'])??date;
+    });
+  }
+  DateTime date=DateTime.now();
+  int count=0;
   @override
   void initState() {
     super.initState();
     read();
-   
-    // authProvider.getUser();
-  }
+   itemCount();
+}
 
   @override
   Widget build(BuildContext context) {
-    final authprovider = Provider.of<AuthProvider>(context);
     return Consumer<ProductModel>(builder: (context, pro, child) {
       return Scaffold(
           appBar: AppBar(
@@ -182,12 +191,7 @@ class _HomePageState extends State<HomePage> {
                   leading: Icon(Icons.home),
                   title: Text('Delivery Address'),
                   onTap: () async {
-                    Result re = await authprovider.getUser();
-                    print(re.user.address);
-                    setState(() {
-                      res = re;
-                    });
-                    changeScreen(context, Address(res));
+                    changeScreen(context, Address());
                   },
                 ),
                 ListTile(
@@ -207,6 +211,7 @@ class _HomePageState extends State<HomePage> {
                     SharedPreferences prefs =
                         await SharedPreferences.getInstance();
                     prefs.clear();
+                    pro.clearList();
                     changeScreenRepacement(context, LoginScreen());
                   },
                   leading: Icon(Icons.exit_to_app),
@@ -218,7 +223,7 @@ class _HomePageState extends State<HomePage> {
           body: ListView(
             physics: BouncingScrollPhysics(),
             children: <Widget>[
-              DeliveryStatus(),
+              DeliveryStatus(count: count,date: date,),
               Cardwidget(),
               ProductCategoryList(),
             ],

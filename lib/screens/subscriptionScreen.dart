@@ -54,79 +54,151 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   if (list.length == 0) {
                     return Image.asset('images/emptycart.png');
                   } else {
-                    return Container(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          height: 90,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 5.0,
-                                color: Colors.grey[350],
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            
-                            children: <Widget>[
-                              Container(
-                                  width: 80,
-                                  height: 80,
-                                  child: Image.network(
-                                      list[index].product.imageUrl)),
-                              Expanded(
-                                child: Container(
-                                  margin: EdgeInsets.all(12.0),
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        list[index]
-                                            .product
-                                            .title
-                                            .toString()
-                                            .toUpperCase(),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        "Quantity " +
-                                            list[index]
-                                                .product
-                                                .noOfUnits
-                                                .toString(),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      RichText(
-                                        text: TextSpan(
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text: "₹" +
-                                                  list[index].amount.toString(),
-                                              style: TextStyle(
-                                                color: black,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Align(alignment: Alignment.topRight,child: FlatButton(child: Text('Edit'),onPressed: (){},))
-                            ],
-                          ),
-                        ),
-                      ),
+                    return OrderShow(
+                      data: list[index],
                     );
                   }
                 },
               ));
+  }
+}
+
+class OrderShow extends StatefulWidget {
+  final SubscriptionData data;
+
+  const OrderShow({Key key, this.data}) : super(key: key);
+  @override
+  _OrderShowState createState() => _OrderShowState();
+}
+
+class _OrderShowState extends State<OrderShow> {
+  bool isLoading = false;
+  int _itemcounter;
+  @override
+  void initState() {
+    super.initState();
+    _itemcounter = widget.data.product.noOfUnits;
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          height: 90,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 5.0,
+                color: Colors.grey[350],
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: <Widget>[
+              Container(
+                  width: 80,
+                  height: 80,
+                  child: Image.network(widget.data.product.imageUrl)),
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.all(12.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        widget.data.product.title.toString().toUpperCase(),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        "Quantity " + widget.data.product.noOfUnits.toString(),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: "₹" + widget.data.amount.toString(),
+                              style: TextStyle(
+                                color: black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            isLoading?Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Container(
+                  height: 30,
+                  width: 75,
+                  decoration: BoxDecoration(
+                      color: white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: blue)),
+                  child: Center(
+                      child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      _itemcounter == 0
+                          ? Container()
+                          : InkWell(
+                              onTap: () async {
+                                setState(() {
+                                  _itemcounter--;
+                                });
+                              },
+                              child: Icon(
+                                Icons.remove,
+                                color: blue,
+                              ),
+                            ),
+                      _itemcounter == 0
+                          ? Text(
+                              'ADD',
+                              style: TextStyle(color: blue),
+                            )
+                          : Text(
+                              _itemcounter.toString(),
+                              style: TextStyle(color: blue),
+                            ),
+                      InkWell(
+                        onTap: ()  {
+                          print('inc');
+                          setState(() {
+                            _itemcounter++;
+                          });
+                        },
+                        child: Icon(
+                          Icons.add,
+                          color: blue,
+                        ),
+                      ),
+                    ],
+                  )),
+                ),
+                FlatButton(onPressed: (){}, child:Text('Cancle'),textColor: white,color: red,)
+              ],
+            ):Container(),
+              Align(
+                  alignment: Alignment.topRight,
+                  child: FlatButton(
+                    child: isLoading ? Text("Save") : Text('Edit'),
+                    onPressed: () => setState(() {
+                      isLoading = !isLoading;
+                    }),
+                  ))
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

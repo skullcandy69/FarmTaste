@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/models/History.dart';
 import 'package:grocery/widgets/helpDialog.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class ShowOrders extends StatelessWidget {
   final HistoryData order;
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   ShowOrders({this.order});
   @override
   Widget build(BuildContext context) {
@@ -279,6 +284,24 @@ class ShowOrders extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          RoundedLoadingButton(
+            width: 150,
+            height: 40,
+            controller: _btnController,
+            onPressed: () {
+              Timer(Duration(seconds: 2), () {
+                _btnController.success();
+              });
+            },
+            color: red,
+            child: Text(
+              "Cancle Order",
+              style: TextStyle(color: white, fontWeight: FontWeight.bold),
             ),
           )
         ])));

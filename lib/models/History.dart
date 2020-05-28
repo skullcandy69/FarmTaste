@@ -158,7 +158,7 @@ class User {
   String email;
   String mobileNo;
   dynamic alternateNo;
-  int wallet;
+  dynamic wallet;
   int cityId;
   int locationId;
   dynamic areaId;

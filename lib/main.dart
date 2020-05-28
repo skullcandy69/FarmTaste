@@ -17,6 +17,7 @@ void main() {
     ChangeNotifierProvider.value(value: ProductModel()),
   ], child: MyApp()));
 }
+
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -26,9 +27,17 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-     Provider.of<ProductModel>(context, listen: false).fetchProducts();
-    Timer(Duration(seconds: 3), () =>changeScreenRepacement(context, SController()));
+    Provider.of<ProductModel>(context, listen: false).fetchProducts();
+   
+    Timer(
+        Duration(seconds: 3),
+        () => changeScreenRepacement(
+            context,
+            SController(
+              
+            )));
   }
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -49,24 +58,24 @@ class _SplashScreenState extends State<SplashScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Container(
-                        width: 170,
-                        height: 170,
-                        
+                          width: 170,
+                          height: 170,
                           child: ClipRRect(
                               borderRadius: BorderRadius.circular(100),
-                              child: Image.asset('images/appstore.png'))
-                      ),
+                              child: Image.asset('images/appstore.png'))),
                       Padding(
                         padding: EdgeInsets.only(top: 10.0),
                       ),
                       Shimmer.fromColors(
                           child: Text(
-                        "Farm Taste",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24.0),
-                      ), baseColor: white, highlightColor: Colors.green[300])
+                            "Farm Taste",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 24.0),
+                          ),
+                          baseColor: white,
+                          highlightColor: Colors.green[300])
                     ],
                   ),
                 ),
@@ -100,7 +109,26 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // getToken() async {
+  //   SharedPreferences pref = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     token = pref.getString('token');
+  //   });
+  // }
+
+  // String token;
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   getToken();
+  // }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -118,6 +146,7 @@ class MyApp extends StatelessWidget {
 }
 
 class SController extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);

@@ -7,6 +7,7 @@ import 'package:grocery/models/user_model.dart';
 import 'package:grocery/payments/paymentScreen.dart';
 import 'package:grocery/widgets/Loader.dart';
 import 'package:grocery/widgets/paymentbanner.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,7 +23,8 @@ class Checkout extends StatefulWidget {
 
 class _CheckoutState extends State<Checkout> {
   String token;
-
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   Future<Result> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
@@ -259,7 +261,7 @@ class _CheckoutState extends State<Checkout> {
                                       style: TextStyle(fontSize: 15)));
                             }).toList(),
                             value: selectedValue,
-                            
+
                             // hint: "Select Area",
                             // label: Text(
                             //   'Area*',
@@ -289,8 +291,9 @@ class _CheckoutState extends State<Checkout> {
                         ),
                         SizedBox(
                           width: 200,
-                          child: FlatButton(
+                          child: RoundedLoadingButton(
                             color: green,
+                            controller: _btnController,
                             onPressed: () async {
                               print(areaid);
                               if (_formKey.currentState.validate()) {
@@ -306,19 +309,24 @@ class _CheckoutState extends State<Checkout> {
                                   "landmark": landmark,
                                   "area_id": areaid
                                 });
+                                print(response.statusCode);
                                 if (response.statusCode == 200) {
+                                  _btnController.success();
                                   changeScreenRepacement(
                                       context,
                                       PaymentScreen(
                                           cart: widget.cart,
                                           totalamount: widget.totalamount,
                                           amount: widget.amount));
+                                } else {
+                                  _btnController.reset();
                                 }
                               }
                             },
-                            child: Text('Proceed'),
-                            textColor: white,
-                            splashColor: Colors.green[100],
+                            child: Text(
+                              'Proceed',
+                              style: TextStyle(color: white),
+                            ),
                           ),
                         ),
                       ],

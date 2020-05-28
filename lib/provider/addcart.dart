@@ -5,12 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<bool> addToCart(id, unit) async {
-  // print(id);
-  // print(unit);
-
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  // print(token.runtimeType);
   var response = await http.put(ADDTOCART, headers: {
     "Authorization": token,
   }, body: {
@@ -18,7 +14,6 @@ Future<bool> addToCart(id, unit) async {
     "no_of_units": unit.toString()
   });
   print('Response status: ${response.statusCode}');
-  // print('Response body: ${response.body}');
   if (response.statusCode == 200) {
     return true;
   } else {
@@ -30,7 +25,6 @@ Future<bool> addToCart(id, unit) async {
 Future<bool> updateCart(id, unit) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  // print(token.runtimeType);
   var response = await http.put(ADDTOCART, headers: {
     "Authorization": token,
   }, body: {
@@ -55,7 +49,6 @@ Future<bool> deletCartItem(id) async {
     "no_of_units": "0",
     "product_id": id
   });
-  // print(response.body);
   if (response.statusCode == 200) {
     print('deleted');
     return true;
@@ -91,7 +84,6 @@ Future<String> createOrder(cartId, mode, amount, address) async {
   return res['data']['id'].toString();
 }
 
-
 Future<void> updateOrder(status, id) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
@@ -100,16 +92,24 @@ Future<void> updateOrder(status, id) async {
   print(response.body);
 }
 
-Future<bool> recurringOrder(String id,nou,sdate,edate,subtype) async {
+Future<String> recurringOrder(String id, nou, sdate, edate, subtype) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  var response = await http.post(RECURRINGORDER,
-      headers: {"Authorization": token}, body: {"product_id": id,"no_of_units":nou,"start_date":sdate,"end_date":edate,"subscription_type":subtype});
+  var response = await http.post(RECURRINGORDER, headers: {
+    "Authorization": token
+  }, body: {
+    "product_id": id,
+    "no_of_units": nou,
+    "start_date": sdate,
+    "end_date": edate,
+    "subscription_type": subtype
+  });
   print(response.body);
-  if(response.statusCode==200){
-      return true;
-  }else{
-    return false;
+  if (response.statusCode == 200) {
+    return 'Success';
+  } else if (json.decode(response.body)['code'] == 107) {
+    return "Insufficient Wallet Funds !";
+  } else {
+    return json.decode(response.body)['message'];
   }
-
 }

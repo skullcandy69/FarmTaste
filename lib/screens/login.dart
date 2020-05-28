@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
             //           );
             //         },
             // )
-            child: Image.asset('images/LOGO.png',scale: 5,semanticLabel: 'WELCOME',),
+            child: Image.asset('images/LOGO.png',scale: 10,semanticLabel: 'WELCOME',),
             ),
             Text(
               'Welcome',
