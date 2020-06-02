@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_share/flutter_share.dart';
@@ -30,22 +31,24 @@ class _ReferAndEarnState extends State<ReferAndEarn> {
           title: Text('Refer & Earn'),
           backgroundColor: pcolor,
         ),
-        body: Column(
-          children: <Widget>[
-            Container(
-              height: MediaQuery.of(context).size.height * .5,
-              child: Stack(
-                children: <Widget>[
-                  Container(
-                    child: Image.asset('images/refer.jpg'),
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Container(
+                height: MediaQuery.of(context).size.height * .45,
+                child: Stack(children: <Widget>[
+                  Hero(tag: 'refer',
+                                      child: Container(
+                      child: Image.asset('images/refer.jpg'),
+                    ),
                   ),
                   Positioned(
-                      bottom: 40,
-                      top: 280,
-                      right: 20,
-                      left: 20,
+                      bottom: 0,
+                      // top: 280,
+                      right: 5,
+                      left: 5,
                       child: Container(
-                        height: 40,
+                        height: 50,
                         decoration: BoxDecoration(
                           color: white,
                           borderRadius: BorderRadius.circular(10),
@@ -69,37 +72,33 @@ class _ReferAndEarnState extends State<ReferAndEarn> {
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            Text(
-                                "Share your referral link and invite \nyour friends to earn upto 1000 points")
+                            AutoSizeText(
+                              "Share your referral link and invite \nyour friends to earn upto 1000 points",
+                              maxLines: 3,stepGranularity: 2,
+                            )
                           ],
                         ),
                       )),
-                ],
+                ]
+                    // child:
+                    ),
               ),
-            ),
-            Expanded(
-              flex: 5,
-              child: Container(
-                height: 100,
+              SizedBox(height: 20,),
+              Container(
+                height: 120,
                 width: 350,
                 child: Image.asset(
                   'images/share.jpg',
                   fit: BoxFit.fitWidth,
                 ),
               ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
+              Center(
                 child: Text(
                   'YOUR REFERAL CODE',
                   style: TextStyle(color: grey),
                 ),
               ),
-            ),
-            Expanded(
-              flex: 2,
-              child: InkWell(
+              InkWell(
                 onTap: () {
                   Clipboard.setData(ClipboardData(
                       text: widget.res.user.referralCode == null
@@ -130,24 +129,21 @@ class _ReferAndEarnState extends State<ReferAndEarn> {
                   ),
                 ),
               ),
-            ),
-            Expanded(
-                flex: 3,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Image.asset(
-                      'images/whatsapp.png',
-                      scale: 15,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () => share(widget.res.user.referralCode),
-                    ),
-                    
-                  ],
-                ))
-          ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Image.asset(
+                    'images/whatsapp.png',
+                    scale: 15,
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.share),
+                    onPressed: () => share(widget.res.user.referralCode),
+                  ),
+                ],
+              )
+            ],
+          ),
         ));
   }
 }

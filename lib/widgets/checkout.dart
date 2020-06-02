@@ -321,7 +321,9 @@ class _CheckoutState extends State<Checkout> {
                                 } else {
                                   _btnController.reset();
                                 }
-                              }
+                              }else {
+                                  _btnController.reset();
+                                }
                             },
                             child: Text(
                               'Proceed',

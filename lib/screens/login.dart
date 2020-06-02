@@ -28,21 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 50,
             ),
             Center(
-            //     child: Image.network(
-            //   'https://cdn.clipart.email/a898fac96bab0c18dd86e71c70c66706_cow-clipart-animations-free-graphics-of-cows-bulls-baby-_800-615.png',
-            //   scale: 4,loadingBuilder: (BuildContext context, Widget child,
-            //             ImageChunkEvent loadingProgress) {
-            //           if (loadingProgress == null) return child;
-            //           return Center(
-            //             child: CircularProgressIndicator(
-            //               value: loadingProgress.expectedTotalBytes != null
-            //                   ? loadingProgress.cumulativeBytesLoaded /
-            //                       loadingProgress.expectedTotalBytes
-            //                   : null,
-            //             ),
-            //           );
-            //         },
-            // )
+            
             child: Image.asset('images/LOGO.png',scale: 10,semanticLabel: 'WELCOME',),
             ),
             Text(
@@ -54,9 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             RaisedButton(
               onPressed: () {
-                //   setState(() {
-                //   _showexistingcustomer=false;
-                // });
+              
                 changeScreen(context, City());
               },
               color: Colors.blue,

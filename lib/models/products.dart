@@ -229,8 +229,8 @@ class ProductData extends Equatable{
 class Rate {
   String sType;
   int id;
-  int baseAmount;
-  int discountedAmount;
+  dynamic baseAmount;
+  dynamic discountedAmount;
 
   Rate({this.sType, this.id, this.baseAmount, this.discountedAmount});
 

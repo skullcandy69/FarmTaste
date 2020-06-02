@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/helpers/navigation.dart';
@@ -16,23 +18,40 @@ class ShoppingCart extends StatefulWidget {
 }
 
 class _ShoppingCartState extends State<ShoppingCart> {
-  bool isLoading = false;
+  bool isLoading = true;
+  CartItem myitem;
+
+  Timer _timer;
+  fetchCart() async {
+    CartItem c = await myCart();
+    setState(() {
+      myitem = c;
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _timer =Timer.periodic(Duration(seconds: 1), (Timer t) => fetchCart());
+  }
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('object');
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Shopping Cart'),
-        backgroundColor: pcolor,
-      ),
-      body: FutureBuilder(
-          future: myCart(),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.data == null) {
-              return Center(
-                child: Container(child: Loader()),
-              );
-            } else {
-              return Consumer<ProductModel>(
+        appBar: AppBar(
+          title: Text('Shopping Cart'),
+          backgroundColor: pcolor,
+        ),
+        body: isLoading
+            ? Container(child: Center(child: Loader()))
+            : Consumer<ProductModel>(
                 builder: (context, cart, child) {
                   return ListView(
                     children: <Widget>[
@@ -49,16 +68,15 @@ class _ShoppingCartState extends State<ShoppingCart> {
                             } else if (cart.tprice != 0) {
                               return Container(
                                 height:
-                                    MediaQuery.of(context).size.height * .25,
+                                    MediaQuery.of(context).size.height * .35,
                                 child: Column(
                                   children: <Widget>[
                                     Container(
                                       height: 20,
-                                      width:
-                                          MediaQuery.of(context).size.width,
+                                      width: MediaQuery.of(context).size.width,
                                       color: Colors.black12,
-                                      child: Center(
-                                          child: Text('PRICE DETAILS')),
+                                      child:
+                                          Center(child: Text('PRICE DETAILS')),
                                     ),
                                     SizedBox(
                                       height: 10,
@@ -72,7 +90,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                         children: <Widget>[
                                           Text(
                                               'Price(${cart.productlist.length} items)'),
-                                          Text('₹' + cart.tprice.toStringAsFixed(2))
+                                          Text('₹' +
+                                              cart.tprice.toStringAsFixed(2))
                                         ],
                                       ),
                                     ),
@@ -85,13 +104,12 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                         children: <Widget>[
                                           Text('Delivery fee'),
                                           Text("+ ₹" +
-                                              snapshot
-                                                  .data.data.deliveryCharge
+                                              myitem.data.deliveryCharge
                                                   .toString())
                                         ],
                                       ),
                                     ),
-                                    snapshot.data.data.couponCode == null
+                                    myitem.data.couponCode == null
                                         ? Padding(
                                             padding: const EdgeInsets.only(
                                                 top: 5,
@@ -104,11 +122,13 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                               children: <Widget>[
                                                 InkWell(
                                                   onTap: () {
-                                                    changeScreen(
-                                                        context,
-                                                        Coupon(
-                                                            amount:
-                                                                cart.tprice));
+                                                    setState(() {
+                                                      changeScreen(
+                                                          context,
+                                                          Coupon(
+                                                              amount:
+                                                                  cart.tprice));
+                                                    });
                                                   },
                                                   child: Container(
                                                     child: Text(
@@ -116,8 +136,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                                       style: TextStyle(
                                                           color: blue,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .w300),
+                                                              FontWeight.w300),
                                                     ),
                                                   ),
                                                 ),
@@ -136,18 +155,18 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                                       .spaceBetween,
                                               children: <Widget>[
                                                 Text("Coupon:  " +
-                                                    snapshot.data.data
-                                                        .couponCode),
+                                                    myitem.data.couponCode),
                                                 InkWell(
                                                   onTap: () async {
-                                                    var res = await http.put(
-                                                        REMOVECOUPON,
-                                                        headers: {
-                                                          "Authorization":
-                                                              token
-                                                        });
                                                     setState(() {});
-                                                    print(res.body);
+                                                    await http.put(REMOVECOUPON,
+                                                        headers: {
+                                                          "Authorization": token
+                                                        });
+                                                    setState(() {
+                                                      myCart();
+                                                    });
+                                                    // print(res.body);
                                                   },
                                                   child: Container(
                                                     child: Text(
@@ -155,15 +174,14 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                                       style: TextStyle(
                                                           color: blue,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .w300),
+                                                              FontWeight.w300),
                                                     ),
                                                   ),
                                                 ),
                                               ],
                                             ),
                                           ),
-                                    snapshot.data.data.couponCode == null
+                                    myitem.data.couponCode == null
                                         ? Container()
                                         : Padding(
                                             padding: const EdgeInsets.only(
@@ -175,8 +193,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                               children: <Widget>[
                                                 Text('Discount '),
                                                 Text('- ₹' +
-                                                    snapshot
-                                                        .data.data.discount
+                                                    myitem.data.discount
                                                         .toString())
                                               ],
                                             ),
@@ -197,10 +214,9 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                           Text('Total Amount'),
                                           Text('₹' +
                                               (cart.tprice +
-                                                      snapshot.data.data
-                                                          .deliveryCharge -
-                                                      snapshot
-                                                          .data.data.discount)
+                                                      myitem
+                                                          .data.deliveryCharge -
+                                                      myitem.data.discount)
                                                   .toStringAsFixed(2))
                                         ],
                                       ),
@@ -247,10 +263,9 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                         TextSpan(
                                             text: '₹' +
                                                 (cart.tprice +
-                                                        snapshot.data.data
+                                                        myitem.data
                                                             .deliveryCharge -
-                                                        snapshot
-                                                            .data.data.discount)
+                                                        myitem.data.discount)
                                                     .toStringAsFixed(2),
                                             style: TextStyle(
                                                 color: black,
@@ -265,12 +280,11 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                           changeScreenRepacement(
                                               context,
                                               Checkout(
-                                                  cart: snapshot.data.data,
+                                                  cart: myitem.data,
                                                   totalamount: (cart.tprice +
-                                                      snapshot.data.data
-                                                          .deliveryCharge -
-                                                      snapshot
-                                                          .data.data.discount),
+                                                      myitem
+                                                          .data.deliveryCharge -
+                                                      myitem.data.discount),
                                                   amount: cart.tprice));
                                         },
                                         child: Center(
@@ -290,10 +304,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                     ],
                   );
                 },
-              );
-            }
-          }),
-    );
+              ));
   }
 }
 
@@ -308,7 +319,7 @@ class BuildCart extends StatefulWidget {
 
 class _BuildCartState extends State<BuildCart> {
   int quantity;
-
+  final car = ShoppingCart();
   @override
   Widget build(BuildContext context) {
     return Consumer<ProductModel>(
@@ -317,7 +328,7 @@ class _BuildCartState extends State<BuildCart> {
         return Container(
           padding: EdgeInsets.all(20.0),
           height: 120.0,
-           decoration: BoxDecoration(
+          decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
               BoxShadow(
@@ -359,12 +370,10 @@ class _BuildCartState extends State<BuildCart> {
                               widget.order.title.toString().toUpperCase(),
                               overflow: TextOverflow.ellipsis,
                             ),
-                            
-                              Text(
-                                widget.order.baseQuantity.toString(),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                             
+                            Text(
+                              widget.order.baseQuantity.toString(),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             Text(widget.order.rate[0].baseAmount.toString())
                           ],
                         ),
@@ -376,7 +385,7 @@ class _BuildCartState extends State<BuildCart> {
                             color: red,
                             icon: Icon(Icons.delete),
                             onPressed: () {
-                              print(widget.order.id);
+                              // print(widget.order.id);
                               Provider.of<ProductModel>(context, listen: false)
                                   .removeProduct(widget.order);
                               setState(() {
@@ -435,6 +444,7 @@ class _BuildCartState extends State<BuildCart> {
                                 behavior: HitTestBehavior.opaque,
                                 onTap: () {
                                   print('add');
+
                                   Provider.of<ProductModel>(context,
                                           listen: false)
                                       .addTaskInList(widget.order);
@@ -442,6 +452,7 @@ class _BuildCartState extends State<BuildCart> {
                                     updateCart(widget.order.id.toString(),
                                         quantity + 1);
                                   });
+                                  car.createState();
                                 },
                                 child: Container(
                                     height: 25,

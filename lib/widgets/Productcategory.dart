@@ -25,6 +25,7 @@ class ProductCategoryList extends StatelessWidget {
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.data == null) {
                 return Container(
+                  height: MediaQuery.of(context).size.height/2,
                   child: Center(
                     child: Loader(),
                   ),

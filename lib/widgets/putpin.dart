@@ -135,7 +135,7 @@ class OtpPinState extends State<OtpPin> {
                     _btnController.reset();
                   }
                 } else if (widget.signup == false) {
-                  if (await authprovider.inputotp()) {
+                  if (await authprovider.inputotp(context)) {
                     _btnController.success();
                     authprovider.clearController();
                     changeScreenRepacement(context, HomePage());

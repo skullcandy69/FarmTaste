@@ -62,9 +62,9 @@ Future<CartItem> myCart() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
   var response = await http.get(MYCART, headers: {"Authorization": token});
-  print(response.body);
+  // print(response.body);
   CartItem cartItem = CartItem.fromJson(json.decode(response.body));
-  print(cartItem.data.amount);
+  // print(cartItem.data.amount);
   return cartItem;
 }
 

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/helpers/navigation.dart';
@@ -43,187 +44,175 @@ class _ProductDetailsState extends State<ProductDetails> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: widget.productsubcat.length,
-        initialIndex: widget.id,
-        child: Scaffold(
-          key: _scaffoldKey,
-          appBar: AppBar(
-            backgroundColor: pcolor,
-            actions: <Widget>[
-              IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: () {
-                    changeScreen(context, SearchProduct());
-                  })
-            ],
-            title: Text(widget.head.toUpperCase()),
-            bottom: TabBar(
-              isScrollable: true,
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicatorWeight: 5,
-              indicatorColor: white,
-              tabs: List<Widget>.generate(widget.productsubcat.length,
-                  (int index) {
-                return new Tab(
-                    text: widget.productsubcat[index].title.toUpperCase());
-              }),
-            ),
-          ),
-          body: TabBarView(
-              children: List<Widget>.generate(widget.productsubcat.length,
-                  (int index) {
-            return FutureBuilder(
-                future:
-                    productcatlist(widget.productsubcat[index].id.toString()),
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if (snapshot.data == null) {
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 16.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: <Widget>[
-                          Expanded(
-                            child: Shimmer.fromColors(
-                              baseColor: Colors.lightGreen[100],
-                              highlightColor: Colors.grey[100],
-                              // enabled: _enabled,
-                              child: ListView.builder(
-                                itemBuilder: (_, __) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 60.0,
-                                        height: 60.0,
-                                        color: Colors.white,
-                                      ),
-                                      const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 8.0),
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            Container(
-                                              width: double.infinity,
-                                              height: 8.0,
-                                              color: Colors.white,
-                                            ),
-                                            const Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 2.0),
-                                            ),
-                                            Container(
-                                              width: double.infinity,
-                                              height: 8.0,
-                                              color: Colors.white,
-                                            ),
-                                            const Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 2.0),
-                                            ),
-                                            Container(
-                                              width: 40.0,
-                                              height: 8.0,
-                                              color: Colors.white,
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                itemCount: 6,
-                              ),
+    
+    return  Consumer<ProductModel>(builder: (context, pro, child) {
+          return DefaultTabController(
+          length: widget.productsubcat.length,
+          initialIndex: widget.id,
+          child: Scaffold(
+            key: _scaffoldKey,
+            appBar: AppBar(
+              backgroundColor: pcolor,
+              actions: <Widget>[
+                IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      changeScreen(context, SearchProduct());
+                    }), Padding(
+                  padding: const EdgeInsets.only(top: 5.0, bottom: 5, right: 5),
+                  child: Stack(
+                    children: <Widget>[
+                      IconButton(
+                          icon: Icon(
+                            Icons.shopping_cart,
+                            color: white,
+                            size: 30,
+                          ),
+                          onPressed: () async {
+                            changeScreen(context, ShoppingCart());
+                          }),
+                      Positioned(
+                        bottom: 5,
+                        left: 5,
+                        child: Container(
+                          height: 15,
+                          width: 18,
+                          decoration: BoxDecoration(
+                              color: white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: grey,
+                                    offset: Offset(2, 2),
+                                    blurRadius: 3)
+                              ]),
+                          child: Center(
+                            child: Text(
+                               pro.productlist.length.toString(),
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: red,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    int len = Provider.of<ProductModel>(context)
-                        .getProductList()
-                        .length;
-                    return ListView(
-                      children: <Widget>[
-                        _listofitems(snapshot.data, context, add, len),
-                        len == 0
-                            ? Container()
-                            : Container(
-                                height:
-                                    MediaQuery.of(context).size.height * .068,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  boxShadow: <BoxShadow>[
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      offset: Offset(1.0, 6.0),
-                                      blurRadius: 10.0,
-                                    ),
-                                  ],
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      right: 10, left: 10.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      RichText(
-                                        text: TextSpan(children: <TextSpan>[
-                                          TextSpan(
-                                              text: 'Total Amount: ₹' +
-                                                  Provider.of<ProductModel>(
-                                                          context)
-                                                      .tprice
-                                                      .toStringAsFixed(2),
-                                              style: TextStyle(
-                                                  color: black,
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.w400))
-                                        ]),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: FlatButton(
-                                          onPressed: () async {
-                                            changeScreen(
-                                                context, ShoppingCart());
-                                          },
-                                          child: Center(
-                                            child: Text(
-                                              'Checkout',
-                                              style: TextStyle(color: white),
-                                            ),
-                                          ),
-                                          color: Colors.deepOrange,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+              title: Text(widget.head.toUpperCase()),
+              bottom: TabBar(
+                isScrollable: true,
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicatorWeight: 5,
+                indicatorColor: white,
+                tabs: List<Widget>.generate(widget.productsubcat.length,
+                    (int index) {
+                  return new Tab(
+                      text: widget.productsubcat[index].title.toUpperCase());
+                }),
+              ),
+            ),
+            body: TabBarView(
+                children: List<Widget>.generate(widget.productsubcat.length,
+                    (int index) {
+              return FutureBuilder(
+                  future:
+                      productcatlist(widget.productsubcat[index].id.toString()),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.data == null) {
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          children: <Widget>[
+                            Expanded(
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.lightGreen[100],
+                                highlightColor: Colors.grey[100],
+                                // enabled: _enabled,
+                                child: ListView.builder(
+                                  itemBuilder: (_, __) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 60.0,
+                                          height: 60.0,
+                                          color: Colors.white,
                                         ),
-                                      )
-                                    ],
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 8.0),
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Container(
+                                                width: double.infinity,
+                                                height: 8.0,
+                                                color: Colors.white,
+                                              ),
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 2.0),
+                                              ),
+                                              Container(
+                                                width: double.infinity,
+                                                height: 8.0,
+                                                color: Colors.white,
+                                              ),
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 2.0),
+                                              ),
+                                              Container(
+                                                width: 40.0,
+                                                height: 8.0,
+                                                color: Colors.white,
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ),
+                                  itemCount: 6,
                                 ),
-                              )
-                      ],
-                    );
-                  }
-                });
-          })),
-        ));
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      int len = Provider.of<ProductModel>(context)
+                          .getProductList()
+                          .length;
+                      return ListView(
+                        children: <Widget>[
+                          _listofitems(snapshot.data, context, add, len),
+                        
+                        ],
+                      );
+                    }
+                  });
+            })),
+          ));}
+    );
   }
 
   _listofitems(
       List<ProductData> item, BuildContext context, bool add, int len) {
     return Container(
-      height: len == 0
-          ? MediaQuery.of(context).size.height * .8
-          : MediaQuery.of(context).size.height * 0.75,
+      height: MediaQuery.of(context).size.height * .8
+         ,
       child: ListView.builder(
         padding: EdgeInsets.all(10),
         itemCount: item.length,
@@ -274,7 +263,7 @@ class _DetailScreenState extends State<DetailScreen> {
       child: Padding(
         padding: const EdgeInsets.all(5.0),
         child: Container(
-          height: 80,
+          height: 90,
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
@@ -321,16 +310,15 @@ class _DetailScreenState extends State<DetailScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              Text(
+                              AutoSizeText(
                                 widget.pro.title.toString().toUpperCase(),
-                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                // overflow: TextOverflow.ellipsis,
                               ),
-                             
-                              Text(
-                                widget.pro.baseQuantity.toString(),
-                                overflow: TextOverflow.ellipsis,
+                            AutoSizeText(
+                                widget.pro.baseQuantity.toString(), maxLines: 1,
+                                // overflow: TextOverflow.ellipsis,
                               ),
-                             
                               RichText(
                                 text: TextSpan(
                                   children: <TextSpan>[

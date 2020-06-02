@@ -29,13 +29,15 @@ dependencies:
   url_launcher:
   google_fonts: ^1.0.0
   progress_indicators:
-  razorpay_flutter: 1.1.2
+  razorpay_flutter: 1.1.0
   shimmer: ^1.1.1
   flutter_share: ^1.0.2+1
   equatable: ^1.1.0
   slide_popup_dialog: ^0.0.2
   date_picker_timeline: ^1.2.0
   rounded_loading_button: ^1.0.6
+  onesignal_flutter: ^2.4.1
+  auto_size_text: ^2.1.0
 
 
 

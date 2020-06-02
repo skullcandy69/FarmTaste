@@ -43,7 +43,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
     super.dispose();
     _razorpay.clear();
   }
-final RoundedLoadingButtonController _btnController =
+
+  final RoundedLoadingButtonController _btnController =
       RoundedLoadingButtonController();
   String cartid;
   dynamic walletamount;
@@ -70,7 +71,6 @@ final RoundedLoadingButtonController _btnController =
     print(netamountpay);
     print(walletamount);
   }
-
 
   void openCheckout(paymethod, method, wallet, res) async {
     print(widget.amount);
@@ -127,9 +127,9 @@ final RoundedLoadingButtonController _btnController =
             height: 50,
             child: FlatButton(
                 onPressed: () async {
-                  await http.put(ME,
+               useWallet? await http.put(ME,
                       headers: {"Authorization": token},
-                      body: {"wallet": walletamount.toString()});
+                      body: {"wallet": walletamount.toString()}):print('wallet no use');
                   await http
                       .delete(EMPTYCART, headers: {"Authorization": token});
                   changeScreenRepacement(context, ShoppingCart());
@@ -204,281 +204,284 @@ final RoundedLoadingButtonController _btnController =
                   child: Loader(),
                 ),
               )
-            : Column(
-                children: <Widget>[
-                  Bannerpayment(
-                    status: true,
-                  ),
-                  Row(
-                    children: <Widget>[
-                      Checkbox(
-                          value: useWallet,
-                          onChanged: (val) {
-                            uwallet(res, val);
-                            setState(() {
-                              useWallet = val;
-                            });
-                          }),
-                      Text('Use Wallet amount (₹ ${res.user.wallet} )')
-                    ],
-                  ),
-                  ListTile(
-                    leading: Text(
-                      'Cash on delivery(COD)',
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
+            : SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    Bannerpayment(
+                      status: true,
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () async {
-                      authprovider.clearList();
-                      EasyDialog(
-                          topImage: NetworkImage(
-                            'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1',
-                          ),
-                          height: 320,
-                          closeButton: false,
-                          title: Text('Order Successful',
-                              style: TextStyle(fontSize: 25)),
-                          description: Text(
-                              'We have recieved your order please \n  check order history in your wallet\n'),
-                          contentList: [
-                            Container(
-                              width: MediaQuery.of(context).size.width,
-                              color: green,
-                              height: 50,
-                              child: FlatButton(
-                                  onPressed: () async {
-                                    await createOrder(widget.cart.id, 'cod',
-                                        widget.amount, res.user.address);
-
-                                    await http.delete(EMPTYCART,
-                                        headers: {"Authorization": token});
-                                    changeScreenRepacement(
-                                        context, ShoppingCart());
-                                  },
-                                  child: Text(
-                                    'Continue Shopping',
-                                    style: TextStyle(
-                                        color: white,
-                                        fontWeight: FontWeight.bold),
-                                  )),
-                            )
-                          ]).show(context);
-                    },
-                  ),
-                  ListTile(
-                    leading: Text(
-                      'Pay with UPI',
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
+                    Row(
+                      children: <Widget>[
+                        Checkbox(
+                            value: useWallet,
+                            onChanged: (val) {
+                              uwallet(res, val);
+                              setState(() {
+                                useWallet = val;
+                              });
+                            }),
+                        Text('Use Wallet amount (₹ ${res.user.wallet} )')
+                      ],
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () =>
-                        openCheckout('upi', 'razor_pay', useWallet, res),
-                  ),
-                  ListTile(
-                    leading: Text(
-                      'NetBanking',
-                      style: TextStyle(
-                        fontSize: 15,
+                    ListTile(
+                      leading: Text(
+                        'Cash on delivery(COD)',
+                        style: TextStyle(
+                          fontSize: 15,
+                        ),
                       ),
-                    ),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () =>
-                        openCheckout('netbanking', 'razor_pay', useWallet, res),
-                  ),
-                  ListTile(
-                    leading: Text(
-                      'Debit Card',
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                    ),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () =>
-                        openCheckout('debitcard', 'razor_pay', useWallet, res),
-                  ),
-                  ListTile(
-                    leading: Text(
-                      'Wallets',
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                    ),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () =>
-                        openCheckout('wallets', 'razor_pay', useWallet, res),
-                  ),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Text(
-                                'Price Details',
-                                style: TextStyle(
-                                  color: grey,
-                                  fontSize: 12,
-                                ),
-                              )
-                            ],
-                          ),
-                          Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                "List Price",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                ),
-                              ),
-                              Text(
-                                "₹" + widget.cart.baseAmount.toString(),
-                                style: TextStyle(
-                                    color: grey,
-                                    decoration: TextDecoration.lineThrough),
-                              )
-                            ],
-                          ),
-                          // SizedBox(
-                          //   height: 10,
-                          // ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                'Selling Price',
-                                style: TextStyle(fontSize: 15),
-                              ),
-                              Text("₹" + widget.cart.amount.toString())
-                            ],
-                          ),
-                          // SizedBox(
-                          //   height: 10,
-                          // ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                'Delivery Charge',
-                                style: TextStyle(fontSize: 15),
-                              ),
-                              Text(
-                                  "+ ₹" + widget.cart.deliveryCharge.toString())
-                            ],
-                          ),
-                          // SizedBox(
-                          //   height: 10,
-                          // ),
-                          widget.cart.couponCode == null
-                              ? Container()
-                              : Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    Text(
-                                      'Coupon Discount',
-                                      style: TextStyle(fontSize: 15),
-                                    ),
-                                    Text(
-                                        "- ₹" + widget.cart.discount.toString())
-                                  ],
-                                ),
-                          // SizedBox(
-                          //   height: 10,
-                          // ),
-                          Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text('Payable amount'),
-                              Text("₹" + netamountpay.toStringAsFixed(2)),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  netamountpay == 0
-                      ? Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              RoundedLoadingButton(
+                      trailing: Icon(Icons.arrow_forward_ios),
+                      onTap: () async {
+                        authprovider.clearList();
+                        EasyDialog(
+                            topImage: NetworkImage(
+                              'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1',
+                            ),
+                            height: 320,
+                            closeButton: false,
+                            title: Text('Order Successful',
+                                style: TextStyle(fontSize: 25)),
+                            description: Text(
+                                'We have recieved your order please \n  check order history in your wallet\n'),
+                            contentList: [
+                              Container(
+                                width: MediaQuery.of(context).size.width,
                                 color: green,
-                                controller: _btnController,
-                                child: Text(
-                                  'Place Order',
-                                  style: TextStyle(color: white),
+                                height: 50,
+                                child: FlatButton(
+                                    onPressed: () async {
+                                      await createOrder(widget.cart.id, 'cod',
+                                          widget.amount, res.user.address);
+
+                                      await http.delete(EMPTYCART,
+                                          headers: {"Authorization": token});
+                                      changeScreenRepacement(
+                                          context, ShoppingCart());
+                                    },
+                                    child: Text(
+                                      'Continue Shopping',
+                                      style: TextStyle(
+                                          color: white,
+                                          fontWeight: FontWeight.bold),
+                                    )),
+                              )
+                            ]).show(context);
+                      },
+                    ),
+                    ListTile(
+                      leading: Text(
+                        'Pay with UPI',
+                        style: TextStyle(
+                          fontSize: 15,
+                        ),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios),
+                      onTap: () =>
+                          openCheckout('upi', 'razor_pay', useWallet, res),
+                    ),
+                    ListTile(
+                      leading: Text(
+                        'NetBanking',
+                        style: TextStyle(
+                          fontSize: 15,
+                        ),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios),
+                      onTap: () => openCheckout(
+                          'netbanking', 'razor_pay', useWallet, res),
+                    ),
+                    ListTile(
+                      leading: Text(
+                        'Debit Card',
+                        style: TextStyle(
+                          fontSize: 15,
+                        ),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios),
+                      onTap: () => openCheckout(
+                          'debitcard', 'razor_pay', useWallet, res),
+                    ),
+                    ListTile(
+                      leading: Text(
+                        'Wallets',
+                        style: TextStyle(
+                          fontSize: 15,
+                        ),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios),
+                      onTap: () =>
+                          openCheckout('wallets', 'razor_pay', useWallet, res),
+                    ),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: <Widget>[
+                            Row(
+                              children: <Widget>[
+                                Text(
+                                  'Price Details',
+                                  style: TextStyle(
+                                    color: grey,
+                                    fontSize: 12,
+                                  ),
+                                )
+                              ],
+                            ),
+                            Divider(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  "List Price",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                  ),
                                 ),
-                                onPressed: () async {
-                                  authprovider.clearList();
-                                  cartid = await createOrder(widget.cart.id,
-                                      'cod', widget.amount, res.user.address);
-                               await http.put(
-                                      UPDATEORDERS + cartid.toString(),
-                                      headers: {"Authorization": token},
-                                      body: {"payment_status": "success"});
-                                    _btnController.success();
-                                  EasyDialog(
-                                      topImage: NetworkImage(
-                                        'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1',
+                                Text(
+                                  "₹" + widget.cart.baseAmount.toString(),
+                                  style: TextStyle(
+                                      color: grey,
+                                      decoration: TextDecoration.lineThrough),
+                                )
+                              ],
+                            ),
+                            // SizedBox(
+                            //   height: 10,
+                            // ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  'Selling Price',
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                                Text("₹" + widget.cart.amount.toString())
+                              ],
+                            ),
+                            // SizedBox(
+                            //   height: 10,
+                            // ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  'Delivery Charge',
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                                Text("+ ₹" +
+                                    widget.cart.deliveryCharge.toString())
+                              ],
+                            ),
+                            // SizedBox(
+                            //   height: 10,
+                            // ),
+                            widget.cart.couponCode == null
+                                ? Container()
+                                : Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Text(
+                                        'Coupon Discount',
+                                        style: TextStyle(fontSize: 15),
                                       ),
-                                      height: 320,
-                                      closeButton: false,
-                                      title: Text('Order Successful',
-                                          style: TextStyle(fontSize: 25)),
-                                      description: Text(
-                                          'We have recieved your order please \n  check order history in your wallet\n'),
-                                      contentList: [
-                                        Container(
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          color: green,
-                                          height: 50,
-                                          child: FlatButton(
-                                              onPressed: () async {
-                                                print(walletamount);
-                                                await http.put(UPDATEWALLET,
-                                                    headers: {
-                                                      "Authorization": token
-                                                    },
-                                                    body: {
-                                                      "amount": walletamount
-                                                          .toString()
-                                                    });
-                                                await http.delete(EMPTYCART,
-                                                    headers: {
-                                                      "Authorization": token
-                                                    });
-                                                changeScreenRepacement(
-                                                    context, ShoppingCart());
-                                              },
-                                              child: Text(
-                                                'Continue Shopping',
-                                                style: TextStyle(
-                                                    color: white,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              )),
-                                        )
-                                      ]).show(context);
-                                },
-                              ),
-                            ],
-                          ),
-                        )
-                      : Container()
-                ],
+                                      Text("- ₹" +
+                                          widget.cart.discount.toString())
+                                    ],
+                                  ),
+                            // SizedBox(
+                            //   height: 10,
+                            // ),
+                            Divider(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text('Payable amount'),
+                                Text("₹" + netamountpay.toStringAsFixed(2)),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    netamountpay == 0
+                        ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                RoundedLoadingButton(
+                                  color: green,
+                                  controller: _btnController,
+                                  child: Text(
+                                    'Place Order',
+                                    style: TextStyle(color: white),
+                                  ),
+                                  onPressed: () async {
+                                    authprovider.clearList();
+                                    cartid = await createOrder(widget.cart.id,
+                                        'cod', widget.amount, res.user.address);
+                                    await http.put(
+                                        UPDATEORDERS + cartid.toString(),
+                                        headers: {"Authorization": token},
+                                        body: {"payment_status": "success"});
+                                    _btnController.success();
+                                    EasyDialog(
+                                        topImage: NetworkImage(
+                                          'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1',
+                                        ),
+                                        height: 320,
+                                        closeButton: false,
+                                        title: Text('Order Successful',
+                                            style: TextStyle(fontSize: 25)),
+                                        description: Text(
+                                            'We have recieved your order please \n  check order history in your wallet\n'),
+                                        contentList: [
+                                          Container(
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            color: green,
+                                            height: 50,
+                                            child: FlatButton(
+                                                onPressed: () async {
+                                                  print(walletamount);
+                                                  await http.put(UPDATEWALLET,
+                                                      headers: {
+                                                        "Authorization": token
+                                                      },
+                                                      body: {
+                                                        "amount": walletamount
+                                                            .toString()
+                                                      });
+                                                  await http.delete(EMPTYCART,
+                                                      headers: {
+                                                        "Authorization": token
+                                                      });
+                                                  changeScreenRepacement(
+                                                      context, ShoppingCart());
+                                                },
+                                                child: Text(
+                                                  'Continue Shopping',
+                                                  style: TextStyle(
+                                                      color: white,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )),
+                                          )
+                                        ]).show(context);
+                                  },
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container()
+                  ],
+                ),
               ));
   }
 }

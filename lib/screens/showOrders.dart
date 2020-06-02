@@ -1,16 +1,44 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/models/History.dart';
 import 'package:grocery/widgets/helpDialog.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
-class ShowOrders extends StatelessWidget {
+class ShowOrders extends StatefulWidget {
   final HistoryData order;
+
+  ShowOrders({this.order});
+
+  @override
+  _ShowOrdersState createState() => _ShowOrdersState();
+}
+
+class _ShowOrdersState extends State<ShowOrders> {
   final RoundedLoadingButtonController _btnController =
       RoundedLoadingButtonController();
-  ShowOrders({this.order});
+  String message = 'Cancel Order';
+  Future<void> updateOrder(id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token');
+    var response = await http.put(ORDERS + "\/$id",
+        headers: {"Authorization": token}, body: {"order_status": "cancelled"});
+    print(response.body);
+    if (response.statusCode == 200) {
+      _btnController.success();
+    } else {
+      setState(() {
+        message = json.decode(response.body)['message'];
+      });
+      _btnController.reset();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +58,7 @@ class ShowOrders extends StatelessWidget {
                 child: Row(
                   children: <Widget>[
                     Text(
-                      "Order Id - " + order.orderId.toString(),
+                      "Order Id - " + widget.order.orderId.toString(),
                       style: TextStyle(fontSize: 15, color: grey),
                     )
                   ],
@@ -43,7 +71,7 @@ class ShowOrders extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text('Order Status'),
-                    Text(order.orderStatus)
+                    Text(widget.order.orderStatus)
                   ],
                 ),
               )
@@ -57,7 +85,7 @@ class ShowOrders extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * .70,
                 child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount: order.products.length,
+                    itemCount: widget.order.products.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
                         height: 90,
@@ -70,7 +98,7 @@ class ShowOrders extends StatelessWidget {
                                 height: 80,
                                 width: 90,
                                 child: Image.network(
-                                  order.products[index].imageUrl,
+                                  widget.order.products[index].imageUrl,
                                   fit: BoxFit.fill,
                                 ),
                               ),
@@ -83,8 +111,8 @@ class ShowOrders extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      Text(
-                                        order.products[index].title
+                                      AutoSizeText(
+                                        widget.order.products[index].title
                                             .toString()
                                             .toUpperCase(),
                                         overflow: TextOverflow.ellipsis,
@@ -93,25 +121,26 @@ class ShowOrders extends StatelessWidget {
                                         height: 20,
                                       ),
                                       Text("₹" +
-                                          order.products[index].rate.toString())
+                                          widget.order.products[index].rate
+                                              .toString())
                                     ],
                                   ),
                                 ),
                               ),
                               Expanded(
                                 child: Container(
-                                  margin: EdgeInsets.all(10.0),
+                                  // margin: EdgeInsets.all(10.0),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      Text(
-                                        '${order.products[index].noOfUnits.toString()} Quantity',
+                                      AutoSizeText(
+                                        '${widget.order.products[index].noOfUnits.toString()} Quantity',
                                         style: TextStyle(color: grey),
                                       ),
-                                      Text(
-                                          '₹ ${(order.products[index].noOfUnits * order.products[index].rate).toString()}')
+                                      AutoSizeText(
+                                          '₹ ${(widget.order.products[index].noOfUnits * widget.order.products[index].rate).toString()}')
                                     ],
                                   ),
                                 ),
@@ -128,7 +157,7 @@ class ShowOrders extends StatelessWidget {
           InkWell(
             onTap: () {
               basicContentEasyDialog(
-                  context, "OrderId: ${order.orderId.toString()}");
+                  context, "OrderId: ${widget.order.orderId.toString()}");
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -163,7 +192,7 @@ class ShowOrders extends StatelessWidget {
                   Row(
                     children: <Widget>[
                       Text(
-                        order.user.name,
+                        widget.order.user.name,
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       )
@@ -172,8 +201,8 @@ class ShowOrders extends StatelessWidget {
                   SizedBox(
                     height: 10,
                   ),
-                  Text(
-                    order.deliveryAddress,
+                  AutoSizeText(
+                    widget.order.deliveryAddress,
                     maxLines: 3,
                     textAlign: TextAlign.start,
                     style: TextStyle(fontSize: 16),
@@ -185,9 +214,9 @@ class ShowOrders extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text('Email:'),
-                      order.user.email != null
+                      widget.order.user.email != null
                           ? Text(
-                              order.user.email,
+                              widget.order.user.email,
                             )
                           : Text(''),
                     ],
@@ -199,9 +228,9 @@ class ShowOrders extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text('Phone no:'),
-                      order.user.mobileNo != null
+                      widget.order.user.mobileNo != null
                           ? Text(
-                              "+91 " + order.user.mobileNo,
+                              "+91 " + widget.order.user.mobileNo,
                             )
                           : Text('')
                     ],
@@ -237,7 +266,7 @@ class ShowOrders extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        order.baseAmount.toString(),
+                        widget.order.baseAmount.toString(),
                         style: TextStyle(
                             color: grey,
                             decoration: TextDecoration.lineThrough),
@@ -254,7 +283,8 @@ class ShowOrders extends StatelessWidget {
                         'Selling Price',
                         style: TextStyle(fontSize: 15),
                       ),
-                      Text((order.amount - order.deliveryCharge).toString())
+                      Text((widget.order.amount - widget.order.deliveryCharge)
+                          .toString())
                     ],
                   ),
                   SizedBox(
@@ -265,7 +295,7 @@ class ShowOrders extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text('Total amount'),
-                      Text(order.amount.toString()),
+                      Text(widget.order.amount.toString()),
                     ],
                   ),
                   SizedBox(
@@ -276,7 +306,7 @@ class ShowOrders extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text('Payment Mode'),
-                      Text(order.paymentMode.toUpperCase()),
+                      Text(widget.order.paymentMode.toUpperCase()),
                     ],
                   ),
                   SizedBox(
@@ -289,18 +319,22 @@ class ShowOrders extends StatelessWidget {
           SizedBox(
             height: 10,
           ),
+          // Center(
+          //   child: Text(
+          //     message,
+          //     style: TextStyle(color: red),
+          //   ),
+          // ),
           RoundedLoadingButton(
             width: 150,
             height: 40,
             controller: _btnController,
             onPressed: () {
-              Timer(Duration(seconds: 2), () {
-                _btnController.success();
-              });
+              updateOrder(widget.order.id);
             },
             color: red,
             child: Text(
-              "Cancle Order",
+             message,
               style: TextStyle(color: white, fontWeight: FontWeight.bold),
             ),
           )

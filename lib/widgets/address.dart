@@ -51,7 +51,20 @@ class _AddressState extends State<Address> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: pcolor,
-        title: Text('Deliver Address'),
+        title: Row(
+          children: <Widget>[
+            Text('Deliver Address'),
+            FittedBox(
+                fit: BoxFit.fill,
+                child: Hero(
+                  tag: 'address',
+                  child: Container(
+                      height: 40,
+                      width: 40,
+                      child: Image.asset('images/address.png')),
+                ))
+          ],
+        ),
       ),
       body: isLoading
           ? Container(
@@ -172,7 +185,7 @@ class _AddressState extends State<Address> {
                                 Timer(Duration(seconds: 2), () {
                                   _btnController.reset();
                                   setState(() {
-                                    editaddress=false;
+                                    editaddress = false;
                                   });
                                 });
                               } else {

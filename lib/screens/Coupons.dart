@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/models/couponsModel.dart';
@@ -38,7 +39,20 @@ class _CouponState extends State<Coupon> {
     return Scaffold(
       key: key,
       appBar: AppBar(
-        title: Text('Offers'),
+        title: Row(
+          children: <Widget>[
+            Text('Offers'),
+            FittedBox(
+                fit: BoxFit.fill,
+                child: Hero(
+                  tag: 'offers',
+                  child: Container(
+                      height: 40,
+                      width: 40,
+                      child: Image.asset('images/offers.png')),
+                ))
+          ],
+        ),
         backgroundColor: pcolor,
       ),
       body: FutureBuilder(
@@ -62,7 +76,7 @@ class _CouponState extends State<Coupon> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
-                          height: 150,
+                          height: MediaQuery.of(context).size.width * .5,
                           width: MediaQuery.of(context).size.width,
                           child: Column(
                             children: <Widget>[
@@ -70,46 +84,59 @@ class _CouponState extends State<Coupon> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: <Widget>[
-                                  Text(
+                                  AutoSizeText(
                                     snapshot.data[index].code,
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 25,
                                         color: green),
                                   ),
-                                  RaisedButton( 
-                                      color: green,
-                                       onPressed: widget.amount>snapshot.data[index].minimumCartValue?() async {
-                                        var res = await http.put(
-                                            APPLYCOUPON +
-                                                snapshot.data[index].id
-                                                    .toString(),
-                                            headers: {
-                                              "Authorization": token
-                                            },
-                                        );
-                                        print(res.body);
-                                        key.currentState.showSnackBar(SnackBar(
-                                          content: Text(
-                                            "Coupon Applied",
-                                            style: TextStyle(color: blue),
-                                          ),
-                                          backgroundColor: white,
-                                        ));
-                                        Navigator.pop(context);
-                                      }:(){
-                                         key.currentState.showSnackBar(SnackBar(
-                                          content: Text(
-                                            "Min cart value should be ₹" + snapshot.data[index].minimumCartValue.toString(),
-                                            style: TextStyle(color: blue),
-                                          ),
-                                          backgroundColor: white,
-                                        ));
-                                      },
-                                      child: Text(
-                                        'Apply',
-                                        style: TextStyle(color: white),
-                                      ))
+                                  widget.amount == 0
+                                      ? Container()
+                                      : RaisedButton(
+                                          color: green,
+                                          onPressed: widget.amount >
+                                                  snapshot.data[index]
+                                                      .minimumCartValue
+                                              ? () async {
+                                                  var res = await http.put(
+                                                    APPLYCOUPON +
+                                                        snapshot.data[index].id
+                                                            .toString(),
+                                                    headers: {
+                                                      "Authorization": token
+                                                    },
+                                                  );
+                                                  print(res.body);
+                                                  key.currentState
+                                                      .showSnackBar(SnackBar(
+                                                    content: AutoSizeText(
+                                                      "Coupon Applied",
+                                                      style: TextStyle(
+                                                          color: blue),
+                                                    ),
+                                                    backgroundColor: white,
+                                                  ));
+                                                  Navigator.pop(context);
+                                                }
+                                              : () {
+                                                  key.currentState
+                                                      .showSnackBar(SnackBar(
+                                                    content: AutoSizeText(
+                                                      "Min cart value should be ₹" +
+                                                          snapshot.data[index]
+                                                              .minimumCartValue
+                                                              .toString(),
+                                                      style: TextStyle(
+                                                          color: blue),
+                                                    ),
+                                                    backgroundColor: white,
+                                                  ));
+                                                },
+                                          child: Text(
+                                            'Apply',
+                                            style: TextStyle(color: white),
+                                          ))
                                 ],
                               ),
                               SizedBox(
@@ -117,7 +144,7 @@ class _CouponState extends State<Coupon> {
                               ),
                               Row(
                                 children: <Widget>[
-                                  Text(
+                                  AutoSizeText(
                                     'Get ${snapshot.data[index].offPercentage}% discount ',
                                     style: TextStyle(
                                       fontSize: 17,
@@ -127,13 +154,10 @@ class _CouponState extends State<Coupon> {
                                 ],
                               ),
                               Divider(),
-                              Row(
-                                children: <Widget>[
-                                  Text(
-                                    'Use code ${snapshot.data[index].code} & get ${snapshot.data[index].offPercentage}% discount \n upto Rs.${snapshot.data[index].offAmount} on orders above Rs.${snapshot.data[index].minimumCartValue}',
-                                    style: TextStyle(color: grey, fontSize: 15),
-                                  )
-                                ],
+                              AutoSizeText(
+                                'Use code ${snapshot.data[index].code} & get ${snapshot.data[index].offPercentage}% discount upto Rs.${snapshot.data[index].offAmount} on orders above Rs.${snapshot.data[index].minimumCartValue}',
+                                style: TextStyle(color: grey),
+                                maxLines: 3,
                               ),
                             ],
                           ),

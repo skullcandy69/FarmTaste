@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/screens/showOrders.dart';
 import 'package:intl/intl.dart';
@@ -37,23 +38,21 @@ class _WalletState extends State<Wallet> {
                     child: Center(child: Loader()),
                   );
                 } else {
-                  return SingleChildScrollView(
-                    child: Container(
-                      height: MediaQuery.of(context).size.height * 0.88,
-                      width: MediaQuery.of(context).size.width,
-                      color: Colors.white,
-                      child: Column(
-                        children: <Widget>[
-                          SizedBox(
-                            height: 15,
-                          ),
-                          walletDetails(snapshot.data.user),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          transactionList(),
-                        ],
-                      ),
+                  return Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    color: Colors.white,
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(
+                          height: 15,
+                        ),
+                        walletDetails(snapshot.data.user),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        transactionList(),
+                      ],
                     ),
                   );
                 }
@@ -73,7 +72,7 @@ class _WalletState extends State<Wallet> {
         ),
         child: Container(
           padding: EdgeInsets.all(10),
-          height: MediaQuery.of(context).size.height * 0.2,
+          height: MediaQuery.of(context).size.height * 0.25,
           width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.only(
@@ -83,7 +82,15 @@ class _WalletState extends State<Wallet> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Icon(Icons.account_balance, size: 24, color: Colors.green[300]),
+              FittedBox(
+                  fit: BoxFit.fill,
+                  child: Hero(
+                    tag: 'wallet',
+                    child: Container(
+                        height: 40,
+                        width: 40,
+                        child: Image.asset('images/wallet.png')),
+                  )),
               SizedBox(
                 width: 10,
               ),
@@ -154,7 +161,7 @@ class _WalletState extends State<Wallet> {
     History trans = History.fromJson(json.decode(response.body));
     // print(trans.data.length);
 
-    return trans.data;
+    return trans.data.reversed.toList();
   }
 
   Future<List<HistoryData>> getOrders() async {
@@ -164,7 +171,7 @@ class _WalletState extends State<Wallet> {
     print(response.body);
     History trans = History.fromJson(json.decode(response.body));
     // print(trans.data[0].cart.products[0].title);
-    return trans.data;
+    return trans.data.reversed.toList();
   }
 
   Widget transactionList() {
@@ -181,11 +188,11 @@ class _WalletState extends State<Wallet> {
               Tab(text: 'FAILED TRANSACTIONS')
             ], labelColor: green),
             Container(
-              height: MediaQuery.of(context).size.height * 0.56,
+              height: MediaQuery.of(context).size.height * 0.5,
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: TabBarView(children: [
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.6,
+                  height: MediaQuery.of(context).size.height * 0.65,
                   child: FutureBuilder(
                       future: ordersdata,
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -269,8 +276,8 @@ class TransactionWidget extends StatelessWidget {
             ));
       },
       child: Container(
-        margin: EdgeInsets.all(10.0),
-        padding: EdgeInsets.all(10.0),
+        margin: EdgeInsets.all(5.0),
+        padding: EdgeInsets.all(5.0),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -327,26 +334,29 @@ class TransactionWidget extends StatelessWidget {
                     children: <Widget>[
                       Row(
                         children: <Widget>[
-                          Text(
+                          AutoSizeText(
                             transaction.orderId.toString(),
+                            maxLines: 1,
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
-                      Text(
+                      AutoSizeText(
                         " ₹${transaction.amount}",
+                        maxLines: 1,
                         style: TextStyle(fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text(
-                        "${DateFormat.EEEE().format(DateTime.parse(transaction.updatedAt))}, ${DateFormat.jm().format(DateTime.parse(transaction.updatedAt))}",
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                      Text(
+                      AutoSizeText(
+                          "${DateFormat.E().format(DateTime.parse(transaction.updatedAt))}, ${DateFormat.jm().format(DateTime.parse(transaction.updatedAt))}",
+                          style: TextStyle(color: Colors.grey[700]),
+                          overflow: TextOverflow.ellipsis),
+                      AutoSizeText(
                         "$transactionName",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -355,7 +365,7 @@ class TransactionWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Text(
+                  AutoSizeText(
                     "${DateFormat.yMMMMd().format(DateTime.parse(transaction.updatedAt))}",
                     style: TextStyle(color: Colors.grey[700]),
                   ),
@@ -417,8 +427,7 @@ class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
     setState(() {
-      if(response.message=="Payment Cancelled")
-      message = "Invalid Amount";
+      if (response.message == "Payment Cancelled") message = "Invalid Amount";
     });
     _btnController.reset();
   }
@@ -431,18 +440,16 @@ class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
     var options = {
       'key': 'rzp_test_9xPUvXMTVSbgW5',
       'amount': (int.parse(textEditingController.text) * 100).toInt(),
-      'name': 'farmtaste',
+      'name': 'FARM TASTE',
       'description': 'Order Payment',
       'prefill': {
         "name": widget.user.name,
         'contact': widget.user.mobileNo,
         'email': widget.user.email,
       },
-      "image":
-          'https://merriam-webster.com/assets/mw/images/article/art-wap-landing-mp-lg/meanwhile-2453-cc63cdb89c527209296a3ec7ffd9ee59@1x.jpg',
-      'external': {
-        'wallet': ['paytm']
-      },
+      // "image":
+      //     'https://merriam-webster.com/assets/mw/images/article/art-wap-landing-mp-lg/meanwhile-2453-cc63cdb89c527209296a3ec7ffd9ee59@1x.jpg',
+
       "currency": "INR",
       "payment_capture": 1,
       "theme": {"color": "#32cd32"}

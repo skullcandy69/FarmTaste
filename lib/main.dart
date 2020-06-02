@@ -6,12 +6,14 @@ import 'package:grocery/models/CartModel.dart';
 import 'package:grocery/provider/auth.dart';
 import 'package:grocery/screens/home.dart';
 import 'package:grocery/screens/login.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:shimmer/shimmer.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider.value(value: AuthProvider.initialize()),
     ChangeNotifierProvider.value(value: ProductModel()),
@@ -27,17 +29,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    setupnotification();
+    
     Provider.of<ProductModel>(context, listen: false).fetchProducts();
-   
-    Timer(
-        Duration(seconds: 3),
-        () => changeScreenRepacement(
-            context,
-            SController(
-              
-            )));
+
+    Timer(Duration(seconds: 3),
+        () => changeScreenRepacement(context, SController()));
   }
- 
+
+  Future<void> setupnotification() async {
+    await OneSignal.shared.init("f8e1e308-b0d5-4453-9601-ce3ea9da054e",
+        iOSSettings: {
+          OSiOSSettings.autoPrompt: false,
+          OSiOSSettings.inAppLaunchUrl: false
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +121,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
   // getToken() async {
   //   SharedPreferences pref = await SharedPreferences.getInstance();
   //   setState(() {
@@ -146,7 +153,6 @@ class _MyAppState extends State<MyApp> {
 }
 
 class SController extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);

@@ -32,33 +32,27 @@ class MapScreenState extends State<ProfilePage>
           Column(
             children: <Widget>[
               new Container(
-                height:150.0,
+                height:155.0,
                 color: Colors.white,
                 child: new Column(
                   children: <Widget>[
-                   
                     Padding(
                       padding: EdgeInsets.only(top: 1.0),
-                      child: new Stack(fit: StackFit.loose, children: <Widget>[
-                        new Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            new Container(
-                                width: 140.0,
-                                height: 130.0,
-                                decoration: new BoxDecoration(
-                                  shape: BoxShape.circle,
-                                
-                                ),
-                                child: Icon(
-                                  Icons.account_circle,
-                                  size: 150,
-                                )),
-                          ],
-                        ),
-                       
-                      ]),
+                      child: new Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          FittedBox(
+                      fit: BoxFit.cover,
+                      child: Hero(
+                        tag: 'user',
+                        child: Container(
+                            height: 150,
+                            width: 200,
+                            child: Image.asset('images/user.png')),
+                      )),
+                        ],
+                      ),
                     )
                   ],
                 ),

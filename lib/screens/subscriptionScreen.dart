@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/models/Subscription.dart';
 import 'package:grocery/widgets/Loader.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -39,7 +41,20 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Subscriptions'),
+          title: Row(
+            children: <Widget>[
+              Text('Subscriptions'),
+              FittedBox(
+                  fit: BoxFit.cover,
+                  child: Hero(
+                    tag: 'plan',
+                    child: Container(
+                        height: 45,
+                        width: 45,
+                        child: Image.asset('images/plan.png')),
+                  ))
+            ],
+          ),
           backgroundColor: pcolor,
         ),
         body: list == null
@@ -48,18 +63,16 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   child: Loader(),
                 ),
               )
-            : ListView.builder(
-                itemCount: list.length,
-                itemBuilder: (BuildContext context, int index) {
-                  if (list.length == 0) {
-                    return Image.asset('images/emptycart.png');
-                  } else {
-                    return OrderShow(
-                      data: list[index],
-                    );
-                  }
-                },
-              ));
+            : list.length == 0
+                ? Container(height: MediaQuery.of(context).size.height ,child: Image.asset('images/emptycart.png',fit: BoxFit.cover,))
+                : ListView.builder(
+                    itemCount: list.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return OrderShow(
+                        data: list[index],
+                      );
+                    },
+                  ));
   }
 }
 
@@ -74,11 +87,33 @@ class OrderShow extends StatefulWidget {
 class _OrderShowState extends State<OrderShow> {
   bool isLoading = false;
   int _itemcounter;
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
+  String message = 'Cancel';
+  Future<void> updateOrder(id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token');
+    var response = await http.delete(
+      BASE_URL + "/subscription/" + "$id",
+      headers: {"Authorization": token},
+    );
+    print(response.body);
+    if (response.statusCode == 200) {
+      _btnController.success();
+    } else {
+      setState(() {
+        message = json.decode(response.body)['message'];
+      });
+      _btnController.reset();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _itemcounter = widget.data.product.noOfUnits;
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -104,16 +139,16 @@ class _OrderShowState extends State<OrderShow> {
                   child: Image.network(widget.data.product.imageUrl)),
               Expanded(
                 child: Container(
-                  margin: EdgeInsets.all(12.0),
+                  margin: EdgeInsets.symmetric(horizontal: 12.0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
+                      AutoSizeText(
                         widget.data.product.title.toString().toUpperCase(),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      Text(
+                      AutoSizeText(
                         "Quantity " + widget.data.product.noOfUnits.toString(),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -133,60 +168,72 @@ class _OrderShowState extends State<OrderShow> {
                   ),
                 ),
               ),
-            isLoading?Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Container(
-                  height: 30,
-                  width: 75,
-                  decoration: BoxDecoration(
-                      color: white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: blue)),
-                  child: Center(
-                      child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      _itemcounter == 0
-                          ? Container()
-                          : InkWell(
-                              onTap: () async {
-                                setState(() {
-                                  _itemcounter--;
-                                });
-                              },
-                              child: Icon(
-                                Icons.remove,
-                                color: blue,
+              isLoading
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        Container(
+                          height: 30,
+                          width: 75,
+                          decoration: BoxDecoration(
+                              color: white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: blue)),
+                          child: Center(
+                              child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              _itemcounter == 0
+                                  ? Container()
+                                  : InkWell(
+                                      onTap: () async {
+                                        setState(() {
+                                          _itemcounter--;
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.remove,
+                                        color: blue,
+                                      ),
+                                    ),
+                              _itemcounter == 0
+                                  ? Text(
+                                      'ADD',
+                                      style: TextStyle(color: blue),
+                                    )
+                                  : Text(
+                                      _itemcounter.toString(),
+                                      style: TextStyle(color: blue),
+                                    ),
+                              InkWell(
+                                onTap: () {
+                                  print('inc');
+                                  setState(() {
+                                    _itemcounter++;
+                                  });
+                                },
+                                child: Icon(
+                                  Icons.add,
+                                  color: blue,
+                                ),
                               ),
-                            ),
-                      _itemcounter == 0
-                          ? Text(
-                              'ADD',
-                              style: TextStyle(color: blue),
-                            )
-                          : Text(
-                              _itemcounter.toString(),
-                              style: TextStyle(color: blue),
-                            ),
-                      InkWell(
-                        onTap: ()  {
-                          print('inc');
-                          setState(() {
-                            _itemcounter++;
-                          });
-                        },
-                        child: Icon(
-                          Icons.add,
-                          color: blue,
+                            ],
+                          )),
                         ),
-                      ),
-                    ],
-                  )),
-                ),
-                FlatButton(onPressed: (){}, child:Text('Cancle'),textColor: white,color: red,)
-              ],
-            ):Container(),
+                        RoundedLoadingButton(
+                          height: 30,
+                          width: 60,
+                          controller: _btnController,
+                          onPressed: () => updateOrder(widget.data.id),
+                          child: AutoSizeText(
+                            " " + message + " ",
+                            style: TextStyle(color: white),
+                          ),
+                          color: red,
+                        )
+                      ],
+                    )
+                  : Container(),
               Align(
                   alignment: Alignment.topRight,
                   child: FlatButton(

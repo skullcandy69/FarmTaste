@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:grocery/models/CartModel.dart';
 import 'package:grocery/models/user_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:grocery/helpers/commons.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum status { Uninitialized, Unauthenticated, Authenticating, Authenticated }
@@ -74,14 +76,15 @@ class AuthProvider with ChangeNotifier {
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
     if (response.statusCode == 200 &&
-        json.decode(response.body)['data'] == "OTP Generated, Kindly Register") {
+        json.decode(response.body)['data'] ==
+            "OTP Generated, Kindly Register") {
       return json.decode(response.body)['otp'];
     } else {
       return 'Already Registered, Please Login';
     }
   }
 
-  Future<bool> inputotp() async {
+  Future<bool> inputotp(BuildContext context) async {
     var response = await http.post(LOGIN,
         body: {"mobile_no": mobno.text.trim(), "otp": otp.text.trim()});
     print('Response status: ${response.statusCode}');
@@ -95,6 +98,8 @@ class AuthProvider with ChangeNotifier {
       prefs.setString('token', res.token);
       print(res.user.id);
       print('success');
+      Provider.of<ProductModel>(context, listen: false).fetchProducts();
+
       return true;
     } else {
       print('failed');

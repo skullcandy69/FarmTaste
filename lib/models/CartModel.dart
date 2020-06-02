@@ -157,13 +157,18 @@ class ProductModel extends ChangeNotifier {
   Future<void> fetchProducts() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
-    var response = await http.get(MYCART, headers: {"Authorization": token});
+    if(token!=null){
+        var response = await http.get(MYCART, headers: {"Authorization": token});
     CartItem cartItem = CartItem.fromJson(json.decode(response.body));
     productlist.clear();
     for (int i = 0; i < cartItem.extra.length; i++) {
      productlist.add(cartItem.extra[i]);
         notifyListeners();
     }
+    }else{
+      print('No Token');
+    }
+  
   }
 
   removeItem(ProductData product) {

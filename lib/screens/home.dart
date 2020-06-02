@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/helpers/navigation.dart';
@@ -10,6 +11,8 @@ import 'package:grocery/screens/login.dart';
 import 'package:grocery/screens/profile.dart';
 import 'package:grocery/screens/subscriptionScreen.dart';
 import 'package:grocery/screens/wallet.dart';
+import 'package:grocery/screens/ViewBill.dart';
+
 import 'package:grocery/widgets/Productcategory.dart';
 import 'package:grocery/widgets/SearchProducts.dart';
 import 'package:grocery/widgets/address.dart';
@@ -19,9 +22,9 @@ import 'package:grocery/screens/shoppingCart.dart';
 import 'package:grocery/widgets/helpDialog.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart'as http;
-class HomePage extends StatefulWidget {
+import 'package:http/http.dart' as http;
 
+class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -34,28 +37,31 @@ class _HomePageState extends State<HomePage> {
     print('response');
     setState(() {
       res = Result.fromJson(json.decode(prefs.getString('response')));
-      
+
       mob = res.user.mobileNo;
       print(res.token);
     });
   }
-   itemCount() async {
+
+  itemCount() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String token = pref.getString('token');
-    var response = await http.get(UPCOMINGITEM,headers:{'authorization':token});
+    var response =
+        await http.get(UPCOMINGITEM, headers: {'authorization': token});
     setState(() {
-      count= json.decode(response.body)['count'];
-      date = DateTime.parse(json.decode(response.body)['date'])??date;
+      count = json.decode(response.body)['count'];
+      date = DateTime.parse(json.decode(response.body)['date']) ?? date;
     });
   }
-  DateTime date=DateTime.now();
-  int count=0;
+
+  DateTime date = DateTime.now();
+  int count = 0;
   @override
   void initState() {
     super.initState();
     read();
-   itemCount();
-}
+    itemCount();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,15 +69,15 @@ class _HomePageState extends State<HomePage> {
       return Scaffold(
           appBar: AppBar(
             title: GestureDetector(
-              onTap: ()=>changeScreen(context,SearchProduct()),
-                          child: Container(
+              onTap: () => changeScreen(context, SearchProduct()),
+              child: Container(
                 height: 40,
                 decoration: BoxDecoration(
                     color: white,
                     borderRadius: BorderRadius.all(Radius.circular(10))),
                 child: TextField(
                   decoration: InputDecoration(
-                    enabled: false,
+                      enabled: false,
                       icon: Icon(
                         Icons.search,
                         color: grey,
@@ -141,14 +147,14 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: ListTile(
-                    leading: Container(
-                        height: 50,
-                        width: 50,
-                        decoration:
-                            BoxDecoration(color: white, shape: BoxShape.circle),
-                        child: Icon(
-                          Icons.account_circle,
-                          size: 50,
+                    leading: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Hero(
+                          tag: 'user',
+                          child: Container(
+                              height: 50,
+                              width: 50,
+                              child: Image.asset('images/user.png')),
                         )),
                     title: mob == null
                         ? Text('null')
@@ -159,27 +165,54 @@ class _HomePageState extends State<HomePage> {
                     onTap: () => changeScreen(context, ProfilePage(res)),
                   ),
                 ),
-               
+
                 ListTile(
-                  leading: Icon(Icons.add_photo_alternate),
+                  leading: FittedBox(
+                      fit: BoxFit.cover,
+                      child: Hero(
+                        tag: 'plan',
+                        child: Container(
+                            height: 45,
+                            width: 45,
+                            child: Image.asset('images/plan.png')),
+                      )),
                   title: Text('Plan'),
-                 onTap: ()=>changeScreen(context, SubscriptionScreen()),
+                  onTap: () => changeScreen(context, SubscriptionScreen()),
                 ),
                 ListTile(
-                  leading: Icon(Icons.account_balance_wallet),
+                  leading: FittedBox(
+                      fit: BoxFit.fill,
+                      child: Hero(
+                        tag: 'wallet',
+                        child: Container(
+                            height: 40,
+                            width: 40,
+                            child: Image.asset('images/wallet.png')),
+                      )),
                   title: Text('Wallet'),
                   onTap: () {
                     changeScreen(context, Wallet());
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.attach_money),
+                  leading: FittedBox(
+                      fit: BoxFit.fill,
+                      child: Hero(
+                        tag: 'bill',
+                        child: Container(
+                            height: 40,
+                            width: 40,
+                            child: Image.asset('images/orderhistory.png')),
+                      )),
                   title: Text('View Bill'),
+                  onTap: () {
+                    changeScreen(context, ViewBill());
+                  },
                 ),
-                ListTile(
-                  leading: Icon(Icons.beach_access),
-                  title: Text('Vacation'),
-                ),
+                // ListTile(
+                //   leading: Icon(Icons.beach_access),
+                //   title: Text('Vacation'),
+                // ),
                 Divider(
                   color: black,
                 ),
@@ -188,23 +221,51 @@ class _HomePageState extends State<HomePage> {
                   child: Text('others', style: TextStyle(fontSize: 20)),
                 ),
                 ListTile(
-                  leading: Icon(Icons.home),
+                  leading: FittedBox(
+                      fit: BoxFit.fill,
+                      child: Hero(
+                        tag: 'address',
+                        child: Container(
+                            height: 40,
+                            width: 40,
+                            child: Image.asset('images/address.png')),
+                      )),
                   title: Text('Delivery Address'),
                   onTap: () async {
                     changeScreen(context, Address());
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.local_offer),
+                  leading: FittedBox(
+                      fit: BoxFit.fill,
+                      child: Hero(
+                        tag: 'offers',
+                        child: Container(
+                            height: 40,
+                            width: 40,
+                            child: Image.asset('images/offers.png')),
+                      )),
                   title: Text('Offers'),
-                  onTap: ()=>changeScreen(context,Coupon(amount: 0,)),
+                  onTap: () => changeScreen(
+                      context,
+                      Coupon(
+                        amount: 0,
+                      )),
                 ),
                 ListTile(
-                  leading: Icon(Icons.grain),
+                  leading: FittedBox(
+                      fit: BoxFit.fill,
+                      child: Hero(
+                        tag: 'refer',
+                        child: Container(
+                            height: 40,
+                            width: 40,
+                            child: Image.asset('images/refer.png')),
+                      )),
                   title: Text('Refer and Earn'),
-                  onTap: ()=>changeScreen(context, ReferAndEarn(res:res)),
+                  onTap: () => changeScreen(context, ReferAndEarn(res: res)),
                 ),
-               
+
                 ListTile(
                   onTap: () async {
                     print('good bye');
@@ -214,7 +275,12 @@ class _HomePageState extends State<HomePage> {
                     pro.clearList();
                     changeScreenRepacement(context, LoginScreen());
                   },
-                  leading: Icon(Icons.exit_to_app),
+                  leading: FittedBox(
+                      fit: BoxFit.fill,
+                      child: Container(
+                          height: 40,
+                          width: 40,
+                          child: Image.asset('images/logout.png'))),
                   title: Text('Logout'),
                 ),
               ],
@@ -223,17 +289,22 @@ class _HomePageState extends State<HomePage> {
           body: ListView(
             physics: BouncingScrollPhysics(),
             children: <Widget>[
-              DeliveryStatus(count: count,date: date,),
+              DeliveryStatus(
+                count: count,
+                date: date,
+              ),
               Cardwidget(),
               ProductCategoryList(),
             ],
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () => basicContentEasyDialog(context,'Hello'),
-            backgroundColor:pcolor,
-            child: Text('help??'),
+            onPressed: () => basicContentEasyDialog(context, 'Hello'),
+            backgroundColor: pcolor,
+            child: AutoSizeText(
+              'help',
+              maxLines: 1,
+            ),
           ));
     });
   }
 }
-

@@ -1,13 +1,16 @@
 import 'dart:convert';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/models/CartModel.dart';
 import 'package:grocery/models/products.dart';
 import 'package:grocery/provider/addcart.dart';
 import 'package:grocery/widgets/Loader.dart';
+import 'package:grocery/widgets/RecurringOrder.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
 
 class SearchProduct extends StatefulWidget {
   @override
@@ -100,13 +103,13 @@ class _SearchProductState extends State<SearchProduct> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: <Widget>[
-                                  Text(
+                                  AutoSizeText(
                                     "Search result : " +
                                         snapshot.data.length.toString() +
                                         " items",
                                     style: TextStyle(
                                         color: black,
-                                        fontSize: 20,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.w500),
                                   ),
                                 ],
@@ -159,7 +162,16 @@ class _DetailScreenState extends State<DetailScreen> {
           .getQuanity(widget.pro.id);
     });
   }
-
+ void _showDialog(ProductData product) {
+    slideDialog.showSlideDialog(
+      context: context,
+      child: RecurringOrder(
+        pro: product,
+      ),
+      pillColor: Colors.red,
+      backgroundColor: white,
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -186,23 +198,25 @@ class _DetailScreenState extends State<DetailScreen> {
                   child: Row(
                     // mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(5),
-                        child: Container(
-                          height: 80,
-                          width: 80,
-                          child: Image.network(widget.pro.imageUrl) == null
-                              ? CircularProgressIndicator()
-                              : Image.network(
-                                  widget.pro.imageUrl,
-                                  fit: BoxFit.cover,
-                                  loadingBuilder: (BuildContext context,
-                                      Widget child,
-                                      ImageChunkEvent loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(child: Loader());
-                                  },
-                                ),
+                      GestureDetector(onTap: () => _showDialog(widget.pro),
+                                              child: ClipRRect(
+                          borderRadius: BorderRadius.circular(5),
+                          child: Container(
+                            height: 80,
+                            width: 80,
+                            child: Image.network(widget.pro.imageUrl) == null
+                                ? CircularProgressIndicator()
+                                : Image.network(
+                                    widget.pro.imageUrl,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (BuildContext context,
+                                        Widget child,
+                                        ImageChunkEvent loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(child: Loader());
+                                    },
+                                  ),
+                          ),
                         ),
                       ),
                       Expanded(
@@ -212,13 +226,14 @@ class _DetailScreenState extends State<DetailScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              Text(
+                              AutoSizeText(
                                 widget.pro.title.toString().toUpperCase(),
-                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                // overflow: TextOverflow.ellipsis,
                               ),
-                              Text(
-                                widget.pro.baseQuantity.toString(),
-                                overflow: TextOverflow.ellipsis,
+                              AutoSizeText(
+                                widget.pro.baseQuantity.toString(),maxLines: 1,
+                                // overflow: TextOverflow.ellipsis,
                               ),
                               RichText(
                                 text: TextSpan(
