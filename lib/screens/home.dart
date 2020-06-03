@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/models/CartModel.dart';
+import 'package:grocery/models/recentitems.dart';
 import 'package:grocery/models/user_model.dart';
 import 'package:grocery/screens/Coupons.dart';
 import 'package:grocery/screens/Refer.dart';
@@ -48,14 +49,19 @@ class _HomePageState extends State<HomePage> {
     String token = pref.getString('token');
     var response =
         await http.get(UPCOMINGITEM, headers: {'authorization': token});
-    setState(() {
-      count = json.decode(response.body)['count'];
-      date = DateTime.parse(json.decode(response.body)['date']) ?? date;
-    });
+    if (response.statusCode == 200) {
+      OntheWay items = OntheWay.fromJson(json.decode(response.body));
+      setState(() {
+        count = items.count;
+        date = DateTime.parse(items.date) ?? date;
+        codes = items.codes;
+      });
+    }
   }
 
   DateTime date = DateTime.now();
   int count = 0;
+  List<Codes> codes=[];
   @override
   void initState() {
     super.initState();
@@ -292,6 +298,7 @@ class _HomePageState extends State<HomePage> {
               DeliveryStatus(
                 count: count,
                 date: date,
+                codes: codes
               ),
               Cardwidget(),
               ProductCategoryList(),

@@ -325,7 +325,7 @@ class _ShowOrdersState extends State<ShowOrders> {
           //     style: TextStyle(color: red),
           //   ),
           // ),
-          RoundedLoadingButton(
+      widget.order.orderStatus=='pending'?    RoundedLoadingButton(
             width: 150,
             height: 40,
             controller: _btnController,
@@ -337,7 +337,7 @@ class _ShowOrdersState extends State<ShowOrders> {
              message,
               style: TextStyle(color: white, fontWeight: FontWeight.bold),
             ),
-          )
+          ):Container()
         ])));
   }
 }

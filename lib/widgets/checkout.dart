@@ -261,14 +261,6 @@ class _CheckoutState extends State<Checkout> {
                                       style: TextStyle(fontSize: 15)));
                             }).toList(),
                             value: selectedValue,
-
-                            // hint: "Select Area",
-                            // label: Text(
-                            //   'Area*',
-                            //   style: TextStyle(color: grey),
-                            // ),
-                            // searchHint: "Select Area",
-                            // displayClearIcon: false,
                             onChanged: (value) {
                               setState(() {
                                 selectedValue = value;

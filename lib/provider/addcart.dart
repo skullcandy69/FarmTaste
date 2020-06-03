@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/models/CartModel.dart';
+import 'package:grocery/models/products.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -113,3 +114,28 @@ Future<String> recurringOrder(String id, nou, sdate, edate, subtype) async {
     return json.decode(response.body)['message'];
   }
 }
+
+
+String getGstPrice(ProductData product){
+   if (product.rate[0].discountedAmount == null ||
+            product.rate[0].discountedAmount == 0) {
+          if (product.isUnderGst == true) {
+            dynamic gstrate = product.rate[0].baseAmount +
+                (product.rate[0].baseAmount * product.gstRate) /
+                    100;
+            return  gstrate.toString();
+          } else {
+            return product.rate[0].baseAmount.toString();
+          }
+        } else {
+          if (product.isUnderGst == true) {
+            dynamic gstrate = product.rate[0].discountedAmount +
+                (product.rate[0].discountedAmount *
+                        product.gstRate) /
+                    100;
+           return gstrate.toString();
+          } else {
+           return product.rate[0].discountedAmount.toString();
+          }
+        }
+      }

@@ -44,9 +44,8 @@ class _ProductDetailsState extends State<ProductDetails> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
-    
-    return  Consumer<ProductModel>(builder: (context, pro, child) {
-          return DefaultTabController(
+    return Consumer<ProductModel>(builder: (context, pro, child) {
+      return DefaultTabController(
           length: widget.productsubcat.length,
           initialIndex: widget.id,
           child: Scaffold(
@@ -58,7 +57,8 @@ class _ProductDetailsState extends State<ProductDetails> {
                     icon: Icon(Icons.search),
                     onPressed: () {
                       changeScreen(context, SearchProduct());
-                    }), Padding(
+                    }),
+                Padding(
                   padding: const EdgeInsets.only(top: 5.0, bottom: 5, right: 5),
                   child: Stack(
                     children: <Widget>[
@@ -88,7 +88,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                               ]),
                           child: Center(
                             child: Text(
-                               pro.productlist.length.toString(),
+                              pro.productlist.length.toString(),
                               style: TextStyle(
                                   fontSize: 10,
                                   color: red,
@@ -125,7 +125,8 @@ class _ProductDetailsState extends State<ProductDetails> {
                       return Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10.0, ),
+                          horizontal: 10.0,
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
                           children: <Widget>[
@@ -198,21 +199,19 @@ class _ProductDetailsState extends State<ProductDetails> {
                       return ListView(
                         children: <Widget>[
                           _listofitems(snapshot.data, context, add, len),
-                        
                         ],
                       );
                     }
                   });
             })),
-          ));}
-    );
+          ));
+    });
   }
 
   _listofitems(
       List<ProductData> item, BuildContext context, bool add, int len) {
     return Container(
-      height: MediaQuery.of(context).size.height * .8
-         ,
+      height: MediaQuery.of(context).size.height * .8,
       child: ListView.builder(
         padding: EdgeInsets.all(10),
         itemCount: item.length,
@@ -315,7 +314,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                 maxLines: 1,
                                 // overflow: TextOverflow.ellipsis,
                               ),
-                            AutoSizeText(
+                              AutoSizeText(
                                 widget.pro.baseQuantity.toString(), maxLines: 1,
                                 // overflow: TextOverflow.ellipsis,
                               ),
@@ -323,11 +322,12 @@ class _DetailScreenState extends State<DetailScreen> {
                                 text: TextSpan(
                                   children: <TextSpan>[
                                     TextSpan(
-                                      text: widget.pro.rate[0]
-                                                  .discountedAmount !=
-                                              null
-                                          ? "₹${widget.pro.rate[0].discountedAmount.toString()}\t"
-                                          : "₹${widget.pro.rate[0].baseAmount.toString()}\t",
+                                      text: "₹" + getGstPrice(widget.pro),
+                                      // text: widget.pro.rate[0]
+                                      //             .discountedAmount !=
+                                      //         null
+                                      //     ? "₹${widget.pro.rate[0].discountedAmount.toString()}\t"
+                                      //     : "₹${widget.pro.rate[0].baseAmount.toString()}\t",
                                       style: TextStyle(
                                         color: black,
                                       ),

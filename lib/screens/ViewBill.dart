@@ -18,7 +18,7 @@ Future<List<HistoryData>> getTransaction() async {
   var response = await http.get(HISTORY, headers: {"Authorization": token});
   print(response.body);
   History trans = History.fromJson(json.decode(response.body));
-  return trans.data;
+  return trans.data.reversed.toList();
 }
 
 Future<List<HistoryData>> getOrders() async {
@@ -28,7 +28,7 @@ Future<List<HistoryData>> getOrders() async {
   print(response.body);
   History trans = History.fromJson(json.decode(response.body));
   print(trans.data[0].deliveryAddress);
-  return trans.data;
+  return trans.data.reversed.toList();
 }
 
 class _ViewBillState extends State<ViewBill> {

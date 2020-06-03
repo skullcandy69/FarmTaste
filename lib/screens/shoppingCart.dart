@@ -374,7 +374,7 @@ class _BuildCartState extends State<BuildCart> {
                               widget.order.baseQuantity.toString(),
                               overflow: TextOverflow.ellipsis,
                             ),
-                            Text(widget.order.rate[0].baseAmount.toString())
+                            Text("₹" + getGstPrice(widget.order))
                           ],
                         ),
                       ),

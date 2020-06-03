@@ -22,6 +22,13 @@ class _RecurringOrderState extends State<RecurringOrder> {
   DateTime _endDate = DateTime.now().add(Duration(days: 6));
   String frequency = 'daily';
   DateTime _initialendDate = DateTime.now().add(Duration(days: 6));
+  List<bool> isSelected;
+  @override
+  void initState() {
+    isSelected = [false, true, false];
+
+    super.initState();
+  }
 
   String message = '';
   @override
@@ -79,11 +86,7 @@ class _RecurringOrderState extends State<RecurringOrder> {
                                     text: TextSpan(
                                       children: <TextSpan>[
                                         TextSpan(
-                                          text: widget.pro.rate[0]
-                                                      .discountedAmount !=
-                                                  null
-                                              ? "₹${widget.pro.rate[0].discountedAmount.toString()}\t"
-                                              : "₹${widget.pro.rate[0].baseAmount.toString()}\t",
+                                          text: "₹" + getGstPrice(widget.pro),
                                           style: TextStyle(
                                             color: black,
                                           ),
@@ -125,8 +128,8 @@ class _RecurringOrderState extends State<RecurringOrder> {
                                     )),
                               ),
                               Container(
-                                height: 25,
-                                width: 65,
+                                height: 30,
+                                width: 80,
                                 decoration: BoxDecoration(
                                     color: white,
                                     borderRadius: BorderRadius.circular(8),
@@ -192,41 +195,70 @@ class _RecurringOrderState extends State<RecurringOrder> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10.0, right: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                FlatButton(
-                  onPressed: () => setState(() {
-                    frequency = "alternative";
-                    _endDate = _initialendDate =
-                        DateTime.now().add(Duration(days: 12));
-                  }),
-                  color: Colors.green[50],
-                  child: Text('Alternative Day'),
-                ),
-                FlatButton(
-                  onPressed: () => setState(() {
-                    frequency = "daily";
-                    _endDate =
-                        _initialendDate = DateTime.now().add(Duration(days: 6));
-                  }),
-                  color: Colors.green[50],
-                  child: Text('Daily'),
-                ),
-                FlatButton(
-                  onPressed: () => setState(() {
-                    frequency = "once a week";
-                    _endDate = _initialendDate =
-                        DateTime.now().add(Duration(days: 37));
-                  }),
-                  color: Colors.green[50],
-                  child: Text('Once a Week'),
-                ),
-              ],
-            ),
-          ),
+          Container(
+              width: MediaQuery.of(context).size.width,
+              alignment: Alignment.center,
+              // margin: EdgeInsets.all(10),
+              padding: EdgeInsets.all(10),
+              child: ToggleButtons(
+                children: <Widget>[
+                  SizedBox(
+                      width: MediaQuery.of(context).size.width / 3.5,
+                      child: Center(
+                          child: Text(
+                        'Alternative Day',
+                        overflow: TextOverflow.ellipsis,
+                      ))),
+                  SizedBox(
+                      width: MediaQuery.of(context).size.width / 3.5,
+                      child: Center(
+                          child:
+                              Text('Daily', overflow: TextOverflow.ellipsis))),
+                  SizedBox(
+                      width: MediaQuery.of(context).size.width / 3.5,
+                      child: Center(
+                          child: Text('Once a Week',
+                              overflow: TextOverflow.ellipsis))),
+                ],
+                isSelected: isSelected,
+                onPressed: (int index) {
+                  setState(() {
+                    for (int i = 0; i < isSelected.length; i++) {
+                      isSelected[i] = i == index;
+                    }
+                  });
+                  switch (index) {
+                    case 0:
+                      setState(() {
+                        frequency = "alternative";
+                        _endDate = _initialendDate =
+                            DateTime.now().add(Duration(days: 12));
+                      });
+                      break;
+                    case 1:
+                      setState(() {
+                        frequency = "daily";
+                        _endDate = _initialendDate =
+                            DateTime.now().add(Duration(days: 6));
+                      });
+                      break;
+                    case 2:
+                      setState(() {
+                        frequency = "once a week";
+                        _endDate = _initialendDate =
+                            DateTime.now().add(Duration(days: 37));
+                      });
+                      break;
+                    default:
+                      setState(() {
+                        frequency = "daily";
+                        _endDate = _initialendDate =
+                            DateTime.now().add(Duration(days: 6));
+                      });
+                      break;
+                  }
+                },
+              )),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(

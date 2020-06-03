@@ -239,11 +239,12 @@ class _DetailScreenState extends State<DetailScreen> {
                                 text: TextSpan(
                                   children: <TextSpan>[
                                     TextSpan(
-                                      text: widget.pro.rate[0]
-                                                  .discountedAmount !=
-                                              null
-                                          ? "₹${widget.pro.rate[0].discountedAmount.toString()}\t"
-                                          : "₹${widget.pro.rate[0].baseAmount.toString()}\t",
+                                      text: "₹" + getGstPrice(widget.pro),
+                                      // text: widget.pro.rate[0]
+                                      //             .discountedAmount !=
+                                      //         null
+                                      //     ? "₹${widget.pro.rate[0].discountedAmount.toString()}\t"
+                                      //     : "₹${widget.pro.rate[0].baseAmount.toString()}\t",
                                       style: TextStyle(
                                         color: black,
                                       ),

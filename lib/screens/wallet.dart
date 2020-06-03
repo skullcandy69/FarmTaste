@@ -117,8 +117,8 @@ class _WalletState extends State<Wallet> {
                         user.mobileNo,
                         style: TextStyle(color: Colors.black),
                       ),
-                      InkWell(
-                        onTap: () {
+                      FlatButton(
+                        onPressed: () {
                           print('00');
                           showDialog(
                               context: context,
@@ -126,9 +126,10 @@ class _WalletState extends State<Wallet> {
                                 return RequestMoneyDialog(user);
                               });
                         },
+                        color: blue,
+                        textColor: white,
                         child: Text(
                           "Add money to wallet",
-                          style: TextStyle(color: blue),
                         ),
                       )
                     ],
@@ -255,8 +256,13 @@ class TransactionWidget extends StatelessWidget {
         transactionIconData = Icons.check_circle_outline;
         color = green;
         break;
-      case 'failure':
-        transactionName = "Failed";
+      case 'cancelled':
+        transactionName = "Cancelled";
+        transactionIconData = Icons.cancel;
+        color = Colors.red;
+        break;
+      case 'rejected':
+        transactionName = "Rejected";
         transactionIconData = Icons.cancel;
         color = Colors.red;
         break;
@@ -353,11 +359,13 @@ class TransactionWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       AutoSizeText(
-                          "${DateFormat.E().format(DateTime.parse(transaction.updatedAt))}, ${DateFormat.jm().format(DateTime.parse(transaction.updatedAt))}",
+                          "${DateFormat.E().format(DateTime.parse(transaction.updatedAt).toLocal())}, ${DateFormat.jm().format(DateTime.parse(transaction.updatedAt).toLocal())}",
                           style: TextStyle(color: Colors.grey[700]),
                           overflow: TextOverflow.ellipsis),
                       AutoSizeText(
                         "$transactionName",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: color,
@@ -366,7 +374,7 @@ class TransactionWidget extends StatelessWidget {
                     ],
                   ),
                   AutoSizeText(
-                    "${DateFormat.yMMMMd().format(DateTime.parse(transaction.updatedAt))}",
+                    "${DateFormat.yMMMMd().format(DateTime.parse(transaction.updatedAt).toLocal())}",
                     style: TextStyle(color: Colors.grey[700]),
                   ),
                 ],
@@ -484,7 +492,7 @@ class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
                 return null;
               },
               decoration: new InputDecoration(
-                  icon: Icon(Icons.monetization_on),
+                  icon: Icon(Icons.unarchive),
                   labelText: "AMOUNT",
                   hintText: "0",
                   border: OutlineInputBorder(

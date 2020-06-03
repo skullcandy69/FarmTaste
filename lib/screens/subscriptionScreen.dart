@@ -224,7 +224,9 @@ class _OrderShowState extends State<OrderShow> {
                           height: 30,
                           width: 60,
                           controller: _btnController,
-                          onPressed: () => updateOrder(widget.data.id),
+                          onPressed: (){ updateOrder(widget.data.id);
+                          
+                          },
                           child: AutoSizeText(
                             " " + message + " ",
                             style: TextStyle(color: white),

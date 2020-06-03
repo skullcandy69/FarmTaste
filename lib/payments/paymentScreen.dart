@@ -77,7 +77,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     cartid = await createOrder(
         widget.cart.id, method, widget.amount, res.user.address);
     var options = {
-      'key': 'rzp_test_9xPUvXMTVSbgW5',
+      'key': 'rzp_test_M67sVToP9WnsZP',
       'amount': (netamountpay * 100).toInt(),
       'name': 'farmtaste',
       'description': 'Order Payment',
@@ -108,9 +108,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
-    print(cartid);
-    await http.put(UPDATEORDERS + cartid,
-        headers: {"Authorization": token}, body: {"payment_status": "success"});
+    print(response.paymentId);
+
+    var r = await http.put(UPDATEORDERS + cartid, headers: {
+      "Authorization": token
+    }, body: {
+      "payment_status": "success",
+      "transaction_id": response.paymentId,
+      "transacted_at": DateTime.now().toString()
+    });
+    print(r.body);
     Provider.of<ProductModel>(context, listen: false).clearList();
     EasyDialog(
         topImage: NetworkImage(
@@ -120,16 +127,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
         title: Text('Order Successful', style: TextStyle(fontSize: 25)),
         description: Text(
             'We have recieved your order please \n  check order history in your wallet\n'),
-        contentList: [
+        contentList: [  
           Container(
             width: MediaQuery.of(context).size.width,
             color: green,
             height: 50,
             child: FlatButton(
                 onPressed: () async {
-               useWallet? await http.put(ME,
-                      headers: {"Authorization": token},
-                      body: {"wallet": walletamount.toString()}):print('wallet no use');
+                  useWallet
+                      ? await http.put(ME,
+                          headers: {"Authorization": token},
+                          body: {"wallet": walletamount.toString()})
+                      : print('wallet no use');
                   await http
                       .delete(EMPTYCART, headers: {"Authorization": token});
                   changeScreenRepacement(context, ShoppingCart());

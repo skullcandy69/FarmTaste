@@ -37,8 +37,9 @@ class _ReferAndEarnState extends State<ReferAndEarn> {
               Container(
                 height: MediaQuery.of(context).size.height * .45,
                 child: Stack(children: <Widget>[
-                  Hero(tag: 'refer',
-                                      child: Container(
+                  Hero(
+                    tag: 'refer',
+                    child: Container(
                       child: Image.asset('images/refer.jpg'),
                     ),
                   ),
@@ -74,7 +75,8 @@ class _ReferAndEarnState extends State<ReferAndEarn> {
                             ),
                             AutoSizeText(
                               "Share your referral link and invite \nyour friends to earn upto 1000 points",
-                              maxLines: 3,stepGranularity: 2,
+                              maxLines: 3,
+                              stepGranularity: 2,
                             )
                           ],
                         ),
@@ -83,7 +85,9 @@ class _ReferAndEarnState extends State<ReferAndEarn> {
                     // child:
                     ),
               ),
-              SizedBox(height: 20,),
+              SizedBox(
+                height: 20,
+              ),
               Container(
                 height: 120,
                 width: 350,
@@ -132,9 +136,12 @@ class _ReferAndEarnState extends State<ReferAndEarn> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Image.asset(
-                    'images/whatsapp.png',
-                    scale: 15,
+                  InkWell(
+                    onTap: () => share(widget.res.user.referralCode),
+                    child: Image.asset(
+                      'images/whatsapp.png',
+                      scale: 15,
+                    ),
                   ),
                   IconButton(
                     icon: Icon(Icons.share),
