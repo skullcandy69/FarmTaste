@@ -5,6 +5,7 @@ import 'package:grocery/models/products.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:grocery/provider/addcart.dart';
 
 CartItem cartItemFromJson(String str) => CartItem.fromJson(json.decode(str));
 
@@ -157,18 +158,17 @@ class ProductModel extends ChangeNotifier {
   Future<void> fetchProducts() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
-    if(token!=null){
-        var response = await http.get(MYCART, headers: {"Authorization": token});
-    CartItem cartItem = CartItem.fromJson(json.decode(response.body));
-    productlist.clear();
-    for (int i = 0; i < cartItem.extra.length; i++) {
-     productlist.add(cartItem.extra[i]);
+    if (token != null) {
+      var response = await http.get(MYCART, headers: {"Authorization": token});
+      CartItem cartItem = CartItem.fromJson(json.decode(response.body));
+      productlist.clear();
+      for (int i = 0; i < cartItem.extra.length; i++) {
+        productlist.add(cartItem.extra[i]);
         notifyListeners();
-    }
-    }else{
+      }
+    } else {
       print('No Token');
     }
-  
   }
 
   removeItem(ProductData product) {
@@ -188,6 +188,7 @@ class ProductModel extends ChangeNotifier {
     productlist.clear();
     notifyListeners();
   }
+  
 
   dynamic get tprice => totalprice();
   dynamic totalprice() {
@@ -196,27 +197,28 @@ class ProductModel extends ChangeNotifier {
       tprice = 0;
     } else {
       for (int i = 0; i < productlist.length; i++) {
-        if (productlist[i].rate[0].discountedAmount == null ||
-            productlist[i].rate[0].discountedAmount == 0) {
-          if (productlist[i].isUnderGst == true) {
-            dynamic gstrate = productlist[i].rate[0].baseAmount +
-                (productlist[i].rate[0].baseAmount * productlist[i].gstRate) /
-                    100;
-            tprice += gstrate;
-          } else {
-            tprice += productlist[i].rate[0].baseAmount;
-          }
-        } else {
-          if (productlist[i].isUnderGst == true) {
-            dynamic gstrate = productlist[i].rate[0].discountedAmount +
-                (productlist[i].rate[0].discountedAmount *
-                        productlist[i].gstRate) /
-                    100;
-            tprice += gstrate;
-          } else {
-            tprice += productlist[i].rate[0].discountedAmount;
-          }
-        }
+        tprice = tprice + double.parse(getGstPrice(productlist[i]));
+        // if (productlist[i].rate[0].discountedAmount == null ||
+        //     productlist[i].rate[0].discountedAmount == 0) {
+        //   if (productlist[i].isUnderGst == true) {
+        //     dynamic gstrate = productlist[i].rate[0].baseAmount +
+        //         (productlist[i].rate[0].baseAmount * productlist[i].gstRate) /
+        //             100;
+        //     tprice += gstrate;
+        //   } else {
+        //     tprice += productlist[i].rate[0].baseAmount;
+        //   }
+        // } else {
+        //   if (productlist[i].isUnderGst == true) {
+        //     dynamic gstrate = productlist[i].rate[0].discountedAmount +
+        //         (productlist[i].rate[0].discountedAmount *
+        //                 productlist[i].gstRate) /
+        //             100;
+        //     tprice += gstrate;
+        //   } else {
+        //     tprice += productlist[i].rate[0].discountedAmount;
+        //   }
+        // }
       }
     }
     // notifyListeners();

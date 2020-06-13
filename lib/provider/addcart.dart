@@ -72,13 +72,13 @@ Future<CartItem> myCart() async {
 Future<String> createOrder(cartId, mode, amount, address) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  print(amount);
+  print(cartId);
   var response = await http.post(ORDERS, headers: {
     "Authorization": token
   }, body: {
     "cart_id": cartId.toString(),
     "payment_mode": mode,
-    "amount": amount.toStringAsFixed(2),
+    "amount": amount,
   });
   var res = json.decode(response.body);
   print(response.body);
@@ -115,27 +115,23 @@ Future<String> recurringOrder(String id, nou, sdate, edate, subtype) async {
   }
 }
 
-
-String getGstPrice(ProductData product){
-   if (product.rate[0].discountedAmount == null ||
-            product.rate[0].discountedAmount == 0) {
-          if (product.isUnderGst == true) {
-            dynamic gstrate = product.rate[0].baseAmount +
-                (product.rate[0].baseAmount * product.gstRate) /
-                    100;
-            return  gstrate.toString();
-          } else {
-            return product.rate[0].baseAmount.toString();
-          }
-        } else {
-          if (product.isUnderGst == true) {
-            dynamic gstrate = product.rate[0].discountedAmount +
-                (product.rate[0].discountedAmount *
-                        product.gstRate) /
-                    100;
-           return gstrate.toString();
-          } else {
-           return product.rate[0].discountedAmount.toString();
-          }
-        }
-      }
+String getGstPrice(ProductData product) {
+  //  if (product.rate[0].discountedAmount == null ||
+  //           product.rate[0].discountedAmount == 0) {
+  if (product.isUnderGst == true) {
+    dynamic gstrate =
+        product.sellingPrice + (product.sellingPrice * product.gstRate) / 100;
+    return gstrate.toString();
+  } else {
+    return product.sellingPrice.toString();
+  }
+  // } else {
+  // if (product.isUnderGst == true) {
+  //   dynamic gstrate = product.rate[0].discountedAmount +
+  //       (product.rate[0].discountedAmount * product.gstRate) / 100;
+  //   return gstrate.toString();
+  // } else {
+  //   return product.rate[0].discountedAmount.toString();
+  // }
+  // }
+}

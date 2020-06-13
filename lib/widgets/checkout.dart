@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/helpers/navigation.dart';
-import 'package:grocery/models/areaModel.dart';
 import 'package:grocery/models/user_model.dart';
 import 'package:grocery/payments/paymentScreen.dart';
 import 'package:grocery/widgets/Loader.dart';
@@ -33,31 +32,31 @@ class _CheckoutState extends State<Checkout> {
       headers: {"Authorization": token},
     );
     Result res = Result.fromJson(json.decode(response.body));
-    var arearesponse = await http.get(
-      ALLAREA + res.user.locationId.toString(),
-      headers: {"Authorization": token},
-    );
-    AreaModel area = AreaModel.fromJson(json.decode(arearesponse.body));
-    for (var i in area.data) {
-      if (i.id == res.user.areaId) {
-        selectedValue = i;
-      }
-    }
+    // var arearesponse = await http.get(
+    //   ALLAREA + res.user.locationId.toString(),
+    //   headers: {"Authorization": token},
+    // );
+    // AreaModel area = AreaModel.fromJson(json.decode(arearesponse.body));
+    // for (var i in area.data) {
+    //   if (i.id == res.user.areaId) {
+    //     selectedValue = i;
+    //   }
+    // }
     setState(() {
-      areaList = area.data;
+      // areaList = area.data;
       name = res.user.name;
       address = res.user.address;
       email = res.user.email;
       mobno = res.user.mobileNo;
       pincode = res.user.pincode;
       landmark = res.user.landmark;
-      areaid = res.user.areaId.toString();
+      // areaid = res.user.areaId.toString();
       isLoading = false;
     });
     return res;
   }
 
-  List<AreaData> areaList;
+  // List<AreaData> areaList;
   Future<Result> user;
   bool isLoading = true;
   @override
@@ -68,16 +67,16 @@ class _CheckoutState extends State<Checkout> {
     });
   }
 
-  String name = '';
-  String address = '';
-  String email = '';
+  String name = ' ';
+  String address = ' ';
+  String email = ' ';
   String mobno = '';
-  String pincode = '';
-  String landmark = '';
-  String areaid = '';
+  String pincode = ' ';
+  String landmark = ' ';
+  // String areaid = '';
 
   final _formKey = GlobalKey<FormState>();
-  AreaData selectedValue;
+  // AreaData selectedValue;
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +145,7 @@ class _CheckoutState extends State<Checkout> {
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             icon: Icon(Icons.phone),
-                            labelText: 'Mobile Number*',
+                            labelText: 'Alternate Mobile Number*',
                             border: InputBorder.none,
                           ),
                           onChanged: (val) {
@@ -189,7 +188,7 @@ class _CheckoutState extends State<Checkout> {
                             Expanded(
                               flex: 2,
                               child: TextFormField(
-                                initialValue: pincode.toString(),
+                                initialValue: pincode==null?" ": pincode.toString(),
                                 keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
                                   icon: Icon(Icons.dialpad),
@@ -226,58 +225,58 @@ class _CheckoutState extends State<Checkout> {
                                     landmark = val;
                                   });
                                 },
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'please select a location';
-                                  }
-                                  return null;
-                                },
+                                // validator: (value) {
+                                //   if (value.isEmpty) {
+                                //     return 'please select a location';
+                                //   }
+                                //   return null;
+                                // },
                               ),
                             ),
                           ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 10.0,
-                            right: 10,
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              Text('Area*'),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 10.0,
-                            right: 10,
-                          ),
-                          child: DropdownButtonFormField(
-                            autovalidate: true,
-                            items: areaList.map((AreaData area) {
-                              return DropdownMenuItem<AreaData>(
-                                  value: area,
-                                  child: Text(area.title.toUpperCase(),
-                                      style: TextStyle(fontSize: 15)));
-                            }).toList(),
-                            value: selectedValue,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedValue = value;
-                                print('changed' + selectedValue.title);
-                                areaid = selectedValue.id.toString();
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null) {
-                                return 'please select a location';
-                              }
-                              return null;
-                            },
+                        // Padding(
+                        //   padding: const EdgeInsets.only(
+                        //     left: 10.0,
+                        //     right: 10,
+                        //   ),
+                        //   child: Row(
+                        //     children: <Widget>[
+                        //       Text('Area*'),
+                        //     ],
+                        //   ),
+                        // ),
+                        // Padding(
+                        //   padding: const EdgeInsets.only(
+                        //     left: 10.0,
+                        //     right: 10,
+                        //   ),
+                        //   child: DropdownButtonFormField(
+                        //     autovalidate: true,
+                        //     items: areaList.map((AreaData area) {
+                        //       return DropdownMenuItem<AreaData>(
+                        //           value: area,
+                        //           child: Text(area.title.toUpperCase(),
+                        //               style: TextStyle(fontSize: 15)));
+                        //     }).toList(),
+                        //     value: selectedValue,
+                        //     onChanged: (value) {
+                        //       setState(() {
+                        //         selectedValue = value;
+                        //         print('changed' + selectedValue.title);
+                        //         areaid = selectedValue.id.toString();
+                        //       });
+                        //     },
+                        //     validator: (value) {
+                        //       if (value == null) {
+                        //         return 'please select a location';
+                        //       }
+                        //       return null;
+                        //     },
 
-                            isExpanded: true,
-                          ),
-                        ),
+                        //     isExpanded: true,
+                        //   ),
+                        // ),
                         SizedBox(
                           height: 20,
                         ),
@@ -287,7 +286,7 @@ class _CheckoutState extends State<Checkout> {
                             color: green,
                             controller: _btnController,
                             onPressed: () async {
-                              print(areaid);
+                              
                               if (_formKey.currentState.validate()) {
                                 print('hell');
                                 var response = await http.put(ME, headers: {
@@ -298,8 +297,8 @@ class _CheckoutState extends State<Checkout> {
                                   "address": address,
                                   "alternate_no": mobno,
                                   "pincode": pincode,
-                                  "landmark": landmark,
-                                  "area_id": areaid
+                                  "landmark": landmark??' ',
+                                  // "area_id": areaid
                                 });
                                 print(response.statusCode);
                                 if (response.statusCode == 200) {

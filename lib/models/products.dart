@@ -151,7 +151,7 @@ class Products {
   }
 }
 
-class ProductData extends Equatable{
+class ProductData extends Equatable {
   String sType;
   int id;
   String title;
@@ -159,12 +159,15 @@ class ProductData extends Equatable{
   String imageUrl;
   bool isUnderGst;
   String baseQuantity;
+  dynamic mrp;
+  dynamic sellingPrice;
+  int cityId;
   dynamic gstRate;
+  bool isActive;
   String slug;
   String createdAt;
   String updatedAt;
   dynamic deletedAt;
-  List<Rate> rate;
 
   ProductData(
       {this.sType,
@@ -174,12 +177,15 @@ class ProductData extends Equatable{
       this.imageUrl,
       this.isUnderGst,
       this.baseQuantity,
+      this.mrp,
+      this.sellingPrice,
+      this.cityId,
       this.gstRate,
+      this.isActive,
       this.slug,
       this.createdAt,
       this.updatedAt,
-      this.deletedAt,
-      this.rate});
+      this.deletedAt});
 
   ProductData.fromJson(Map<String, dynamic> json) {
     sType = json['__type'];
@@ -189,17 +195,15 @@ class ProductData extends Equatable{
     imageUrl = json['image_url'];
     isUnderGst = json['is_under_gst'];
     baseQuantity = json['base_quantity'];
+    mrp = json['mrp'];
+    sellingPrice = json['selling_price'];
+    cityId = json['city_id'];
     gstRate = json['gst_rate'];
+    isActive = json['is_active'];
     slug = json['slug'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     deletedAt = json['deleted_at'];
-    if (json['rate'] != null) {
-      rate = new List<Rate>();
-      json['rate'].forEach((v) {
-        rate.add(new Rate.fromJson(v));
-      });
-    }
   }
 
   Map<String, dynamic> toJson() {
@@ -211,42 +215,17 @@ class ProductData extends Equatable{
     data['image_url'] = this.imageUrl;
     data['is_under_gst'] = this.isUnderGst;
     data['base_quantity'] = this.baseQuantity;
+    data['mrp'] = this.mrp;
+    data['selling_price'] = this.sellingPrice;
+    data['city_id'] = this.cityId;
     data['gst_rate'] = this.gstRate;
+    data['is_active'] = this.isActive;
     data['slug'] = this.slug;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['deleted_at'] = this.deletedAt;
-    if (this.rate != null) {
-      data['rate'] = this.rate.map((v) => v.toJson()).toList();
-    }
     return data;
   }
-
-  @override
+   @override
   List<Object> get props => [id];
-}
-
-class Rate {
-  String sType;
-  int id;
-  dynamic baseAmount;
-  dynamic discountedAmount;
-
-  Rate({this.sType, this.id, this.baseAmount, this.discountedAmount});
-
-  Rate.fromJson(Map<String, dynamic> json) {
-    sType = json['__type'];
-    id = json['id'];
-    baseAmount = json['base_amount'];
-    discountedAmount = json['discounted_amount'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['__type'] = this.sType;
-    data['id'] = this.id;
-    data['base_amount'] = this.baseAmount;
-    data['discounted_amount'] = this.discountedAmount;
-    return data;
-  }
 }

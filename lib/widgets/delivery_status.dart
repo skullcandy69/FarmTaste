@@ -1,13 +1,11 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
-import 'package:grocery/models/recentitems.dart';
 import 'package:intl/intl.dart';
 
 class DeliveryStatus extends StatefulWidget {
   final int count;
   final DateTime date;
-  final List<Codes> codes;
+  final String codes;
   const DeliveryStatus({Key key, this.count, this.date, this.codes});
 
   @override
@@ -15,7 +13,6 @@ class DeliveryStatus extends StatefulWidget {
 }
 
 class _DeliveryStatusState extends State<DeliveryStatus> {
-  Codes selectedValue;
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -25,7 +22,7 @@ class _DeliveryStatusState extends State<DeliveryStatus> {
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Row(
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: <Widget>[
@@ -52,7 +49,7 @@ class _DeliveryStatusState extends State<DeliveryStatus> {
                       ])),
                 ],
               ),
-              // Text(codes.length==0?'':codes[0].code.toUpperCase())
+              Text('Code\n'+widget.codes.toUpperCase())
               // Container(
               //   width: 100,
               //   child: DropdownButtonFormField(

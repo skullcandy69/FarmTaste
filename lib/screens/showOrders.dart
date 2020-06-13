@@ -1,19 +1,63 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
+import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/models/History.dart';
 import 'package:grocery/widgets/helpDialog.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:native_pdf_view/native_pdf_view.dart';
+
+class Invoice extends StatefulWidget {
+  const Invoice({Key key}) : super(key: key);
+
+  @override
+  _InvoiceState createState() => _InvoiceState();
+}
+
+class _InvoiceState extends State<Invoice> {
+  String assetPDFPath = "";
+  PdfController _pdfController;
+
+  @override
+  void initState() {
+    _pdfController = PdfController(
+      document: PdfDocument.openFile(
+          '/storage/emulated/0/Android/data/com.example.grocery/files/Invoice.pdf'),
+    );
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _pdfController.dispose();
+    super.dispose();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PdfView(
+        documentLoader: Center(child: CircularProgressIndicator()),
+        pageLoader: Center(child: CircularProgressIndicator()),
+        scrollDirection: Axis.vertical,
+        controller: _pdfController,
+       
+      ),
+    );
+  }
+}
 
 class ShowOrders extends StatefulWidget {
   final HistoryData order;
-
-  ShowOrders({this.order});
+  final VoidCallback fun;
+  ShowOrders({this.order, this.fun});
 
   @override
   _ShowOrdersState createState() => _ShowOrdersState();
@@ -23,14 +67,56 @@ class _ShowOrdersState extends State<ShowOrders> {
   final RoundedLoadingButtonController _btnController =
       RoundedLoadingButtonController();
   String message = 'Cancel Order';
+
+  final imgUrl = "https://unsplash.com/photos/iEJVyyevw-U/download?force=true";
+  bool downloading = false;
+  var progressString = "";
+
+  Future<void> downloadFile() async {
+    Dio dio = Dio();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token');
+    try {
+      var dir = await getExternalStorageDirectory();
+
+      await dio.download(
+        GETINVOICE + widget.order.id.toString(),
+        "${dir.path}/Invoice.pdf",
+        options: Options(headers: {"Authorization": token}),
+        onReceiveProgress: (rec, total) {
+          print("${dir.path}/myimage.pdf");
+          print("Rec: $rec , Total: $total");
+          setState(() {
+            downloading = true;
+            progressString = ((rec / total) * 100).toStringAsFixed(0) + "%";
+          });
+        },
+      );
+    } catch (e) {
+      print(e);
+    }
+
+    setState(() {
+      downloading = false;
+      progressString = "Completed";
+    });
+    print("Download completed");
+    changeScreen(context, Invoice());
+  }
+
   Future<void> updateOrder(id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
+
     var response = await http.put(ORDERS + "\/$id",
         headers: {"Authorization": token}, body: {"order_status": "cancelled"});
     print(response.body);
     if (response.statusCode == 200) {
       _btnController.success();
+      Timer(Duration(seconds: 3), () {
+        widget.fun();
+        Navigator.pop(context);
+      });
     } else {
       setState(() {
         message = json.decode(response.body)['message'];
@@ -156,8 +242,8 @@ class _ShowOrdersState extends State<ShowOrders> {
           Divider(),
           InkWell(
             onTap: () {
-              basicContentEasyDialog(
-                  context, "OrderId: ${widget.order.orderId.toString()}");
+              basicContentEasyDialog(context,
+                  "Welcome to Farm Taste Chat Support. Let us  know your query you are facing with your order (order-id: ${widget.order.orderId.toString()}) and resolve it in couple of time.");
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -266,7 +352,7 @@ class _ShowOrdersState extends State<ShowOrders> {
                         ),
                       ),
                       Text(
-                        widget.order.baseAmount.toString(),
+                        " ₹" + widget.order.baseAmount.toString(),
                         style: TextStyle(
                             color: grey,
                             decoration: TextDecoration.lineThrough),
@@ -283,8 +369,22 @@ class _ShowOrdersState extends State<ShowOrders> {
                         'Selling Price',
                         style: TextStyle(fontSize: 15),
                       ),
-                      Text((widget.order.amount - widget.order.deliveryCharge)
-                          .toString())
+                      Text(" ₹" +
+                          (widget.order.amount - widget.order.deliveryCharge)
+                              .toString())
+                    ],
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        'Discount',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      Text("- ₹" + (widget.order.discount).toString())
                     ],
                   ),
                   SizedBox(
@@ -295,7 +395,9 @@ class _ShowOrdersState extends State<ShowOrders> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text('Total amount'),
-                      Text(widget.order.amount.toString()),
+                      Text(" ₹" +
+                          (widget.order.amount - widget.order.discount)
+                              .toString()),
                     ],
                   ),
                   SizedBox(
@@ -319,25 +421,27 @@ class _ShowOrdersState extends State<ShowOrders> {
           SizedBox(
             height: 10,
           ),
-          // Center(
-          //   child: Text(
-          //     message,
-          //     style: TextStyle(color: red),
-          //   ),
-          // ),
-      widget.order.orderStatus=='pending'?    RoundedLoadingButton(
-            width: 150,
-            height: 40,
-            controller: _btnController,
-            onPressed: () {
-              updateOrder(widget.order.id);
-            },
-            color: red,
-            child: Text(
-             message,
-              style: TextStyle(color: white, fontWeight: FontWeight.bold),
-            ),
-          ):Container()
+          
+         
+         widget.order.orderStatus == 'delivered'
+              ?  FlatButton(
+              onPressed: () =>downloadFile(),color: red,textColor: white,padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text("Download Invoice")):Container(),
+          widget.order.orderStatus == 'pending'|| widget.order.orderStatus == 'on the way'
+              ? RoundedLoadingButton(
+                  width: 150,
+                  height: 40,
+                  controller: _btnController,
+                  onPressed: () {
+                    updateOrder(widget.order.id);
+                  },
+                  color: red,
+                  child: Text(
+                    message,
+                    style: TextStyle(color: white, fontWeight: FontWeight.bold),
+                  ),
+                )
+              : Container()
         ])));
   }
 }

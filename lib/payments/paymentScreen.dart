@@ -6,7 +6,7 @@ import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/models/CartModel.dart';
 import 'package:grocery/models/user_model.dart';
 import 'package:grocery/provider/addcart.dart';
-import 'package:grocery/screens/shoppingCart.dart';
+import 'package:grocery/screens/OrderComplete.dart';
 import 'package:grocery/widgets/Loader.dart';
 import 'package:grocery/widgets/paymentbanner.dart';
 import 'package:provider/provider.dart';
@@ -77,7 +77,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     cartid = await createOrder(
         widget.cart.id, method, widget.amount, res.user.address);
     var options = {
-      'key': 'rzp_test_M67sVToP9WnsZP',
+      'key': TESTKEY,
       'amount': (netamountpay * 100).toInt(),
       'name': 'farmtaste',
       'description': 'Order Payment',
@@ -109,7 +109,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
     print(response.paymentId);
-
     var r = await http.put(UPDATEORDERS + cartid, headers: {
       "Authorization": token
     }, body: {
@@ -118,37 +117,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
       "transacted_at": DateTime.now().toString()
     });
     print(r.body);
-    Provider.of<ProductModel>(context, listen: false).clearList();
-    EasyDialog(
-        topImage: NetworkImage(
-            'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1'),
-        height: 320,
-        closeButton: false,
-        title: Text('Order Successful', style: TextStyle(fontSize: 25)),
-        description: Text(
-            'We have recieved your order please \n  check order history in your wallet\n'),
-        contentList: [  
-          Container(
-            width: MediaQuery.of(context).size.width,
-            color: green,
-            height: 50,
-            child: FlatButton(
-                onPressed: () async {
-                  useWallet
-                      ? await http.put(ME,
-                          headers: {"Authorization": token},
-                          body: {"wallet": walletamount.toString()})
-                      : print('wallet no use');
-                  await http
-                      .delete(EMPTYCART, headers: {"Authorization": token});
-                  changeScreenRepacement(context, ShoppingCart());
-                },
-                child: Text(
-                  'Continue Shopping',
-                  style: TextStyle(color: white, fontWeight: FontWeight.bold),
-                )),
-          )
-        ]).show(context);
+    changeScreenRepacement(
+        context,
+        OrderSuccess(
+          deliveryCharge: widget.cart.deliveryCharge,
+          discount: widget.cart.discount,
+        ));
   }
 
   void _handlePaymentError(PaymentFailureResponse response) async {
@@ -241,40 +215,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () async {
-                        authprovider.clearList();
-                        EasyDialog(
-                            topImage: NetworkImage(
-                              'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1',
-                            ),
-                            height: 320,
-                            closeButton: false,
-                            title: Text('Order Successful',
-                                style: TextStyle(fontSize: 25)),
-                            description: Text(
-                                'We have recieved your order please \n  check order history in your wallet\n'),
-                            contentList: [
-                              Container(
-                                width: MediaQuery.of(context).size.width,
-                                color: green,
-                                height: 50,
-                                child: FlatButton(
-                                    onPressed: () async {
-                                      await createOrder(widget.cart.id, 'cod',
-                                          widget.amount, res.user.address);
+                        print(widget.amount);
+                        await createOrder(widget.cart.id, 'cod', widget.amount,
+                            res.user.address);
 
-                                      await http.delete(EMPTYCART,
-                                          headers: {"Authorization": token});
-                                      changeScreenRepacement(
-                                          context, ShoppingCart());
-                                    },
-                                    child: Text(
-                                      'Continue Shopping',
-                                      style: TextStyle(
-                                          color: white,
-                                          fontWeight: FontWeight.bold),
-                                    )),
-                              )
-                            ]).show(context);
+                        changeScreenRepacement(
+                            context,
+                            OrderSuccess(
+                              deliveryCharge: widget.cart.deliveryCharge,
+                              discount: widget.cart.discount,
+                            ));
                       },
                     ),
                     ListTile(
@@ -286,7 +236,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () =>
-                          openCheckout('upi', 'razor_pay', useWallet, res),
+                          openCheckout('upi', 'online', useWallet, res),
                     ),
                     ListTile(
                       leading: Text(
@@ -296,8 +246,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         ),
                       ),
                       trailing: Icon(Icons.arrow_forward_ios),
-                      onTap: () => openCheckout(
-                          'netbanking', 'razor_pay', useWallet, res),
+                      onTap: () =>
+                          openCheckout('netbanking', 'online', useWallet, res),
                     ),
                     ListTile(
                       leading: Text(
@@ -307,19 +257,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         ),
                       ),
                       trailing: Icon(Icons.arrow_forward_ios),
-                      onTap: () => openCheckout(
-                          'debitcard', 'razor_pay', useWallet, res),
+                      onTap: () =>
+                          openCheckout('debitcard', 'online', useWallet, res),
                     ),
                     ListTile(
                       leading: Text(
-                        'Wallets',
+                        'External Wallets (FreeCharge,PayZapp)',
                         style: TextStyle(
                           fontSize: 15,
                         ),
                       ),
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () =>
-                          openCheckout('wallets', 'razor_pay', useWallet, res),
+                          openCheckout('wallets', 'online', useWallet, res),
                     ),
                     Card(
                       child: Padding(
@@ -407,7 +357,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text('Payable amount'),
-                                Text("₹" + netamountpay.toStringAsFixed(2)),
+                                Text("₹" + netamountpay.toStringAsFixed(3)),
                               ],
                             ),
                             SizedBox(
@@ -431,58 +381,30 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                     style: TextStyle(color: white),
                                   ),
                                   onPressed: () async {
-                                    authprovider.clearList();
+                                    // authprovider.clearList();
                                     cartid = await createOrder(widget.cart.id,
                                         'cod', widget.amount, res.user.address);
                                     await http.put(
                                         UPDATEORDERS + cartid.toString(),
                                         headers: {"Authorization": token},
                                         body: {"payment_status": "success"});
+                                    await http.post(UPDATEWALLET, headers: {
+                                      "Authorization": token
+                                    }, body: {
+                                      "type": "subtract",
+                                      "amount": walletamount.toString()
+                                    });
+                                    // await http.delete(EMPTYCART,
+                                    //     headers: {"Authorization": token});
                                     _btnController.success();
-                                    EasyDialog(
-                                        topImage: NetworkImage(
-                                          'https://i2.wp.com/codemyui.com/wp-content/uploads/2015/10/progress-and-tick-icon-animation.gif?fit=880%2C440&ssl=1',
-                                        ),
-                                        height: 320,
-                                        closeButton: false,
-                                        title: Text('Order Successful',
-                                            style: TextStyle(fontSize: 25)),
-                                        description: Text(
-                                            'We have recieved your order please \n  check order history in your wallet\n'),
-                                        contentList: [
-                                          Container(
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            color: green,
-                                            height: 50,
-                                            child: FlatButton(
-                                                onPressed: () async {
-                                                  print(walletamount);
-                                                  await http.put(UPDATEWALLET,
-                                                      headers: {
-                                                        "Authorization": token
-                                                      },
-                                                      body: {
-                                                        "amount": walletamount
-                                                            .toString()
-                                                      });
-                                                  await http.delete(EMPTYCART,
-                                                      headers: {
-                                                        "Authorization": token
-                                                      });
-                                                  changeScreenRepacement(
-                                                      context, ShoppingCart());
-                                                },
-                                                child: Text(
-                                                  'Continue Shopping',
-                                                  style: TextStyle(
-                                                      color: white,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                )),
-                                          )
-                                        ]).show(context);
+                                    changeScreenRepacement(
+                                        context,
+                                        OrderSuccess(
+                                          deliveryCharge:
+                                              widget.cart.deliveryCharge,
+                                          discount: widget.cart.discount,
+                                        ));
+                                 
                                   },
                                 ),
                               ],

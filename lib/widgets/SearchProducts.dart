@@ -235,26 +235,18 @@ class _DetailScreenState extends State<DetailScreen> {
                                 widget.pro.baseQuantity.toString(),maxLines: 1,
                                 // overflow: TextOverflow.ellipsis,
                               ),
-                              RichText(
+                               RichText(
                                 text: TextSpan(
                                   children: <TextSpan>[
                                     TextSpan(
                                       text: "₹" + getGstPrice(widget.pro),
-                                      // text: widget.pro.rate[0]
-                                      //             .discountedAmount !=
-                                      //         null
-                                      //     ? "₹${widget.pro.rate[0].discountedAmount.toString()}\t"
-                                      //     : "₹${widget.pro.rate[0].baseAmount.toString()}\t",
+                                     
                                       style: TextStyle(
                                         color: black,
                                       ),
                                     ),
                                     TextSpan(
-                                        text: widget.pro.rate[0]
-                                                    .discountedAmount !=
-                                                null
-                                            ? "₹${widget.pro.rate[0].baseAmount.toString()}"
-                                            : '',
+                                        text: widget.pro.mrp.toString(),
                                         style: TextStyle(
                                             color: grey,
                                             decoration:

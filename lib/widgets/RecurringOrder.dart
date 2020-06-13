@@ -87,16 +87,13 @@ class _RecurringOrderState extends State<RecurringOrder> {
                                       children: <TextSpan>[
                                         TextSpan(
                                           text: "₹" + getGstPrice(widget.pro),
+                                         
                                           style: TextStyle(
                                             color: black,
                                           ),
                                         ),
                                         TextSpan(
-                                            text: widget.pro.rate[0]
-                                                        .discountedAmount !=
-                                                    null
-                                                ? "₹${widget.pro.rate[0].baseAmount.toString()}"
-                                                : '',
+                                            text: widget.pro.mrp.toString(),
                                             style: TextStyle(
                                                 color: grey,
                                                 decoration: TextDecoration

@@ -33,11 +33,16 @@ dependencies:
   shimmer: ^1.1.1
   flutter_share: ^1.0.2+1
   equatable: ^1.1.0
-  slide_popup_dialog: ^0.0.2
+  slide_popup_dialog: ^0.0.2  
   date_picker_timeline: ^1.2.0
   rounded_loading_button: ^1.0.6
   onesignal_flutter: ^2.4.1
   auto_size_text: ^2.1.0
+  native_pdf_view: ^3.6.2
+  # smartlook: ^0.0.9
+  path_provider: ^1.6.10
+  dio: ^3.0.9
+  # flutter_full_pdf_viewer: ^1.0.4
 
 
 

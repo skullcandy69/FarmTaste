@@ -25,22 +25,7 @@ class _DistrictState extends State<District> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Container(
-          height: 40,
-          width: MediaQuery.of(context).size.width * .7,
-          decoration: BoxDecoration(
-              color: white,
-              borderRadius: BorderRadius.all(Radius.circular(10))),
-          child: TextField(
-            decoration: InputDecoration(
-                icon: Icon(
-                  Icons.search,
-                  color: grey,
-                ),
-                hintText: 'Search Location',
-                border: InputBorder.none),
-          ),
-        ),
+        title: Text('Select Location'),
         backgroundColor: pcolor,
       ),
       body: FutureBuilder(
@@ -57,9 +42,12 @@ class _DistrictState extends State<District> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        color: index % 2 == 0
-                            ? Colors.black26
-                            : Colors.black12,
+                        decoration: BoxDecoration(color: white, boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey,
+                            blurRadius: 5.0,
+                          ),
+                        ]),
                         child: ListTile(
                           onTap: () {
                             changeScreen(

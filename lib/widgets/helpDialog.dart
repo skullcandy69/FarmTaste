@@ -24,7 +24,7 @@ basicContentEasyDialog(BuildContext context , String message) {
                 trailing: Icon(Icons.arrow_forward_ios),
                 onTap: () => launch("tel://8750185501")),
             ListTile(
-              onTap: () => launch("mailto:farmtaste@gmail.com"),
+              onTap: () => launch("mailto: support@farmtaste.co.in"),
               leading:
                   Container(height: 45, child: Image.asset('images/email.png')),
               title: Text('Mail Us'),

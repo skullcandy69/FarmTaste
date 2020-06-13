@@ -22,22 +22,23 @@ class History {
 }
 
 class HistoryData {
-  int id;
-  int orderId;
-  int userId;
+  dynamic id;
+  dynamic orderId;
+  dynamic userId;
   String deliveryAddress;
   List<Products> products;
   dynamic baseAmount;
   dynamic amount;
   dynamic deliveryCharge;
   dynamic discount;
-  int employeeId;
+  dynamic employeeId;
   String paymentMode;
   String paymentStatus;
   String deliveryDate;
   String orderStatus;
-  int transactionId;
+  String transactionId;
   String transactedAt;
+  String invoiceUrl;
   String createdAt;
   String updatedAt;
   String deletedAt;
@@ -60,6 +61,7 @@ class HistoryData {
       this.orderStatus,
       this.transactionId,
       this.transactedAt,
+       this.invoiceUrl,
       this.createdAt,
       this.updatedAt,
       this.deletedAt,
@@ -87,6 +89,7 @@ class HistoryData {
     orderStatus = json['order_status'];
     transactionId = json['transaction_id'];
     transactedAt = json['transacted_at'];
+    invoiceUrl = json['invoice_url'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     deletedAt = json['deleted_at'];
@@ -113,6 +116,7 @@ class HistoryData {
     data['order_status'] = this.orderStatus;
     data['transaction_id'] = this.transactionId;
     data['transacted_at'] = this.transactedAt;
+    data['invoice_url'] = this.invoiceUrl;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['deleted_at'] = this.deletedAt;

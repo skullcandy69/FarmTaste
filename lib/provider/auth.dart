@@ -28,13 +28,13 @@ class AuthProvider with ChangeNotifier {
   }
   Future<Result> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    Result re = Result.fromJson(json.decode(prefs.getString('response')));
-    String token = re.token.toString();
+    String token =prefs.getString('token');
     var response = await http.get(
       ME,
       headers: {"Authorization": token},
     );
     res = Result.fromJson(json.decode(response.body));
+    
     notifyListeners();
     return res;
   }
@@ -109,13 +109,21 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> signup(cityId, locationId) async {
-    var response = await http.post(SIGNUP, body: {
-      "city_id": cityId,
-      "location_id": locationId,
-      "mobile_no": mobno.text.trim(),
-      "otp": otp.text.trim()
-    });
+  Future<bool> signup(cityId, locationId, code) async {
+    var response = code == null
+        ? await http.post(SIGNUP, body: {
+            "city_id": cityId,
+            "location_id": locationId,
+            "mobile_no": mobno.text.trim(),
+            "otp": otp.text.trim(),
+          })
+        : await http.post(SIGNUP, body: {
+            "city_id": cityId,
+            "location_id": locationId,
+            "mobile_no": mobno.text.trim(),
+            "otp": otp.text.trim(),
+            "referral_code": code
+          });
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
     if (response.statusCode == 200) {

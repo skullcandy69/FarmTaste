@@ -13,11 +13,10 @@ import 'package:grocery/screens/profile.dart';
 import 'package:grocery/screens/subscriptionScreen.dart';
 import 'package:grocery/screens/wallet.dart';
 import 'package:grocery/screens/ViewBill.dart';
-
 import 'package:grocery/widgets/Productcategory.dart';
 import 'package:grocery/widgets/SearchProducts.dart';
 import 'package:grocery/widgets/address.dart';
-import 'package:grocery/widgets/card.dart';
+// import 'package:grocery/widgets/card.dart';
 import 'package:grocery/widgets/delivery_status.dart';
 import 'package:grocery/screens/shoppingCart.dart';
 import 'package:grocery/widgets/helpDialog.dart';
@@ -35,12 +34,12 @@ class _HomePageState extends State<HomePage> {
   String mob;
   read() async {
     final prefs = await SharedPreferences.getInstance();
-    print('response');
-    setState(() {
-      res = Result.fromJson(json.decode(prefs.getString('response')));
+    res = Result.fromJson(json.decode(prefs.getString('response')));
+    print(res.user.name);
 
+    setState(() {
       mob = res.user.mobileNo;
-      print(res.token);
+      print("token" + prefs.getString('token'));
     });
   }
 
@@ -54,14 +53,16 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         count = items.count;
         date = DateTime.parse(items.date) ?? date;
-        codes = items.codes;
+        print(items.date);
+        print(res.token);
+        codes = items.code;
       });
     }
   }
 
   DateTime date = DateTime.now();
   int count = 0;
-  List<Codes> codes=[];
+  String codes = '';
   @override
   void initState() {
     super.initState();
@@ -71,247 +72,281 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProductModel>(builder: (context, pro, child) {
-      return Scaffold(
-          appBar: AppBar(
-            title: GestureDetector(
-              onTap: () => changeScreen(context, SearchProduct()),
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                    color: white,
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-                child: TextField(
-                  decoration: InputDecoration(
-                      enabled: false,
-                      icon: Icon(
-                        Icons.search,
-                        color: grey,
-                      ),
-                      hintText: 'Search for Products',
-                      border: InputBorder.none),
-                ),
+    Size size = MediaQuery.of(context).size;
+
+    return WillPopScope(
+      onWillPop: () async {
+        return (await showDialog(
+              context: context,
+              builder: (context) => new AlertDialog(
+                title: new Text('Are you sure?'),
+                content: new Text('Do you want to exit an App'),
+                actions: <Widget>[
+                  new FlatButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: new Text('No'),
+                  ),
+                  new FlatButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: new Text('Yes'),
+                  ),
+                ],
               ),
-            ),
-            backgroundColor: pcolor,
-            actions: <Widget>[
-              InkWell(
-                  onTap: () {
-                    changeScreen(context, Wallet());
-                  },
-                  child: Icon(
-                    Icons.account_balance_wallet,
-                    size: 28,
-                  )),
-              Padding(
-                padding: const EdgeInsets.only(top: 5.0, bottom: 5, right: 5),
-                child: Stack(
-                  children: <Widget>[
-                    IconButton(
+            )) ??
+            false;
+      },
+      child: Consumer<ProductModel>(builder: (context, pro, child) {
+        return Scaffold(
+            appBar: AppBar(
+              title: GestureDetector(
+                onTap: () => changeScreen(context, SearchProduct()),
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                      color: white,
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: TextField(
+                    decoration: InputDecoration(
+                        enabled: false,
                         icon: Icon(
-                          Icons.shopping_cart,
-                          color: white,
-                          size: 30,
+                          Icons.search,
+                          color: grey,
                         ),
-                        onPressed: () async {
-                          changeScreen(context, ShoppingCart());
-                        }),
-                    Positioned(
-                      bottom: 5,
-                      left: 5,
-                      child: Container(
-                        height: 15,
-                        width: 18,
-                        decoration: BoxDecoration(
-                            color: white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: grey,
-                                  offset: Offset(2, 2),
-                                  blurRadius: 3)
-                            ]),
-                        child: Center(
-                          child: Text(
-                            pro.productlist.length.toString(),
-                            style: TextStyle(
-                                fontSize: 10,
-                                color: red,
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-          drawer: Drawer(
-            child: ListView(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: ListTile(
-                    leading: FittedBox(
-                        fit: BoxFit.fill,
-                        child: Hero(
-                          tag: 'user',
-                          child: Container(
-                              height: 50,
-                              width: 50,
-                              child: Image.asset('images/user.png')),
-                        )),
-                    title: mob == null
-                        ? Text('null')
-                        : Text(
-                            mob,
-                            style: TextStyle(fontSize: 20),
-                          ),
-                    onTap: () => changeScreen(context, ProfilePage(res)),
+                        hintText: 'Search for Products',
+                        border: InputBorder.none),
                   ),
                 ),
-
-                ListTile(
-                  leading: FittedBox(
-                      fit: BoxFit.cover,
-                      child: Hero(
-                        tag: 'plan',
-                        child: Container(
-                            height: 45,
-                            width: 45,
-                            child: Image.asset('images/plan.png')),
-                      )),
-                  title: Text('Plan'),
-                  onTap: () => changeScreen(context, SubscriptionScreen()),
-                ),
-                ListTile(
-                  leading: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Hero(
-                        tag: 'wallet',
-                        child: Container(
-                            height: 40,
-                            width: 40,
-                            child: Image.asset('images/wallet.png')),
-                      )),
-                  title: Text('Wallet'),
-                  onTap: () {
-                    changeScreen(context, Wallet());
-                  },
-                ),
-                ListTile(
-                  leading: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Hero(
-                        tag: 'bill',
-                        child: Container(
-                            height: 40,
-                            width: 40,
-                            child: Image.asset('images/orderhistory.png')),
-                      )),
-                  title: Text('View Bill'),
-                  onTap: () {
-                    changeScreen(context, ViewBill());
-                  },
-                ),
-                // ListTile(
-                //   leading: Icon(Icons.beach_access),
-                //   title: Text('Vacation'),
-                // ),
-                Divider(
-                  color: black,
-                ),
+              ),
+              backgroundColor: pcolor,
+              actions: <Widget>[
+                InkWell(
+                    onTap: () {
+                      changeScreen(context, Wallet());
+                    },
+                    child: Icon(
+                      Icons.account_balance_wallet,
+                      size: 28,
+                    )),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('others', style: TextStyle(fontSize: 20)),
-                ),
-                ListTile(
-                  leading: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Hero(
-                        tag: 'address',
+                  padding: const EdgeInsets.only(top: 5.0, bottom: 5, right: 5),
+                  child: Stack(
+                    children: <Widget>[
+                      IconButton(
+                          icon: Icon(
+                            Icons.shopping_cart,
+                            color: white,
+                            size: 30,
+                          ),
+                          onPressed: () async {
+                            changeScreen(context, ShoppingCart());
+                          }),
+                      Positioned(
+                        bottom: 5,
+                        left: 5,
                         child: Container(
-                            height: 40,
-                            width: 40,
-                            child: Image.asset('images/address.png')),
-                      )),
-                  title: Text('Delivery Address'),
-                  onTap: () async {
-                    changeScreen(context, Address());
-                  },
-                ),
-                ListTile(
-                  leading: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Hero(
-                        tag: 'offers',
-                        child: Container(
-                            height: 40,
-                            width: 40,
-                            child: Image.asset('images/offers.png')),
-                      )),
-                  title: Text('Offers'),
-                  onTap: () => changeScreen(
-                      context,
-                      Coupon(
-                        amount: 0,
-                      )),
-                ),
-                ListTile(
-                  leading: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Hero(
-                        tag: 'refer',
-                        child: Container(
-                            height: 40,
-                            width: 40,
-                            child: Image.asset('images/refer.png')),
-                      )),
-                  title: Text('Refer and Earn'),
-                  onTap: () => changeScreen(context, ReferAndEarn(res: res)),
-                ),
-
-                ListTile(
-                  onTap: () async {
-                    print('good bye');
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    prefs.clear();
-                    pro.clearList();
-                    changeScreenRepacement(context, LoginScreen());
-                  },
-                  leading: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Container(
-                          height: 40,
-                          width: 40,
-                          child: Image.asset('images/logout.png'))),
-                  title: Text('Logout'),
+                          height: 15,
+                          width: 18,
+                          decoration: BoxDecoration(
+                              color: white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: grey,
+                                    offset: Offset(2, 2),
+                                    blurRadius: 3)
+                              ]),
+                          child: Center(
+                            child: Text(
+                              pro.productlist.length.toString(),
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: red,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-          body: ListView(
-            physics: BouncingScrollPhysics(),
-            children: <Widget>[
-              DeliveryStatus(
-                count: count,
-                date: date,
-                codes: codes
+            drawer: Drawer(
+              child: ListView(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: ListTile(
+                      leading: FittedBox(
+                          fit: BoxFit.fill,
+                          child: Hero(
+                            tag: 'user',
+                            child: Container(
+                                height: 50,
+                                width: 50,
+                                child: Image.asset('images/user.png')),
+                          )),
+                      title: mob == null
+                          ? Text('null')
+                          : Text(
+                              mob,
+                              style: TextStyle(fontSize: 20),
+                            ),
+                      onTap: () => changeScreen(context, ProfilePage()),
+                    ),
+                  ),
+
+                  ListTile(
+                    leading: FittedBox(
+                        fit: BoxFit.cover,
+                        child: Hero(
+                          tag: 'plan',
+                          child: Container(
+                              height: 45,
+                              width: 45,
+                              child: Image.asset('images/plan.png')),
+                        )),
+                    title: Text('Plan'),
+                    onTap: () => changeScreen(context, SubscriptionScreen()),
+                  ),
+                  ListTile(
+                    leading: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Hero(
+                          tag: 'wallet',
+                          child: Container(
+                              height: 40,
+                              width: 40,
+                              child: Image.asset('images/wallet.png')),
+                        )),
+                    title: Text('Wallet'),
+                    onTap: () {
+                      changeScreen(context, Wallet());
+                    },
+                  ),
+                  ListTile(
+                    leading: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Hero(
+                          tag: 'bill',
+                          child: Container(
+                              height: 40,
+                              width: 40,
+                              child: Image.asset('images/orderhistory.png')),
+                        )),
+                    title: Text('View Bill'),
+                    onTap: () {
+                      changeScreen(context, ViewBill());
+                    },
+                  ),
+                  // ListTile(
+                  //   leading: Icon(Icons.beach_access),
+                  //   title: Text('Vacation'),
+                  // ),
+                  Divider(
+                    color: black,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('others', style: TextStyle(fontSize: 20)),
+                  ),
+                  ListTile(
+                    leading: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Hero(
+                          tag: 'address',
+                          child: Container(
+                              height: 40,
+                              width: 40,
+                              child: Image.asset('images/address.png')),
+                        )),
+                    title: Text('Delivery Address'),
+                    onTap: () async {
+                      changeScreen(context, Address());
+                    },
+                  ),
+                  ListTile(
+                    leading: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Hero(
+                          tag: 'offers',
+                          child: Container(
+                              height: 40,
+                              width: 40,
+                              child: Image.asset('images/offers.png')),
+                        )),
+                    title: Text('Offers'),
+                    onTap: () => changeScreen(
+                        context,
+                        Coupon(
+                          amount: 0,
+                        )),
+                  ),
+                  ListTile(
+                    leading: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Hero(
+                          tag: 'refer',
+                          child: Container(
+                              height: 40,
+                              width: 40,
+                              child: Image.asset('images/refer.png')),
+                        )),
+                    title: Text('Refer and Earn'),
+                    onTap: () => changeScreen(context, ReferAndEarn(res: res)),
+                  ),
+
+                  ListTile(
+                    onTap: () async {
+                      print('good bye');
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      prefs.clear();
+                      pro.clearList();
+                      changeScreenRepacement(context, LoginScreen());
+                    },
+                    leading: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Container(
+                            height: 40,
+                            width: 40,
+                            child: Image.asset('images/logout.png'))),
+                    title: Text('Logout'),
+                  ),
+                ],
               ),
-              Cardwidget(),
-              ProductCategoryList(),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => basicContentEasyDialog(context, 'Hello'),
-            backgroundColor: pcolor,
-            child: AutoSizeText(
-              'help',
-              maxLines: 1,
             ),
-          ));
-    });
+            body: Container(
+              height: size.height,
+              width: size.width,
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  ListView(
+                    physics: BouncingScrollPhysics(),
+                    children: <Widget>[
+                      DeliveryStatus(count: count, date: date, codes: codes),
+                      // Cardwidget(),
+                      ProductCategoryList(),
+                    ],
+                  ),
+                  // FabButton(
+                  //   message:
+                  //       "Welcome to Farm Taste Chat Support. Let us  know your query you are facing with your order and resolve it in couple of time.",
+                  // )
+                ],
+              ),
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => basicContentEasyDialog(context,
+                  "Welcome to Farm Taste Chat Support. Let us  know your query you are facing with your order and resolve it in couple of time."),
+              backgroundColor: pcolor,
+              child: AutoSizeText(
+                'help',
+                maxLines: 1,
+              ),
+            ));
+      }),
+    );
   }
 }

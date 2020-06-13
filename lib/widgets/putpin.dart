@@ -13,7 +13,8 @@ class OtpPin extends StatefulWidget {
   final int area;
   final int cityId;
   final String otp;
-  OtpPin({this.signup, this.cityId, this.area, this.otp});
+  final String code;
+  OtpPin({this.signup, this.cityId, this.area, this.otp, this.code});
   @override
   OtpPinState createState() => OtpPinState();
 }
@@ -23,9 +24,8 @@ class OtpPinState extends State<OtpPin> {
   final _formKey = GlobalKey<FormState>();
   final RoundedLoadingButtonController _btnController =
       RoundedLoadingButtonController();
- 
-  
-
+final RoundedLoadingButtonController _resend =
+      RoundedLoadingButtonController();
   Widget onlySelectedBorderPinPut(TextEditingController otp) {
     BoxDecoration pinPutDecoration = BoxDecoration(
       color: Color.fromRGBO(235, 236, 237, 1),
@@ -37,7 +37,7 @@ class OtpPinState extends State<OtpPin> {
       child: PinPut(
         key: _formKey,
         fieldsCount: 5,
-        autoValidate: true,
+        autoValidate: false,
         textStyle: TextStyle(fontSize: 25, color: Colors.black),
         eachFieldWidth: 45,
         eachFieldHeight: 55,
@@ -48,8 +48,6 @@ class OtpPinState extends State<OtpPin> {
         validator: (val) {
           if (val.length < 5) {
             return 'cannot be empty';
-          } else if (val != widget.otp) {
-            return 'Incorrect OTP';
           }
           return null;
         },
@@ -120,32 +118,86 @@ class OtpPinState extends State<OtpPin> {
               height: 30,
             ),
             onlySelectedBorderPinPut(authprovider.otp),
-            RoundedLoadingButton(
-              child: Text('Verify OTP!', style: TextStyle(color: Colors.white)),
-              controller: _btnController,
-              color: green,
-              onPressed: () async {
-                if (widget.signup == true) {
-                  if (await authprovider.signup(
-                      widget.cityId.toString(), widget.area.toString())) {
-                    _btnController.success();
-                    authprovider.clearController();
-                    changeScreenRepacement(context, HomePage());
-                  } else {
-                    _btnController.reset();
-                  }
-                } else if (widget.signup == false) {
-                  if (await authprovider.inputotp(context)) {
-                    _btnController.success();
-                    authprovider.clearController();
-                    changeScreenRepacement(context, HomePage());
-                  } else {
-                    _btnController.reset();
-                  }
-                }
-              },
+            Row(
+              children: <Widget>[
+                Flexible(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child:  RoundedLoadingButton(
+                    child: Text('Resend OTP!',
+                        style: TextStyle(color: Colors.white)),
+                    controller: _resend,
+                    color: green,
+                    onPressed: () async {
+                      print(widget.signup);
+                      if (widget.signup == false) {
+                          String message = await authprovider.genOtplogin();
+                          if (message == 'Kindly Register First') {
+                             _resend.reset();
+                            setState(() {
+                              // hasError = true;
+                              // errorMessage = message;
+                            });
+                          } else {
+                             _resend.success();
+                            
+                          }
+                          print(message);
+                        } else {
+                          String message = await authprovider.genOtpSignup();
+                          if (message == 'Already Registered, Please Login') {
+                             _resend.reset();
+                            // setState(() {
+                            //   // hasError = true;
+                            //   // errorMessage = message;
+                            // });
+                          } else {
+                             _resend.success();
+                           
+                          }
+                          print(message);
+                        }
+                    },
+                    width: 200,
+                  ),
+                  ),
+                ),
+                Flexible(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: RoundedLoadingButton(
+                      child: Text('Verify OTP!',
+                          style: TextStyle(color: Colors.white)),
+                      controller: _btnController,
+                      width: MediaQuery.of(context).size.width * 0.5,
+                      color: green,
+                      onPressed: () async {
+                        if (widget.signup == true) {
+                          if (await authprovider.signup(widget.cityId.toString(),
+                              widget.area.toString(), widget.code)) {
+                            _btnController.success();
+                            authprovider.clearController();
+                            changeScreenRepacement(context, HomePage());
+                          } else {
+                            _btnController.reset();
+                          }
+                        } else if (widget.signup == false) {
+                          if (await authprovider.inputotp(context)) {
+                            _btnController.success();
+                            authprovider.clearController();
+                            changeScreenRepacement(context, HomePage());
+                          } else {
+                            _btnController.reset();
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-            
           ],
         ),
       ),

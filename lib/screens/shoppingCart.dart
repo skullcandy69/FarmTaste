@@ -7,6 +7,7 @@ import 'package:grocery/models/CartModel.dart';
 import 'package:grocery/models/products.dart';
 import 'package:grocery/provider/addcart.dart';
 import 'package:grocery/screens/Coupons.dart';
+import 'package:grocery/screens/home.dart';
 import 'package:grocery/widgets/Loader.dart';
 import 'package:grocery/widgets/checkout.dart';
 import 'package:http/http.dart' as http;
@@ -33,8 +34,9 @@ class _ShoppingCartState extends State<ShoppingCart> {
   @override
   void initState() {
     super.initState();
-    _timer =Timer.periodic(Duration(seconds: 1), (Timer t) => fetchCart());
+    _timer = Timer.periodic(Duration(seconds: 1), (Timer t) => fetchCart());
   }
+
   @override
   void dispose() {
     _timer.cancel();
@@ -44,267 +46,286 @@ class _ShoppingCartState extends State<ShoppingCart> {
   @override
   Widget build(BuildContext context) {
     print('object');
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Shopping Cart'),
-          backgroundColor: pcolor,
-        ),
-        body: isLoading
-            ? Container(child: Center(child: Loader()))
-            : Consumer<ProductModel>(
-                builder: (context, cart, child) {
-                  return ListView(
-                    children: <Widget>[
-                      Container(
-                        height: MediaQuery.of(context).size.height * .80,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: BouncingScrollPhysics(),
-                          itemCount: cart.getProductList().length + 1,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (index < cart.getProductList().length) {
-                              return BuildCart(
-                                  order: cart.getProductList()[index]);
-                            } else if (cart.tprice != 0) {
-                              return Container(
-                                height:
-                                    MediaQuery.of(context).size.height * .35,
-                                child: Column(
-                                  children: <Widget>[
-                                    Container(
-                                      height: 20,
-                                      width: MediaQuery.of(context).size.width,
-                                      color: Colors.black12,
-                                      child:
-                                          Center(child: Text('PRICE DETAILS')),
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 10.0, right: 10),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Text(
-                                              'Price(${cart.productlist.length} items)'),
-                                          Text('₹' +
-                                              cart.tprice.toStringAsFixed(2))
-                                        ],
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text('Shopping Cart'),
+            backgroundColor: pcolor,
+            automaticallyImplyLeading: true,
+            leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: () {
+                  _timer.cancel();
+                  changeScreen(context, HomePage());
+                }),
+          ),
+          body: isLoading
+              ? Container(child: Center(child: Loader()))
+              : Consumer<ProductModel>(
+                  builder: (context, cart, child) {
+                    return ListView(
+                      children: <Widget>[
+                        Container(
+                          height: MediaQuery.of(context).size.height * .80,
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: BouncingScrollPhysics(),
+                            itemCount: cart.getProductList().length + 1,
+                            itemBuilder: (BuildContext context, int index) {
+                              if (index < cart.getProductList().length) {
+                                return BuildCart(
+                                    order: cart.getProductList()[index]);
+                              } else if (cart.tprice != 0) {
+                                return Container(
+                                  height:
+                                      MediaQuery.of(context).size.height * .35,
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        height: 20,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        color: Colors.black12,
+                                        child: Center(
+                                            child: Text('PRICE DETAILS')),
                                       ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 10.0, right: 10, bottom: 10),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Text('Delivery fee'),
-                                          Text("+ ₹" +
-                                              myitem.data.deliveryCharge
-                                                  .toString())
-                                        ],
+                                      SizedBox(
+                                        height: 10,
                                       ),
-                                    ),
-                                    myitem.data.couponCode == null
-                                        ? Padding(
-                                            padding: const EdgeInsets.only(
-                                                top: 5,
-                                                left: 10.0,
-                                                right: 10,
-                                                bottom: 5),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: <Widget>[
-                                                InkWell(
-                                                  onTap: () {
-                                                    setState(() {
-                                                      changeScreen(
-                                                          context,
-                                                          Coupon(
-                                                              amount:
-                                                                  cart.tprice));
-                                                    });
-                                                  },
-                                                  child: Container(
-                                                    child: Text(
-                                                      "Apply Coupon",
-                                                      style: TextStyle(
-                                                          color: blue,
-                                                          fontWeight:
-                                                              FontWeight.w300),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 10.0, right: 10),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Text(
+                                                'Price(${cart.productlist.length} items)'),
+                                            Text('₹' +
+                                                cart.tprice.toStringAsFixed(2))
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 10.0, right: 10, bottom: 10),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Text('Delivery fee'),
+                                            Text("+ ₹" +
+                                                myitem.data.deliveryCharge
+                                                    .toString())
+                                          ],
+                                        ),
+                                      ),
+                                      myitem.data.couponCode == null
+                                          ? Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 5,
+                                                  left: 10.0,
+                                                  right: 10,
+                                                  bottom: 5),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: <Widget>[
+                                                  InkWell(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        changeScreen(
+                                                            context,
+                                                            Coupon(
+                                                                amount: cart
+                                                                    .tprice));
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      child: Text(
+                                                        "Apply Coupon",
+                                                        style: TextStyle(
+                                                            color: blue,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w300),
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        : Padding(
-                                            padding: const EdgeInsets.only(
-                                                top: 5,
-                                                left: 10.0,
-                                                right: 10,
-                                                bottom: 5),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: <Widget>[
-                                                Text("Coupon:  " +
-                                                    myitem.data.couponCode),
-                                                InkWell(
-                                                  onTap: () async {
-                                                    setState(() {});
-                                                    await http.put(REMOVECOUPON,
-                                                        headers: {
-                                                          "Authorization": token
-                                                        });
-                                                    setState(() {
-                                                      myCart();
-                                                    });
-                                                    // print(res.body);
-                                                  },
-                                                  child: Container(
-                                                    child: Text(
-                                                      "Remove",
-                                                      style: TextStyle(
-                                                          color: blue,
-                                                          fontWeight:
-                                                              FontWeight.w300),
+                                                ],
+                                              ),
+                                            )
+                                          : Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 5,
+                                                  left: 10.0,
+                                                  right: 10,
+                                                  bottom: 5),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: <Widget>[
+                                                  Text("Coupon:  " +
+                                                      myitem.data.couponCode),
+                                                  InkWell(
+                                                    onTap: () async {
+                                                      setState(() {});
+                                                      await http.put(
+                                                          REMOVECOUPON,
+                                                          headers: {
+                                                            "Authorization":
+                                                                token
+                                                          });
+                                                      setState(() {
+                                                        myCart();
+                                                      });
+                                                      // print(res.body);
+                                                    },
+                                                    child: Container(
+                                                      child: Text(
+                                                        "Remove",
+                                                        style: TextStyle(
+                                                            color: blue,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w300),
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                    myitem.data.couponCode == null
-                                        ? Container()
-                                        : Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 10.0, right: 10),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: <Widget>[
-                                                Text('Discount '),
-                                                Text('- ₹' +
-                                                    myitem.data.discount
-                                                        .toString())
-                                              ],
+                                      myitem.data.couponCode == null
+                                          ? Container()
+                                          : Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 10.0, right: 10),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: <Widget>[
+                                                  Text('Discount '),
+                                                  Text('- ₹' +
+                                                      myitem.data.discount
+                                                          .toString())
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                    Divider(
-                                      color: black,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 10,
-                                          left: 10.0,
-                                          right: 10,
-                                          bottom: 10),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Text('Total Amount'),
-                                          Text('₹' +
-                                              (cart.tprice +
-                                                      myitem
-                                                          .data.deliveryCharge -
-                                                      myitem.data.discount)
-                                                  .toStringAsFixed(2))
-                                        ],
+                                      Divider(
+                                        color: black,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            } else {
-                              return Center(
-                                child: Container(
-                                  height: 500,
-                                  child: Image.asset(
-                                    'images/emptycart.png',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      cart.tprice != 0
-                          ? Container(
-                              height: MediaQuery.of(context).size.height * .08,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                boxShadow: <BoxShadow>[
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    offset: Offset(1.0, 6.0),
-                                    blurRadius: 10.0,
-                                  ),
-                                ],
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    right: 10, left: 10.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    RichText(
-                                      text: TextSpan(children: <TextSpan>[
-                                        TextSpan(
-                                            text: '₹' +
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 10,
+                                            left: 10.0,
+                                            right: 10,
+                                            bottom: 10),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Text('Total Amount'),
+                                            Text('₹' +
                                                 (cart.tprice +
                                                         myitem.data
                                                             .deliveryCharge -
                                                         myitem.data.discount)
-                                                    .toStringAsFixed(2),
-                                            style: TextStyle(
-                                                color: black,
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w400))
-                                      ]),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: FlatButton(
-                                        onPressed: () async {
-                                          changeScreenRepacement(
-                                              context,
-                                              Checkout(
-                                                  cart: myitem.data,
-                                                  totalamount: (cart.tprice +
-                                                      myitem
-                                                          .data.deliveryCharge -
-                                                      myitem.data.discount),
-                                                  amount: cart.tprice));
-                                        },
-                                        child: Center(
-                                          child: Text(
-                                            'Checkout',
-                                            style: TextStyle(color: white),
-                                          ),
+                                                    .toStringAsFixed(2))
+                                          ],
                                         ),
-                                        color: Colors.deepOrange,
                                       ),
-                                    )
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                return Center(
+                                  child: Container(
+                                    height: 500,
+                                    child: Image.asset(
+                                      'images/emptycart.png',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                        cart.tprice != 0
+                            ? Container(
+                                height:
+                                    MediaQuery.of(context).size.height * .08,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  boxShadow: <BoxShadow>[
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      offset: Offset(1.0, 6.0),
+                                      blurRadius: 10.0,
+                                    ),
                                   ],
                                 ),
-                              ),
-                            )
-                          : Container()
-                    ],
-                  );
-                },
-              ));
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      right: 10, left: 10.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      RichText(
+                                        text: TextSpan(children: <TextSpan>[
+                                          TextSpan(
+                                              text: '₹' +
+                                                  (cart.tprice +
+                                                          myitem.data
+                                                              .deliveryCharge -
+                                                          myitem.data.discount)
+                                                      .toStringAsFixed(2),
+                                              style: TextStyle(
+                                                  color: black,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w400))
+                                        ]),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: FlatButton(
+                                          onPressed: () async {
+                                            _timer.cancel();
+                                            // Timer(Duration(seconds: 2),()=>)
+                                            changeScreenRepacement(
+                                                context,
+                                                Checkout(
+                                                    cart: myitem.data,
+                                                    totalamount: (cart.tprice +
+                                                        myitem.data
+                                                            .deliveryCharge -
+                                                        myitem.data.discount),
+                                                    amount: cart.tprice
+                                                        .toStringAsFixed(3)));
+                                          },
+                                          child: Center(
+                                            child: Text(
+                                              'Checkout',
+                                              style: TextStyle(color: white),
+                                            ),
+                                          ),
+                                          color: Colors.deepOrange,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : Container()
+                      ],
+                    );
+                  },
+                )),
+    );
   }
 }
 

@@ -10,6 +10,7 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:shimmer/shimmer.dart';
+// import 'package:smartlook/smartlook.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,15 +31,18 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     setupnotification();
-    
+
     Provider.of<ProductModel>(context, listen: false).fetchProducts();
 
     Timer(Duration(seconds: 3),
         () => changeScreenRepacement(context, SController()));
+
+    // Smartlook.setupAndStartRecording(
+    //     '0f0fe4ac9b7614a8e3480fbcfc7d30e00024b450');
   }
 
   Future<void> setupnotification() async {
-    await OneSignal.shared.init("f8e1e308-b0d5-4453-9601-ce3ea9da054e",
+    await OneSignal.shared.init("d7af44a8-42d2-4f40-809c-fe50ada70a7a",
         iOSSettings: {
           OSiOSSettings.autoPrompt: false,
           OSiOSSettings.inAppLaunchUrl: false
@@ -121,7 +125,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   // getToken() async {
   //   SharedPreferences pref = await SharedPreferences.getInstance();
   //   setState(() {

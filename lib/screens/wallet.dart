@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:grocery/helpers/navigation.dart';
-import 'package:grocery/screens/showOrders.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
-import 'package:grocery/models/History.dart';
+import 'package:grocery/models/Transactions.dart';
 import 'package:grocery/provider/auth.dart';
 import 'package:grocery/widgets/Loader.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +19,11 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> {
+  Future<Null> _refreshLocalGallery() async {
+    await new Future.delayed(new Duration(seconds: 2));
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final authprovider = Provider.of<AuthProvider>(context);
@@ -30,33 +33,61 @@ class _WalletState extends State<Wallet> {
             title: Text('Wallet'),
             backgroundColor: pcolor,
           ),
-          body: FutureBuilder(
-              future: authprovider.getUser(),
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                if (snapshot.data == null) {
-                  return Container(
-                    child: Center(child: Loader()),
-                  );
-                } else {
-                  return Container(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.white,
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(
-                          height: 15,
-                        ),
-                        walletDetails(snapshot.data.user),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        transactionList(),
-                      ],
-                    ),
-                  );
-                }
-              })),
+          body: RefreshIndicator(
+            onRefresh: _refreshLocalGallery,
+            child: FutureBuilder(
+                future: authprovider.getUser(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.data == null) {
+                    return Container(
+                      child: Center(child: Loader()),
+                    );
+                  } else {
+                    return Container(
+                      height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.white,
+                      child: Column(
+                        children: <Widget>[
+                          SizedBox(
+                            height: 15,
+                          ),
+                          walletDetails(snapshot.data.user),
+                       ListTile(leading: Text(
+                                'ALL TRANSATIONS',
+                                style: TextStyle(color: green),
+                              ),),
+                          Expanded(
+                            child: Container(
+                              height: MediaQuery.of(context).size.height * 0.65,
+                              child: FutureBuilder(
+                                  future: ordersdata,
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot snapshot) {
+                                    if (snapshot.data == null) {
+                                      return Container(
+                                        child: Center(child: Loader()),
+                                      );
+                                    } else {
+                                      return ListView.builder(
+                                        itemCount: snapshot.data.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return TransactionDetails(
+                                              transaction:
+                                                  snapshot.data[index]);
+                                        },
+                                      );
+                                    }
+                                  }),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                }),
+          )),
     );
   }
 
@@ -123,7 +154,12 @@ class _WalletState extends State<Wallet> {
                           showDialog(
                               context: context,
                               builder: (BuildContext context) {
-                                return RequestMoneyDialog(user);
+                                return RequestMoneyDialog(
+                                  user: user,
+                                  fun: () {
+                                    setState(() {});
+                                  },
+                                );
                               });
                         },
                         color: blue,
@@ -148,138 +184,119 @@ class _WalletState extends State<Wallet> {
     super.initState();
     setState(() {
       ordersdata = getOrders();
-      historydata = getTransaction();
     });
   }
 
-  Future<List<HistoryData>> ordersdata;
-  Future<List<HistoryData>> historydata;
+  Future<List<TransactionData>> ordersdata;
 
-  Future<List<HistoryData>> getTransaction() async {
+  Future<List<TransactionData>> getOrders() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
-    var response = await http.get(HISTORY, headers: {"Authorization": token});
-    History trans = History.fromJson(json.decode(response.body));
-    // print(trans.data.length);
-
-    return trans.data.reversed.toList();
-  }
-
-  Future<List<HistoryData>> getOrders() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token');
-    var response = await http.get(ORDERS, headers: {"Authorization": token});
+    var response =
+        await http.get(TRANSACTIONS, headers: {"Authorization": token});
     print(response.body);
-    History trans = History.fromJson(json.decode(response.body));
+    Transactions trans = Transactions.fromJson(json.decode(response.body));
     // print(trans.data[0].cart.products[0].title);
     return trans.data.reversed.toList();
   }
 
-  Widget transactionList() {
-    return DefaultTabController(
-        length: 2,
-        initialIndex: 0,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            TabBar(tabs: [
-              Tab(
-                text: 'ALL TRANSACTIONS',
-              ),
-              Tab(text: 'FAILED TRANSACTIONS')
-            ], labelColor: green),
-            Container(
-              height: MediaQuery.of(context).size.height * 0.5,
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              child: TabBarView(children: [
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.65,
-                  child: FutureBuilder(
-                      future: ordersdata,
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (snapshot.data == null) {
-                          return Container(
-                            child: Center(child: Loader()),
-                          );
-                        } else {
-                          return ListView.builder(
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return TransactionWidget(
-                                  transaction: snapshot.data[index]);
-                            },
-                          );
-                        }
-                      }),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.6,
-                  child: FutureBuilder(
-                      future: historydata,
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (snapshot.data == null) {
-                          return Container(
-                            child: Center(child: Loader()),
-                          );
-                        } else {
-                          return ListView.builder(
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return TransactionWidget(
-                                  transaction: snapshot.data[index]);
-                            },
-                          );
-                        }
-                      }),
-                ),
-              ]),
-            )
-          ],
-        ));
-  }
+  // Widget transactionList() {
+  //   return DefaultTabController(
+  //       length: 2,
+  //       initialIndex: 0,
+  //       child: Column(
+  //         mainAxisAlignment: MainAxisAlignment.start,
+  //         children: <Widget>[
+  //           TabBar(tabs: [
+  //             Tab(
+  //               text: 'ALL TRANSACTIONS',
+  //             ),
+  //             Tab(text: 'FAILED TRANSACTIONS')
+  //           ], labelColor: green),
+  //           Container(
+  //             height: MediaQuery.of(context).size.height * 0.5,
+  //             padding: EdgeInsets.symmetric(horizontal: 15),
+  //             child: TabBarView(children: [
+  //               Container(
+  //                 height: MediaQuery.of(context).size.height * 0.65,
+  //                 child: FutureBuilder(
+  //                     future: ordersdata,
+  //                     builder: (BuildContext context, AsyncSnapshot snapshot) {
+  //                       if (snapshot.data == null) {
+  //                         return Container(
+  //                           child: Center(child: Loader()),
+  //                         );
+  //                       } else {
+  //                         return ListView.builder(
+  //                           itemCount: snapshot.data.length,
+  //                           itemBuilder: (BuildContext context, int index) {
+  //                             return TransactionDetails(
+  //                                 transaction: snapshot.data[index]);
+  //                           },
+  //                         );
+  //                       }
+  //                     }),
+  //               ),
+  //               Container(
+  //                 height: MediaQuery.of(context).size.height * 0.6,
+  //                 child: FutureBuilder(
+  //                     future: historydata,
+  //                     builder: (BuildContext context, AsyncSnapshot snapshot) {
+  //                       if (snapshot.data == null) {
+  //                         return Container(
+  //                           child: Center(child: Loader()),
+  //                         );
+  //                       } else {
+  //                         return ListView.builder(
+  //                           itemCount: snapshot.data.length,
+  //                           itemBuilder: (BuildContext context, int index) {
+  //                             return TransactionDetails(
+  //                                 transaction: snapshot.data[index]);
+  //                           },
+  //                         );
+  //                       }
+  //                     }),
+  //               ),
+  //             ]),
+  //           )
+  //         ],
+  //       ));
+  // }
 }
 
 // enum TransactionStatus {success,failure,pending}
 
-class TransactionWidget extends StatelessWidget {
-  final HistoryData transaction;
-  TransactionWidget({this.transaction});
+class TransactionDetails extends StatelessWidget {
+  final TransactionData transaction;
+  final VoidCallback fun;
+  TransactionDetails({this.transaction, this.fun});
 
   @override
   Widget build(BuildContext context) {
     String transactionName;
     IconData transactionIconData;
     Color color;
-    switch (transaction.orderStatus) {
-      case 'success':
-        transactionName = "Completed";
+    switch (transaction.type) {
+      case 'add':
+        transactionName = "Credited";
         transactionIconData = Icons.check_circle_outline;
         color = green;
         break;
-      case 'cancelled':
-        transactionName = "Cancelled";
-        transactionIconData = Icons.cancel;
+      case 'subtract':
+        transactionName = "Debited";
+        transactionIconData = Icons.remove;
         color = Colors.red;
-        break;
-      case 'rejected':
-        transactionName = "Rejected";
-        transactionIconData = Icons.cancel;
-        color = Colors.red;
-        break;
-      case "pending":
-        transactionName = "Pending";
-        transactionIconData = Icons.blur_circular;
-        color = Colors.orange;
         break;
     }
     return GestureDetector(
       onTap: () {
         // print(transaction.products.length);
-        changeScreen(
-            context,
-            ShowOrders(
-              order: transaction,
-            ));
+        // changeScreen(
+        //     context,
+        //     ShowOrders(
+        //       order: transaction,
+        //       fun: fun,
+        //     ));
       },
       child: Container(
         margin: EdgeInsets.all(5.0),
@@ -341,7 +358,7 @@ class TransactionWidget extends StatelessWidget {
                       Row(
                         children: <Widget>[
                           AutoSizeText(
-                            transaction.orderId.toString(),
+                            transaction.id.toString(),
                             maxLines: 1,
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
@@ -389,8 +406,8 @@ class TransactionWidget extends StatelessWidget {
 
 class RequestMoneyDialog extends StatefulWidget {
   final dynamic user;
-
-  const RequestMoneyDialog(this.user);
+  final VoidCallback fun;
+  const RequestMoneyDialog({this.user, this.fun});
   @override
   _RequestMoneyDialogState createState() => _RequestMoneyDialogState();
 }
@@ -420,14 +437,20 @@ class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
     print((widget.user.wallet + int.parse(textEditingController.text))
         .toString()
         .runtimeType);
-    await http.put(ME, headers: {
+    var res = await http.post(UPDATEWALLET, headers: {
       "Authorization": token
     }, body: {
-      "wallet": (widget.user.wallet + int.parse(textEditingController.text))
+      "type": "add",
+      "amount": (widget.user.wallet + int.parse(textEditingController.text))
           .toString()
     });
+    print(res.body);
+
     _btnController.success();
-    Timer(Duration(seconds: 2), () => Navigator.pop(context));
+    Timer(Duration(seconds: 2), () {
+      widget.fun();
+      Navigator.pop(context);
+    });
   }
 
   void _handlePaymentError(PaymentFailureResponse response) async {
@@ -446,7 +469,7 @@ class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
 
   void openCheckout() async {
     var options = {
-      'key': 'rzp_test_9xPUvXMTVSbgW5',
+      'key': TESTKEY,
       'amount': (int.parse(textEditingController.text) * 100).toInt(),
       'name': 'FARM TASTE',
       'description': 'Order Payment',

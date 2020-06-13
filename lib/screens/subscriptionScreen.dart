@@ -64,7 +64,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 ),
               )
             : list.length == 0
-                ? Container(height: MediaQuery.of(context).size.height ,child: Image.asset('images/emptycart.png',fit: BoxFit.cover,))
+                ? Container(
+                    height: MediaQuery.of(context).size.height,
+                    child: Image.asset(
+                      'images/emptycart.png',
+                      fit: BoxFit.cover,
+                    ))
                 : ListView.builder(
                     itemCount: list.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -78,7 +83,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
 class OrderShow extends StatefulWidget {
   final SubscriptionData data;
-
+  
   const OrderShow({Key key, this.data}) : super(key: key);
   @override
   _OrderShowState createState() => _OrderShowState();
@@ -172,60 +177,60 @@ class _OrderShowState extends State<OrderShow> {
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
-                        Container(
-                          height: 30,
-                          width: 75,
-                          decoration: BoxDecoration(
-                              color: white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: blue)),
-                          child: Center(
-                              child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              _itemcounter == 0
-                                  ? Container()
-                                  : InkWell(
-                                      onTap: () async {
-                                        setState(() {
-                                          _itemcounter--;
-                                        });
-                                      },
-                                      child: Icon(
-                                        Icons.remove,
-                                        color: blue,
-                                      ),
-                                    ),
-                              _itemcounter == 0
-                                  ? Text(
-                                      'ADD',
-                                      style: TextStyle(color: blue),
-                                    )
-                                  : Text(
-                                      _itemcounter.toString(),
-                                      style: TextStyle(color: blue),
-                                    ),
-                              InkWell(
-                                onTap: () {
-                                  print('inc');
-                                  setState(() {
-                                    _itemcounter++;
-                                  });
-                                },
-                                child: Icon(
-                                  Icons.add,
-                                  color: blue,
-                                ),
-                              ),
-                            ],
-                          )),
-                        ),
+                        // Container(
+                        //   height: 30,
+                        //   width: 75,
+                        //   decoration: BoxDecoration(
+                        //       color: white,
+                        //       borderRadius: BorderRadius.circular(8),
+                        //       border: Border.all(color: blue)),
+                        //   child: Center(
+                        //       child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        //     children: <Widget>[
+                        //       _itemcounter == 0
+                        //           ? Container()
+                        //           : InkWell(
+                        //               onTap: () async {
+                        //                 setState(() {
+                        //                   _itemcounter--;
+                        //                 });
+                        //               },
+                        //               child: Icon(
+                        //                 Icons.remove,
+                        //                 color: blue,
+                        //               ),
+                        //             ),
+                        //       _itemcounter == 0
+                        //           ? Text(
+                        //               'ADD',
+                        //               style: TextStyle(color: blue),
+                        //             )
+                        //           : Text(
+                        //               _itemcounter.toString(),
+                        //               style: TextStyle(color: blue),
+                        //             ),
+                        //       InkWell(
+                        //         onTap: () {
+                        //           print('inc');
+                        //           setState(() {
+                        //             _itemcounter++;
+                        //           });
+                        //         },
+                        //         child: Icon(
+                        //           Icons.add,
+                        //           color: blue,
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   )),
+                        // ),
                         RoundedLoadingButton(
                           height: 30,
                           width: 60,
                           controller: _btnController,
-                          onPressed: (){ updateOrder(widget.data.id);
-                          
+                          onPressed: () {
+                            updateOrder(widget.data.id);
                           },
                           child: AutoSizeText(
                             " " + message + " ",
@@ -236,14 +241,16 @@ class _OrderShowState extends State<OrderShow> {
                       ],
                     )
                   : Container(),
-              Align(
-                  alignment: Alignment.topRight,
-                  child: FlatButton(
-                    child: isLoading ? Text("Save") : Text('Edit'),
-                    onPressed: () => setState(() {
-                      isLoading = !isLoading;
-                    }),
-                  ))
+              isLoading
+                  ? Container()
+                  : Align(
+                      alignment: Alignment.topRight,
+                      child: FlatButton(
+                        child: isLoading ? Text("Save") : Text('Edit'),
+                        onPressed: () => setState(() {
+                          isLoading = !isLoading;
+                        }),
+                      ))
             ],
           ),
         ),

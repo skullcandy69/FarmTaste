@@ -26,22 +26,17 @@ class ProductDetails extends StatefulWidget {
   _ProductDetailsState createState() => _ProductDetailsState();
 }
 
-final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
 Future<List<ProductData>> productcatlist(String id) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
   var response =
       await http.get(GETSUBPRODUCATCAT + id, headers: {"Authorization": token});
-  // print('products');
   Products products = Products.fromJson(json.decode(response.body));
-  // print('products:' + products.data[1].title);
   return products.data;
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
   bool add = false;
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Consumer<ProductModel>(builder: (context, pro, child) {
@@ -49,7 +44,6 @@ class _ProductDetailsState extends State<ProductDetails> {
           length: widget.productsubcat.length,
           initialIndex: widget.id,
           child: Scaffold(
-            key: _scaffoldKey,
             appBar: AppBar(
               backgroundColor: pcolor,
               actions: <Widget>[
@@ -193,12 +187,82 @@ class _ProductDetailsState extends State<ProductDetails> {
                         ),
                       );
                     } else {
-                      int len = Provider.of<ProductModel>(context)
-                          .getProductList()
-                          .length;
-                      return ListView(
+                      int len = pro.getProductList().length;
+                      return Stack(
+                        fit: StackFit.expand,
                         children: <Widget>[
-                          _listofitems(snapshot.data, context, add, len),
+                          ListView(
+                            children: <Widget>[
+                              _listofitems(snapshot.data, context, add, len),
+                            ],
+                          ),
+                          len != 0
+                              ? Positioned(
+                                  bottom: 0,
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      boxShadow: <BoxShadow>[
+                                        BoxShadow(
+                                          color: Colors.black12,
+                                          offset: Offset(1.0, 6.0),
+                                          blurRadius: 10.0,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 10, left: 10.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          RichText(
+                                            text: TextSpan(children: <TextSpan>[
+                                              TextSpan(
+                                                  text: 'Total Amount: ',
+                                                  style: TextStyle(
+                                                      color: grey,
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w400)),
+                                              TextSpan(
+                                                  text: '₹' +
+                                                      pro.tprice
+                                                          .toStringAsFixed(2),
+                                                  style: TextStyle(
+                                                      color: black,
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w400))
+                                            ]),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: FlatButton(
+                                              onPressed: () async {
+                                                // _timer.cancel();
+                                                // Timer(Duration(seconds: 2),()=>)
+                                                changeScreenRepacement(
+                                                    context, ShoppingCart());
+                                              },
+                                              child: Center(
+                                                child: Text(
+                                                  'Checkout',
+                                                  style:
+                                                      TextStyle(color: white),
+                                                ),
+                                              ),
+                                              color: Colors.deepOrange,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ))
+                              : Container()
                         ],
                       );
                     }
@@ -322,7 +386,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                 text: TextSpan(
                                   children: <TextSpan>[
                                     TextSpan(
-                                      text: "₹" + getGstPrice(widget.pro),
+                                      text: "₹" + getGstPrice(widget.pro) + ' ',
                                       // text: widget.pro.rate[0]
                                       //             .discountedAmount !=
                                       //         null
@@ -333,11 +397,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                       ),
                                     ),
                                     TextSpan(
-                                        text: widget.pro.rate[0]
-                                                    .discountedAmount !=
-                                                null
-                                            ? "₹${widget.pro.rate[0].baseAmount.toString()}"
-                                            : '',
+                                        text: widget.pro.mrp.toString(),
                                         style: TextStyle(
                                             color: grey,
                                             decoration:

@@ -45,9 +45,7 @@ class _CityState extends State<City> {
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
-                      color: index % 2 == 0
-                          ? Colors.amberAccent[100]
-                          : Colors.black12,
+                      
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: GestureDetector(
