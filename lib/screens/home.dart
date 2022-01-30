@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/models/CartModel.dart';
@@ -16,6 +17,7 @@ import 'package:grocery/screens/ViewBill.dart';
 import 'package:grocery/widgets/Productcategory.dart';
 import 'package:grocery/widgets/SearchProducts.dart';
 import 'package:grocery/widgets/address.dart';
+import 'package:grocery/widgets/card.dart';
 // import 'package:grocery/widgets/card.dart';
 import 'package:grocery/widgets/delivery_status.dart';
 import 'package:grocery/screens/shoppingCart.dart';
@@ -35,11 +37,9 @@ class _HomePageState extends State<HomePage> {
   read() async {
     final prefs = await SharedPreferences.getInstance();
     res = Result.fromJson(json.decode(prefs.getString('response')));
-    print(res.user.name);
 
     setState(() {
       mob = res.user.mobileNo;
-      print("token" + prefs.getString('token'));
     });
   }
 
@@ -47,16 +47,18 @@ class _HomePageState extends State<HomePage> {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String token = pref.getString('token');
     var response =
-        await http.get(UPCOMINGITEM, headers: {'authorization': token});
+        await http.get(Uri.parse(UPCOMINGITEM), headers: {'authorization': token});
     if (response.statusCode == 200) {
       OntheWay items = OntheWay.fromJson(json.decode(response.body));
-      setState(() {
-        count = items.count;
-        date = DateTime.parse(items.date) ?? date;
-        print(items.date);
-        print(res.token);
-        codes = items.code;
-      });
+      // print(items.date);
+      // print(items.count);
+      if (items.count > 0) {
+        setState(() {
+          count = items.count;
+          date = DateTime.parse(items.date) ?? date;
+          codes = items.code;
+        });
+      }
     }
   }
 
@@ -87,7 +89,7 @@ class _HomePageState extends State<HomePage> {
                     child: new Text('No'),
                   ),
                   new FlatButton(
-                    onPressed: () => Navigator.of(context).pop(true),
+                    onPressed: () => SystemNavigator.pop(),
                     child: new Text('Yes'),
                   ),
                 ],
@@ -326,20 +328,17 @@ class _HomePageState extends State<HomePage> {
                     physics: BouncingScrollPhysics(),
                     children: <Widget>[
                       DeliveryStatus(count: count, date: date, codes: codes),
-                      // Cardwidget(),
+                      Cardwidget(),
                       ProductCategoryList(),
+                      SizedBox(height: 50,)
                     ],
                   ),
-                  // FabButton(
-                  //   message:
-                  //       "Welcome to Farm Taste Chat Support. Let us  know your query you are facing with your order and resolve it in couple of time.",
-                  // )
                 ],
               ),
             ),
             floatingActionButton: FloatingActionButton(
-              onPressed: () => basicContentEasyDialog(context,
-                  "Welcome to Farm Taste Chat Support. Let us  know your query you are facing with your order and resolve it in couple of time."),
+              onPressed: () => basicContentEasyDialog(context, """Hello,
+I have issue/query regarding my order"""),
               backgroundColor: pcolor,
               child: AutoSizeText(
                 'help',

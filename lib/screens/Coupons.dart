@@ -20,7 +20,7 @@ String token;
 Future<List<CouponList>> getCoupons() async {
   SharedPreferences pref = await SharedPreferences.getInstance();
   token = pref.getString('token');
-  var response = await http.get(COUPON, headers: {"Authorization": token});
+  var response = await http.get(Uri.parse(COUPON), headers: {"Authorization": token});
   Coupons coupons = Coupons.fromJson(json.decode(response.body));
   return coupons.data;
 }
@@ -99,15 +99,14 @@ class _CouponState extends State<Coupon> {
                                                   snapshot.data[index]
                                                       .minimumCartValue
                                               ? () async {
-                                                  var res = await http.put(
-                                                    APPLYCOUPON +
+                                                  await http.put(
+                                                   Uri.parse( APPLYCOUPON +
                                                         snapshot.data[index].id
-                                                            .toString(),
+                                                            .toString()),
                                                     headers: {
                                                       "Authorization": token
                                                     },
                                                   );
-                                                  print(res.body);
                                                   key.currentState
                                                       .showSnackBar(SnackBar(
                                                     content: AutoSizeText(
@@ -126,7 +125,7 @@ class _CouponState extends State<Coupon> {
                                                       "Min cart value should be ₹" +
                                                           snapshot.data[index]
                                                               .minimumCartValue
-                                                              .toString(),
+                                                              .toStringAsFixed(1),
                                                       style: TextStyle(
                                                           color: blue),
                                                     ),

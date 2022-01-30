@@ -14,8 +14,7 @@ class District extends StatefulWidget {
 }
 
 Future<List<dynamic>> getLocation(cityId) async {
-  print(AREA + cityId.toString());
-  http.Response response = await http.get(AREA + cityId.toString());
+  http.Response response = await http.get(Uri.parse(AREA + cityId.toString()));
   Map<String, dynamic> decodedCategories = json.decode(response.body);
   return decodedCategories['data'];
 }

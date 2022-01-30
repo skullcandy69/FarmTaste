@@ -12,13 +12,14 @@ class Cardwidget extends StatefulWidget {
 }
 
 class _CardwidgetState extends State<Cardwidget> {
-  List<ImageData> list;
+  List<ImageData> list = [];
   bool isLoading = true;
   getCoverImages() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
-    var response = await http.get(GETIMAGES, headers: {"Authorization": token});
-    print(response.body);
+
+    var response =
+        await http.get(Uri.parse(GETIMAGES), headers: {"Authorization": token});
     if (response.statusCode == 200) {
       CoverImages coverImages =
           CoverImages.fromJson(json.decode(response.body));
@@ -38,20 +39,32 @@ class _CardwidgetState extends State<Cardwidget> {
   @override
   Widget build(BuildContext context) {
     return CarouselSlider.builder(
-        height: 200,
+        options: CarouselOptions(
+          height: 200,
+          aspectRatio: 16 / 9,
+          viewportFraction: 0.8,
+          initialPage: 0,
+          enableInfiniteScroll: true,
+          reverse: false,
+          autoPlay: true,
+          autoPlayInterval: Duration(seconds: 3),
+          autoPlayAnimationDuration: Duration(milliseconds: 800),
+          autoPlayCurve: Curves.fastOutSlowIn,
+          enlargeCenterPage: true,
+          scrollDirection: Axis.horizontal,
+        ),
         itemCount: isLoading ? 0 : list.length,
-        autoPlay: true,
-        itemBuilder: (context, index) {
-          if (isLoading == true) {
+        itemBuilder: (context, i, index) {
+          if (isLoading == true || list.length == 0) {
             return Card(
               child: Container(
                 height: 200,
                 child: Center(
-                  child: Text(
-                    "Loading...",
-                    style: TextStyle(color: grey),
-                  ),
-                ),
+                    child: Icon(
+                  Icons.error_outline,
+                  size: 50,
+                  color: grey,
+                )),
               ),
             );
           } else {
@@ -68,7 +81,7 @@ _buildListItem(BuildContext context, ImageData document) {
       child: document == null
           ? Container(child: Center(child: CircularProgressIndicator()))
           : Image.network(
-              BASE_URL + "/" + document.imageUrl,
+              document.imageUrl,
               fit: BoxFit.fill,
               loadingBuilder: (BuildContext context, Widget child,
                   ImageChunkEvent loadingProgress) {

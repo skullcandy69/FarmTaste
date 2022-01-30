@@ -1,13 +1,14 @@
-class CoverImages {
-  List<ImageData> data;
+class Slots {
+  List<SlotData> data;
 
-  CoverImages({this.data});
+  Slots({this.data});
 
-  CoverImages.fromJson(Map<String, dynamic> json) {
+  Slots.fromJson(Map<String, dynamic> json) {
     if (json['data'] != null) {
+      // data = new List<SlotData>();
       data = [];
       json['data'].forEach((v) {
-        data.add(new ImageData.fromJson(v));
+        data.add(new SlotData.fromJson(v));
       });
     }
   }
@@ -21,30 +22,27 @@ class CoverImages {
   }
 }
 
-class ImageData {
+class SlotData {
   int id;
-  String title;
-  String imageUrl;
-  String slug;
-  int priority;
+  String startTime;
+  String endTime;
+  bool isActive;
   String createdAt;
   String updatedAt;
 
-  ImageData(
+  SlotData(
       {this.id,
-      this.title,
-      this.imageUrl,
-      this.slug,
-      this.priority,
+      this.startTime,
+      this.endTime,
+      this.isActive,
       this.createdAt,
       this.updatedAt});
 
-  ImageData.fromJson(Map<String, dynamic> json) {
+  SlotData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    title = json['title'];
-    imageUrl = json['image_url'];
-    slug = json['slug'];
-    priority = json['priority'];
+    startTime = json['start_time'];
+    endTime = json['end_time'];
+    isActive = json['is_active'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
   }
@@ -52,10 +50,9 @@ class ImageData {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
-    data['title'] = this.title;
-    data['image_url'] = this.imageUrl;
-    data['slug'] = this.slug;
-    data['priority'] = this.priority;
+    data['start_time'] = this.startTime;
+    data['end_time'] = this.endTime;
+    data['is_active'] = this.isActive;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     return data;

@@ -5,7 +5,8 @@ class History {
 
   History.fromJson(Map<String, dynamic> json) {
     if (json['data'] != null) {
-      data = new List<HistoryData>();
+      // data = new List<HistoryData>();
+      data = [];
       json['data'].forEach((v) {
         data.add(new HistoryData.fromJson(v));
       });
@@ -32,6 +33,7 @@ class HistoryData {
   dynamic deliveryCharge;
   dynamic discount;
   dynamic employeeId;
+  String deliveryCode;
   String paymentMode;
   String paymentStatus;
   String deliveryDate;
@@ -55,6 +57,8 @@ class HistoryData {
       this.deliveryCharge,
       this.discount,
       this.employeeId,
+            this.deliveryCode,
+
       this.paymentMode,
       this.paymentStatus,
       this.deliveryDate,
@@ -73,7 +77,8 @@ class HistoryData {
     userId = json['user_id'];
     deliveryAddress = json['delivery_address'];
     if (json['products'] != null) {
-      products = new List<Products>();
+      // products = new List<Products>();
+      products =[];
       json['products'].forEach((v) {
         products.add(new Products.fromJson(v));
       });
@@ -83,6 +88,7 @@ class HistoryData {
     deliveryCharge = json['delivery_charge'];
     discount = json['discount'];
     employeeId = json['employee_id'];
+    deliveryCode = json['delivery_code'];
     paymentMode = json['payment_mode'];
     paymentStatus = json['payment_status'];
     deliveryDate = json['delivery_date'];
@@ -110,6 +116,7 @@ class HistoryData {
     data['delivery_charge'] = this.deliveryCharge;
     data['discount'] = this.discount;
     data['employee_id'] = this.employeeId;
+    data['delivery_code'] = this.deliveryCode;
     data['payment_mode'] = this.paymentMode;
     data['payment_status'] = this.paymentStatus;
     data['delivery_date'] = this.deliveryDate;

@@ -141,7 +141,6 @@ class _ExistingCustomerState extends State<ExistingCustomer> {
                     controller: _btnController,
                     color: green,
                     onPressed: () async {
-                      print(widget.signup);
                       if (_formKey.currentState.validate()) {
                         if (widget.signup == false) {
                           String message = await authprovider.genOtplogin();
@@ -156,7 +155,6 @@ class _ExistingCustomerState extends State<ExistingCustomer> {
                             changeScreenRepacement(context,
                                 OtpPin(signup: widget.signup, otp: message));
                           }
-                          print(message);
                         } else {
                           String message = await authprovider.genOtpSignup();
                           if (message == 'Already Registered, Please Login') {
@@ -177,7 +175,6 @@ class _ExistingCustomerState extends State<ExistingCustomer> {
                                   code:code
                                 ));
                           }
-                          print(message);
                         }
                       }
                     },

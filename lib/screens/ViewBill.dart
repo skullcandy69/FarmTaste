@@ -49,13 +49,12 @@ class TransactionWidget extends StatelessWidget {
         break;
       case "on the way":
         transactionName = "on the way";
-        transactionIconData = Icons.update ;
+        transactionIconData = Icons.update;
         color = Colors.indigoAccent;
         break;
     }
     return GestureDetector(
       onTap: () {
-        // print(transaction.products.length);
         changeScreen(
             context,
             ShowOrders(
@@ -130,7 +129,7 @@ class TransactionWidget extends StatelessWidget {
                         ],
                       ),
                       AutoSizeText(
-                        " ₹${transaction.amount - transaction.discount  }",
+                        " ₹${transaction.amount - transaction.discount}",
                         maxLines: 1,
                         style: TextStyle(fontWeight: FontWeight.bold),
                         overflow: TextOverflow.ellipsis,
@@ -155,9 +154,17 @@ class TransactionWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                  AutoSizeText(
-                    "${DateFormat.yMMMMd().format(DateTime.parse(transaction.updatedAt).toLocal())}",
-                    style: TextStyle(color: Colors.grey[700]),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      AutoSizeText(
+                        "${DateFormat.yMMMMd().format(DateTime.parse(transaction.updatedAt).toLocal())}",
+                        style: TextStyle(color: Colors.grey[700]),
+                      ),
+                    ['Pending','on the way'].contains(transactionName) ?  AutoSizeText("Code:${transaction.deliveryCode}",
+                          style: TextStyle(color: Colors.grey[700]),
+                          overflow: TextOverflow.ellipsis):Text(''),
+                    ],
                   ),
                 ],
               ),
@@ -168,11 +175,11 @@ class TransactionWidget extends StatelessWidget {
     );
   }
 }
+
 Future<List<HistoryData>> getTransaction() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  var response = await http.get(HISTORY, headers: {"Authorization": token});
-  // print(response.body);
+  var response = await http.get(Uri.parse(HISTORY), headers: {"Authorization": token});
   History trans = History.fromJson(json.decode(response.body));
   return trans.data.reversed.toList();
 }
@@ -181,13 +188,8 @@ Future<List<HistoryData>> getOrders() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
   var response;
-  // Timer.periodic(Duration(seconds: 2), (Timer t) async {
-
-  // });
-  response = await http.get(ORDERS, headers: {"Authorization": token});
-  print(response.body);
+  response = await http.get(Uri.parse(ORDERS), headers: {"Authorization": token});
   History trans = History.fromJson(json.decode(response.body));
-  print(trans.data[0].orderStatus);
   return trans.data.reversed.toList();
 }
 

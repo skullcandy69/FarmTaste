@@ -5,7 +5,8 @@ class Transactions {
 
   Transactions.fromJson(Map<String, dynamic> json) {
     if (json['data'] != null) {
-      data = new List<TransactionData>();
+      // data = new List<TransactionData>();
+      data = [];
       json['data'].forEach((v) {
         data.add(new TransactionData.fromJson(v));
       });
@@ -77,13 +78,13 @@ class User {
   int wallet;
   int cityId;
   int locationId;
-  Null areaId;
+  dynamic areaId;
   String pincode;
   String address;
   String landmark;
-  Null state;
+  dynamic state;
   String referralCode;
-  Null referredBy;
+  dynamic referredBy;
   String createdAt;
   String updatedAt;
 

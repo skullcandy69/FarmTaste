@@ -21,13 +21,13 @@ class _AddressState extends State<Address> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
     var response = await http.get(
-      ME,
+      Uri.parse(ME),
       headers: {"Authorization": token},
     );
     setState(() {
       res = Result.fromJson(json.decode(response.body));
       address = res.user.address;
-      pincode = res.user.pincode;
+      pincode.text = res.user.pincode.toString().trim();
       isLoading = false;
     });
   }
@@ -41,7 +41,7 @@ class _AddressState extends State<Address> {
   bool editaddress = false;
   bool nameedit = false;
   String address;
-  dynamic pincode;
+   TextEditingController pincode = TextEditingController();
   final _formkey = GlobalKey<FormState>();
   FocusNode focusaddress = FocusNode();
   final RoundedLoadingButtonController _btnController =
@@ -134,20 +134,21 @@ class _AddressState extends State<Address> {
                                 child: TextFormField(
                                   keyboardType: TextInputType.number,
                                   enabled: editaddress,
+                                  controller: pincode,
                                   initialValue: res.user.pincode,
                                   validator: (value) {
                                     if (value.isEmpty) {
                                       return 'cannot be empty';
-                                    } else if (value.length != 6) {
-                                      return ' Invalid pincode';
-                                    }
+                                    }// } else if (value.length != 6) {
+                                    //   return ' Invalid pincode';
+                                    // }
                                     return null;
                                   },
-                                  onSaved: (val) {
-                                    setState(() {
-                                      pincode = val;
-                                    });
-                                  },
+                                  // onSaved: (val) {
+                                  //   setState(() {
+                                  //     pincode = val;
+                                  //   });
+                                  // },
                                   decoration: InputDecoration(
                                       labelText: 'Pin Code',
                                       hintText: 'Enter Pin Code',
@@ -174,7 +175,7 @@ class _AddressState extends State<Address> {
                               SharedPreferences prefs =
                                   await SharedPreferences.getInstance();
                               String token = prefs.getString('token');
-                              var response = await http.put(ME, headers: {
+                              var response = await http.put(Uri.parse(ME), headers: {
                                 "Authorization": token
                               }, body: {
                                 "address": address,

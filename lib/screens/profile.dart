@@ -25,7 +25,7 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  Future<Null> _refreshLocalGallery() async {
+  Future<dynamic> _refreshLocalGallery(BuildContext context) async {
     await new Future.delayed(new Duration(seconds: 2));
     final authprovider = Provider.of<AuthProvider>(context, listen: false);
     Result u = await authprovider.getUser();
@@ -41,7 +41,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     fetchUser();
-    _refreshLocalGallery();
+    _refreshLocalGallery(context);
   }
 
   @override
@@ -52,7 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
           title: Text('PROFILE'),
         ),
         body: RefreshIndicator(
-          onRefresh: _refreshLocalGallery,
+          onRefresh:()=> _refreshLocalGallery(context),
           child: SingleChildScrollView(
             child: user == null
                 ? Container(
@@ -279,7 +279,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ListTile(
                               dense: true,
                               title: Text(
-                                "Version 1.0.0",
+                                "Version 1.0.1",
                                 style: Theme.of(context).textTheme.bodyText1,
                               ),
                               trailing: Icon(

@@ -5,7 +5,7 @@ class Coupons {
 
   Coupons.fromJson(Map<String, dynamic> json) {
     if (json['data'] != null) {
-      data = new List<CouponList>();
+      data = [];
       json['data'].forEach((v) {
         data.add(new CouponList.fromJson(v));
       });
@@ -24,15 +24,15 @@ class Coupons {
 class CouponList {
   int id;
   String code;
-  Null userId;
+  dynamic userId;
   int offAmount;
   int offPercentage;
   int minimumCartValue;
   int frequency;
-  Null createdBy;
+  dynamic createdBy;
   String createdAt;
   String updatedAt;
-  Null deletedAt;
+  dynamic deletedAt;
 
   CouponList(
       {this.id,

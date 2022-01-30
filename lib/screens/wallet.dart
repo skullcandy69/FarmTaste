@@ -19,9 +19,9 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> {
-  Future<Null> _refreshLocalGallery() async {
+  Future<dynamic> _refreshLocalGallery() async {
     await new Future.delayed(new Duration(seconds: 2));
-    setState(() {});
+    // setState(() {});
   }
 
   @override
@@ -54,14 +54,14 @@ class _WalletState extends State<Wallet> {
                           ),
                           walletDetails(snapshot.data.user),
                        ListTile(leading: Text(
-                                'ALL TRANSATIONS',
+                                'ALL TRANSACTIONS',
                                 style: TextStyle(color: green),
                               ),),
                           Expanded(
                             child: Container(
                               height: MediaQuery.of(context).size.height * 0.65,
                               child: FutureBuilder(
-                                  future: ordersdata,
+                                  future: getOrders(),
                                   builder: (BuildContext context,
                                       AsyncSnapshot snapshot) {
                                     if (snapshot.data == null) {
@@ -150,7 +150,6 @@ class _WalletState extends State<Wallet> {
                       ),
                       FlatButton(
                         onPressed: () {
-                          print('00');
                           showDialog(
                               context: context,
                               builder: (BuildContext context) {
@@ -179,13 +178,13 @@ class _WalletState extends State<Wallet> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    setState(() {
-      ordersdata = getOrders();
-    });
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   setState(() {
+  //     ordersdata = getOrders();
+  //   });
+  // }
 
   Future<List<TransactionData>> ordersdata;
 
@@ -193,78 +192,16 @@ class _WalletState extends State<Wallet> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
     var response =
-        await http.get(TRANSACTIONS, headers: {"Authorization": token});
-    print(response.body);
+        await http.get(Uri.parse(TRANSACTIONS), headers: {"Authorization": token});
+    // print(response.body);
     Transactions trans = Transactions.fromJson(json.decode(response.body));
-    // print(trans.data[0].cart.products[0].title);
+    // print(trans.data);
     return trans.data.reversed.toList();
   }
 
-  // Widget transactionList() {
-  //   return DefaultTabController(
-  //       length: 2,
-  //       initialIndex: 0,
-  //       child: Column(
-  //         mainAxisAlignment: MainAxisAlignment.start,
-  //         children: <Widget>[
-  //           TabBar(tabs: [
-  //             Tab(
-  //               text: 'ALL TRANSACTIONS',
-  //             ),
-  //             Tab(text: 'FAILED TRANSACTIONS')
-  //           ], labelColor: green),
-  //           Container(
-  //             height: MediaQuery.of(context).size.height * 0.5,
-  //             padding: EdgeInsets.symmetric(horizontal: 15),
-  //             child: TabBarView(children: [
-  //               Container(
-  //                 height: MediaQuery.of(context).size.height * 0.65,
-  //                 child: FutureBuilder(
-  //                     future: ordersdata,
-  //                     builder: (BuildContext context, AsyncSnapshot snapshot) {
-  //                       if (snapshot.data == null) {
-  //                         return Container(
-  //                           child: Center(child: Loader()),
-  //                         );
-  //                       } else {
-  //                         return ListView.builder(
-  //                           itemCount: snapshot.data.length,
-  //                           itemBuilder: (BuildContext context, int index) {
-  //                             return TransactionDetails(
-  //                                 transaction: snapshot.data[index]);
-  //                           },
-  //                         );
-  //                       }
-  //                     }),
-  //               ),
-  //               Container(
-  //                 height: MediaQuery.of(context).size.height * 0.6,
-  //                 child: FutureBuilder(
-  //                     future: historydata,
-  //                     builder: (BuildContext context, AsyncSnapshot snapshot) {
-  //                       if (snapshot.data == null) {
-  //                         return Container(
-  //                           child: Center(child: Loader()),
-  //                         );
-  //                       } else {
-  //                         return ListView.builder(
-  //                           itemCount: snapshot.data.length,
-  //                           itemBuilder: (BuildContext context, int index) {
-  //                             return TransactionDetails(
-  //                                 transaction: snapshot.data[index]);
-  //                           },
-  //                         );
-  //                       }
-  //                     }),
-  //               ),
-  //             ]),
-  //           )
-  //         ],
-  //       ));
-  // }
+
 }
 
-// enum TransactionStatus {success,failure,pending}
 
 class TransactionDetails extends StatelessWidget {
   final TransactionData transaction;
@@ -288,117 +225,106 @@ class TransactionDetails extends StatelessWidget {
         color = Colors.red;
         break;
     }
-    return GestureDetector(
-      onTap: () {
-        // print(transaction.products.length);
-        // changeScreen(
-        //     context,
-        //     ShowOrders(
-        //       order: transaction,
-        //       fun: fun,
-        //     ));
-      },
-      child: Container(
-        margin: EdgeInsets.all(5.0),
-        padding: EdgeInsets.all(5.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 5.0,
-              color: Colors.grey[350],
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: <Widget>[
-            Flexible(
-              flex: 1,
-              child: Stack(
-                children: <Widget>[
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(15.0),
-                    child: Image.asset(
-                      "images/order.png",
-                      fit: BoxFit.fill,
-                      alignment: Alignment.center,
+    return Container(
+      margin: EdgeInsets.all(5.0),
+      padding: EdgeInsets.all(5.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 5.0,
+            color: Colors.grey[350],
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: <Widget>[
+          Flexible(
+            flex: 1,
+            child: Stack(
+              children: <Widget>[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(15.0),
+                  child: Image.asset(
+                    "images/order.png",
+                    fit: BoxFit.fill,
+                    alignment: Alignment.center,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 15.0,
+                    height: 15.0,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                    child: FittedBox(
+                      child: Icon(
+                        transactionIconData,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 15.0,
-                      height: 15.0,
-                      decoration: BoxDecoration(
+                )
+              ],
+            ),
+          ),
+          SizedBox(width: 5.0),
+          Flexible(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        AutoSizeText(
+                          transaction.id.toString(),
+                          maxLines: 1,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    AutoSizeText(
+                      " ₹${transaction.amount}",
+                      maxLines: 1,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    AutoSizeText(
+                        "${DateFormat.E().format(DateTime.parse(transaction.updatedAt).toLocal())}, ${DateFormat.jm().format(DateTime.parse(transaction.updatedAt).toLocal())}",
+                        style: TextStyle(color: Colors.grey[700]),
+                        overflow: TextOverflow.ellipsis),
+                    AutoSizeText(
+                      "$transactionName",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
                         color: color,
-                        shape: BoxShape.circle,
-                      ),
-                      child: FittedBox(
-                        child: Icon(
-                          transactionIconData,
-                          color: Colors.white,
-                        ),
                       ),
                     ),
-                  )
-                ],
-              ),
+                  ],
+                ),
+                AutoSizeText(
+                  "${DateFormat.yMMMMd().format(DateTime.parse(transaction.updatedAt).toLocal())}",
+                  style: TextStyle(color: Colors.grey[700]),
+                ),
+              ],
             ),
-            SizedBox(width: 5.0),
-            Flexible(
-              flex: 4,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          AutoSizeText(
-                            transaction.id.toString(),
-                            maxLines: 1,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      AutoSizeText(
-                        " ₹${transaction.amount}",
-                        maxLines: 1,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      AutoSizeText(
-                          "${DateFormat.E().format(DateTime.parse(transaction.updatedAt).toLocal())}, ${DateFormat.jm().format(DateTime.parse(transaction.updatedAt).toLocal())}",
-                          style: TextStyle(color: Colors.grey[700]),
-                          overflow: TextOverflow.ellipsis),
-                      AutoSizeText(
-                        "$transactionName",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                        ),
-                      ),
-                    ],
-                  ),
-                  AutoSizeText(
-                    "${DateFormat.yMMMMd().format(DateTime.parse(transaction.updatedAt).toLocal())}",
-                    style: TextStyle(color: Colors.grey[700]),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -434,17 +360,14 @@ class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
   Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
-    print((widget.user.wallet + int.parse(textEditingController.text))
-        .toString()
-        .runtimeType);
-    var res = await http.post(UPDATEWALLET, headers: {
+    
+  await http.post(Uri.parse(UPDATEWALLET), headers: {
       "Authorization": token
     }, body: {
       "type": "add",
       "amount": (widget.user.wallet + int.parse(textEditingController.text))
           .toString()
     });
-    print(res.body);
 
     _btnController.success();
     Timer(Duration(seconds: 2), () {
@@ -454,7 +377,6 @@ class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) async {
-    print('fail ' + response.message);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
     setState(() {
@@ -464,12 +386,11 @@ class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
   }
 
   void _handlePaymentWallet(ExternalWalletResponse response) {
-    print('wallet ' + response.walletName);
   }
 
   void openCheckout() async {
     var options = {
-      'key': TESTKEY,
+      'key': LIVEKEY,
       'amount': (int.parse(textEditingController.text) * 100).toInt(),
       'name': 'FARM TASTE',
       'description': 'Order Payment',
@@ -478,9 +399,6 @@ class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
         'contact': widget.user.mobileNo,
         'email': widget.user.email,
       },
-      // "image":
-      //     'https://merriam-webster.com/assets/mw/images/article/art-wap-landing-mp-lg/meanwhile-2453-cc63cdb89c527209296a3ec7ffd9ee59@1x.jpg',
-
       "currency": "INR",
       "payment_capture": 1,
       "theme": {"color": "#32cd32"}

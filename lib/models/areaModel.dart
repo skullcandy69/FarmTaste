@@ -1,3 +1,5 @@
+import 'package:equatable/equatable.dart';
+
 class AreaModel {
   List<AreaData> data;
 
@@ -5,7 +7,8 @@ class AreaModel {
 
   AreaModel.fromJson(Map<String, dynamic> json) {
     if (json['data'] != null) {
-      data = new List<AreaData>();
+      // data = new List<AreaData>();
+      data =[];
       json['data'].forEach((v) {
         data.add(new AreaData.fromJson(v));
       });
@@ -21,23 +24,23 @@ class AreaModel {
   }
 }
 
-class AreaData {
+class AreaData extends Equatable {
   int id;
   String title;
   String slug;
-  String imageUrl;
-  int locationId;
+  dynamic imageUrl;
+  int cityId;
   bool isActive;
   String createdAt;
   String updatedAt;
-  Null deletedAt;
+  dynamic deletedAt;
 
   AreaData(
       {this.id,
       this.title,
       this.slug,
       this.imageUrl,
-      this.locationId,
+      this.cityId,
       this.isActive,
       this.createdAt,
       this.updatedAt,
@@ -48,7 +51,7 @@ class AreaData {
     title = json['title'];
     slug = json['slug'];
     imageUrl = json['image_url'];
-    locationId = json['location_id'];
+    cityId = json['city_id'];
     isActive = json['is_active'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
@@ -61,11 +64,14 @@ class AreaData {
     data['title'] = this.title;
     data['slug'] = this.slug;
     data['image_url'] = this.imageUrl;
-    data['location_id'] = this.locationId;
+    data['city_id'] = this.cityId;
     data['is_active'] = this.isActive;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['deleted_at'] = this.deletedAt;
     return data;
   }
+
+  @override
+  List<Object> get props => [id];
 }
