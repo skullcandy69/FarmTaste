@@ -30,7 +30,7 @@ class AuthProvider with ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token =prefs.getString('token');
     var response = await http.get(
-      ME,
+      Uri.parse(ME),
       headers: {"Authorization": token},
     );
     res = Result.fromJson(json.decode(response.body));
@@ -42,7 +42,7 @@ class AuthProvider with ChangeNotifier {
   Future<bool> updateUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
-    var response = await http.put(ME, headers: {
+    var response = await http.put(Uri.parse(ME), headers: {
       "Authorization": token
     }, body: {
       "address": adddress.text,
@@ -50,7 +50,6 @@ class AuthProvider with ChangeNotifier {
     if (response.statusCode == 200) {
       return true;
     } else {
-      print('failed');
       return false;
     }
   }
@@ -58,9 +57,8 @@ class AuthProvider with ChangeNotifier {
   Future<String> genOtplogin() async {
     _status = status.Authenticating;
     notifyListeners();
-    var response = await http.post(OTP, body: {"mobile_no": mobno.text.trim()});
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+    var response = await http.post(Uri.parse(OTP), body: {"mobile_no": mobno.text.trim(),"type":"login"});
+    
     if (response.statusCode == 200 &&
         json.decode(response.body)['data'] == "OTP Generated, Kindly Login") {
       return json.decode(response.body)['otp'];
@@ -72,9 +70,8 @@ class AuthProvider with ChangeNotifier {
   Future<String> genOtpSignup() async {
     _status = status.Authenticating;
     notifyListeners();
-    var response = await http.post(OTP, body: {"mobile_no": mobno.text.trim()});
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+    var response = await http.post(Uri.parse(OTP), body: {"mobile_no": mobno.text.trim(),"type":"signup"});
+   
     if (response.statusCode == 200 &&
         json.decode(response.body)['data'] ==
             "OTP Generated, Kindly Register") {
@@ -85,10 +82,9 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<bool> inputotp(BuildContext context) async {
-    var response = await http.post(LOGIN,
+    var response = await http.post(Uri.parse(LOGIN),
         body: {"mobile_no": mobno.text.trim(), "otp": otp.text.trim()});
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+   
     if (response.statusCode == 200) {
       _status = status.Authenticated;
       notifyListeners();
@@ -96,13 +92,11 @@ class AuthProvider with ChangeNotifier {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('response', json.encode(res));
       prefs.setString('token', res.token);
-      print(res.user.id);
-      print('success');
+      
       Provider.of<ProductModel>(context, listen: false).fetchProducts();
 
       return true;
     } else {
-      print('failed');
       _status = status.Authenticating;
       notifyListeners();
       return false;
@@ -111,21 +105,20 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> signup(cityId, locationId, code) async {
     var response = code == null
-        ? await http.post(SIGNUP, body: {
+        ? await http.post(Uri.parse(SIGNUP), body: {
             "city_id": cityId,
             "location_id": locationId,
             "mobile_no": mobno.text.trim(),
             "otp": otp.text.trim(),
           })
-        : await http.post(SIGNUP, body: {
+        : await http.post(Uri.parse(SIGNUP), body: {
             "city_id": cityId,
             "location_id": locationId,
             "mobile_no": mobno.text.trim(),
             "otp": otp.text.trim(),
             "referral_code": code
           });
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+   
     if (response.statusCode == 200) {
       _status = status.Authenticated;
       notifyListeners();
@@ -134,11 +127,9 @@ class AuthProvider with ChangeNotifier {
       prefs.setString('response', json.encode(res));
       prefs.setString('token', res.token);
 
-      print(res.user.id);
-      print('success');
+      
       return true;
     } else {
-      print('failed');
       _status = status.Authenticating;
       notifyListeners();
       return false;
@@ -154,14 +145,12 @@ class AuthProvider with ChangeNotifier {
   Future<void> _onStateChanged(Result user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // Result res = Result.fromJson(json.decode(prefs.getString('response')));
-    // print(res.token);
     String token = prefs.getString('token');
     if (token == null) {
       _status = status.Unauthenticated;
     } else {
       _status = status.Authenticated;
       // _userModel = await _userServicse.getUserById(user.uid);
-      // return _userModel;
     }
     notifyListeners();
   }

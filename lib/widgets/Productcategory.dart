@@ -9,7 +9,7 @@ import 'package:grocery/widgets/category.dart';
 import 'package:http/http.dart' as http;
 
 Future<List<ProductCategoryData>> productcatlist() async {
-  var response = await http.get(GETPRODUCT);
+  var response = await http.get(Uri.parse(GETPRODUCT));
   ProductsCategories productsCategories =
       ProductsCategories.fromJson(json.decode(response.body));
   return productsCategories.data;
@@ -46,7 +46,7 @@ class ProductCategoryList extends StatelessWidget {
                                 Text(
                                   snapshot.data[index].title,
                                   style: TextStyle(
-                                      color: black, fontWeight: FontWeight.bold),
+                                      color: black, fontWeight: FontWeight.bold,fontSize: 17),
                                 ),
                               ],
                             ),

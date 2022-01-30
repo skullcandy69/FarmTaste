@@ -12,6 +12,8 @@ import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:native_pdf_view/native_pdf_view.dart';
+import 'package:intl/intl.dart';
+
 
 class Invoice extends StatefulWidget {
   const Invoice({Key key}) : super(key: key);
@@ -23,12 +25,12 @@ class Invoice extends StatefulWidget {
 class _InvoiceState extends State<Invoice> {
   String assetPDFPath = "";
   PdfController _pdfController;
-
+  
   @override
   void initState() {
     _pdfController = PdfController(
       document: PdfDocument.openFile(
-          '/storage/emulated/0/Android/data/com.example.grocery/files/Invoice.pdf'),
+          '/storage/emulated/0/Android/data/com.farmtaste.grocery/files/Invoice.pdf'),
     );
     super.initState();
   }
@@ -68,7 +70,6 @@ class _ShowOrdersState extends State<ShowOrders> {
       RoundedLoadingButtonController();
   String message = 'Cancel Order';
 
-  final imgUrl = "https://unsplash.com/photos/iEJVyyevw-U/download?force=true";
   bool downloading = false;
   var progressString = "";
 
@@ -76,7 +77,10 @@ class _ShowOrdersState extends State<ShowOrders> {
     Dio dio = Dio();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
+  //  await SimplePermissions.requestPermission(Permission. WriteExternalStorage);
+
     try {
+      // permissionResult == PermissionStatus.authorized;
       var dir = await getExternalStorageDirectory();
 
       await dio.download(
@@ -84,8 +88,7 @@ class _ShowOrdersState extends State<ShowOrders> {
         "${dir.path}/Invoice.pdf",
         options: Options(headers: {"Authorization": token}),
         onReceiveProgress: (rec, total) {
-          print("${dir.path}/myimage.pdf");
-          print("Rec: $rec , Total: $total");
+          print("${dir.path}/Invoice.pdf");
           setState(() {
             downloading = true;
             progressString = ((rec / total) * 100).toStringAsFixed(0) + "%";
@@ -100,7 +103,6 @@ class _ShowOrdersState extends State<ShowOrders> {
       downloading = false;
       progressString = "Completed";
     });
-    print("Download completed");
     changeScreen(context, Invoice());
   }
 
@@ -108,9 +110,8 @@ class _ShowOrdersState extends State<ShowOrders> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
 
-    var response = await http.put(ORDERS + "\/$id",
+    var response = await http.put(Uri.parse(ORDERS + "\/$id"),
         headers: {"Authorization": token}, body: {"order_status": "cancelled"});
-    print(response.body);
     if (response.statusCode == 200) {
       _btnController.success();
       Timer(Duration(seconds: 3), () {
@@ -208,7 +209,7 @@ class _ShowOrdersState extends State<ShowOrders> {
                                       ),
                                       Text("₹" +
                                           widget.order.products[index].rate
-                                              .toString())
+                                              .toStringAsFixed(1))
                                     ],
                                   ),
                                 ),
@@ -226,7 +227,7 @@ class _ShowOrdersState extends State<ShowOrders> {
                                         style: TextStyle(color: grey),
                                       ),
                                       AutoSizeText(
-                                          '₹ ${(widget.order.products[index].noOfUnits * widget.order.products[index].rate).toString()}')
+                                          '₹ ${(widget.order.products[index].noOfUnits * widget.order.products[index].rate).toStringAsFixed(1)}')
                                     ],
                                   ),
                                 ),
@@ -243,7 +244,9 @@ class _ShowOrdersState extends State<ShowOrders> {
           InkWell(
             onTap: () {
               basicContentEasyDialog(context,
-                  "Welcome to Farm Taste Chat Support. Let us  know your query you are facing with your order (order-id: ${widget.order.orderId.toString()}) and resolve it in couple of time.");
+                  """Hello,
+I have issue/query regarding my order placed on  ${DateFormat.yMMMEd().format(DateTime.parse(widget.order.createdAt))} ,
+ORDER ID ${widget.order.orderId.toString()}. """);
             },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -290,7 +293,7 @@ class _ShowOrdersState extends State<ShowOrders> {
                   AutoSizeText(
                     widget.order.deliveryAddress,
                     maxLines: 3,
-                    textAlign: TextAlign.start,
+                    textAlign: TextAlign.left,
                     style: TextStyle(fontSize: 16),
                   ),
                   SizedBox(
@@ -352,7 +355,7 @@ class _ShowOrdersState extends State<ShowOrders> {
                         ),
                       ),
                       Text(
-                        " ₹" + widget.order.baseAmount.toString(),
+                        " ₹" + widget.order.baseAmount.toStringAsFixed(1),
                         style: TextStyle(
                             color: grey,
                             decoration: TextDecoration.lineThrough),
@@ -371,7 +374,7 @@ class _ShowOrdersState extends State<ShowOrders> {
                       ),
                       Text(" ₹" +
                           (widget.order.amount - widget.order.deliveryCharge)
-                              .toString())
+                              .toStringAsFixed(1))
                     ],
                   ),
                   SizedBox(
@@ -384,7 +387,7 @@ class _ShowOrdersState extends State<ShowOrders> {
                         'Discount',
                         style: TextStyle(fontSize: 15),
                       ),
-                      Text("- ₹" + (widget.order.discount).toString())
+                      Text("- ₹" + (widget.order.discount).toStringAsFixed(1))
                     ],
                   ),
                   SizedBox(
@@ -397,7 +400,7 @@ class _ShowOrdersState extends State<ShowOrders> {
                       Text('Total amount'),
                       Text(" ₹" +
                           (widget.order.amount - widget.order.discount)
-                              .toString()),
+                              .toStringAsFixed(1)),
                     ],
                   ),
                   SizedBox(
@@ -441,7 +444,8 @@ class _ShowOrdersState extends State<ShowOrders> {
                     style: TextStyle(color: white, fontWeight: FontWeight.bold),
                   ),
                 )
-              : Container()
+              : Container(),
+              SizedBox(height: 10,)
         ])));
   }
 }

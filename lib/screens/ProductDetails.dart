@@ -30,7 +30,8 @@ Future<List<ProductData>> productcatlist(String id) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
   var response =
-      await http.get(GETSUBPRODUCATCAT + id, headers: {"Authorization": token});
+      await http.get(Uri.parse(GETSUBPRODUCATCAT + id), headers: {"Authorization": token});
+  print(response.body);
   Products products = Products.fromJson(json.decode(response.body));
   return products.data;
 }
@@ -199,66 +200,69 @@ class _ProductDetailsState extends State<ProductDetails> {
                           len != 0
                               ? Positioned(
                                   bottom: 0,
-                                  child: Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      boxShadow: <BoxShadow>[
-                                        BoxShadow(
-                                          color: Colors.black12,
-                                          offset: Offset(1.0, 6.0),
-                                          blurRadius: 10.0,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 10, left: 10.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          RichText(
-                                            text: TextSpan(children: <TextSpan>[
-                                              TextSpan(
-                                                  text: 'Total Amount: ',
-                                                  style: TextStyle(
-                                                      color: grey,
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w400)),
-                                              TextSpan(
-                                                  text: '₹' +
-                                                      pro.tprice
-                                                          .toStringAsFixed(2),
-                                                  style: TextStyle(
-                                                      color: black,
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w400))
-                                            ]),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        boxShadow: <BoxShadow>[
+                                          BoxShadow(
+                                            color: grey,
+                                            offset: Offset(1.0, 1.0),
+                                            blurRadius: 2.0,
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: FlatButton(
-                                              onPressed: () async {
-                                                // _timer.cancel();
-                                                // Timer(Duration(seconds: 2),()=>)
-                                                changeScreenRepacement(
-                                                    context, ShoppingCart());
-                                              },
-                                              child: Center(
-                                                child: Text(
-                                                  'Checkout',
-                                                  style:
-                                                      TextStyle(color: white),
-                                                ),
-                                              ),
-                                              color: Colors.deepOrange,
-                                            ),
-                                          )
                                         ],
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                            right: 10, left: 10.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            RichText(
+                                              text: TextSpan(children: <TextSpan>[
+                                                TextSpan(
+                                                    text: 'Total Amount: ',
+                                                    style: TextStyle(
+                                                        color: grey,
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.w400)),
+                                                TextSpan(
+                                                    text: '₹' +
+                                                        pro.tprice
+                                                            .toStringAsFixed(1),
+                                                    style: TextStyle(
+                                                        color: black,
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.w400))
+                                              ]),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: FlatButton(
+                                                onPressed: () async {
+                                                  // _timer.cancel();
+                                                  // Timer(Duration(seconds: 2),()=>)
+                                                  changeScreenRepacement(
+                                                      context, ShoppingCart());
+                                                },
+                                                child: Center(
+                                                  child: Text(
+                                                    'Checkout',
+                                                    style:
+                                                        TextStyle(color: white),
+                                                  ),
+                                                ),
+                                                color: Colors.deepOrange,
+                                              ),
+                                            )
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ))
@@ -278,11 +282,18 @@ class _ProductDetailsState extends State<ProductDetails> {
       height: MediaQuery.of(context).size.height * .8,
       child: ListView.builder(
         padding: EdgeInsets.all(10),
-        itemCount: item.length,
+        itemCount: item.length + 1,
         itemBuilder: (BuildContext context, int index) {
-          return DetailScreen(
-            pro: item[index],
-          );
+          print(item.length);
+          if (index == item.length) {
+            return SizedBox(
+              height: 50,
+            );
+          } else {
+            return DetailScreen(
+              pro: item[index],
+            );
+          }
         },
       ),
     );
@@ -344,26 +355,37 @@ class _DetailScreenState extends State<DetailScreen> {
                 Expanded(
                   child: Row(
                     children: <Widget>[
-                      GestureDetector(
-                        onTap: () => _showDialog(widget.pro),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            height: 80,
-                            width: 80,
-                            child: Image.network(widget.pro.imageUrl) == null
-                                ? CircularProgressIndicator()
-                                : Image.network(
-                                    widget.pro.imageUrl,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (BuildContext context,
-                                        Widget child,
-                                        ImageChunkEvent loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Center(child: Loader());
-                                    },
-                                  ),
-                          ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          height: 80,
+                          width: 80,
+                          child: Image.network(widget.pro.imageUrl) == null
+                              ? CircularProgressIndicator()
+                              : Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    Image.network(
+                                      widget.pro.imageUrl,
+                                      fit: BoxFit.cover,
+                                      loadingBuilder: (BuildContext context,
+                                          Widget child,
+                                          ImageChunkEvent loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
+                                        return Center(child: Loader());
+                                      },
+                                    ),
+                                    widget.pro.inStock
+                                        ? Container()
+                                        : Image.asset(
+                                            'images/outofstock.png',
+                                            fit: BoxFit.contain,
+                                            // color: Colors.white,
+                                            // colorBlendMode: BlendMode.darken,
+                                          )
+                                  ],
+                                ),
                         ),
                       ),
                       Expanded(
@@ -379,14 +401,15 @@ class _DetailScreenState extends State<DetailScreen> {
                                 // overflow: TextOverflow.ellipsis,
                               ),
                               AutoSizeText(
-                                widget.pro.baseQuantity.toString(), maxLines: 1,
+                                widget.pro.baseQuantity.toString(),
+                                maxLines: 1,
                                 // overflow: TextOverflow.ellipsis,
                               ),
                               RichText(
                                 text: TextSpan(
                                   children: <TextSpan>[
                                     TextSpan(
-                                      text: "₹" + getGstPrice(widget.pro) + ' ',
+                                      text: "₹" +widget.pro.gstAmount.toString() + ' ',
                                       // text: widget.pro.rate[0]
                                       //             .discountedAmount !=
                                       //         null
@@ -397,7 +420,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                       ),
                                     ),
                                     TextSpan(
-                                        text: widget.pro.mrp.toString(),
+                                        text: widget.pro.mrp.toStringAsFixed(1),
                                         style: TextStyle(
                                             color: grey,
                                             decoration:
@@ -409,93 +432,96 @@ class _DetailScreenState extends State<DetailScreen> {
                           ),
                         ),
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          GestureDetector(
-                            onTap: () {
-                              Provider.of<ProductModel>(context, listen: false)
-                                  .removeProduct(widget.pro);
-                              setState(() {
-                                _itemcounter = 0;
-                                deletCartItem(widget.pro.id.toString());
-                              });
-                            },
-                            child: Container(
-                                // color: white,
-                                decoration: BoxDecoration(
-                                    color: white,
-                                    borderRadius: BorderRadius.circular(50)),
-                                child: Icon(
-                                  Icons.replay,
-                                  color: blue,
-                                )),
-                          ),
-                          Container(
-                            height: 30,
-                            width: 75,
-                            decoration: BoxDecoration(
-                                color: white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: blue)),
-                            child: Center(
-                                child: Row(
+                      widget.pro.inStock == false
+                          ? Container()
+                          : Column(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: <Widget>[
-                                _itemcounter == 0
-                                    ? Container()
-                                    : InkWell(
+                                GestureDetector(
+                                  onTap: () => widget.pro.inStock
+                                      ? _showDialog(widget.pro)
+                                      : Scaffold.of(context)
+                                          .showSnackBar(SnackBar(
+                                          content: Text("OUT OF STOCK"),
+                                          backgroundColor: red,
+                                        )),
+                                  child: Container(
+                                      decoration: BoxDecoration(
+                                          color: white,
+                                          borderRadius:
+                                              BorderRadius.circular(50)),
+                                      child: Icon(
+                                        Icons.replay,
+                                        color: blue,
+                                      )),
+                                ),
+                                Container(
+                                  height: 30,
+                                  width: 75,
+                                  decoration: BoxDecoration(
+                                      color: white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: blue)),
+                                  child: Center(
+                                      child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: <Widget>[
+                                      _itemcounter == 0
+                                          ? Container()
+                                          : InkWell(
+                                              onTap: () async {
+                                                setState(() {
+                                                  _itemcounter--;
+                                                });
+                                                Provider.of<ProductModel>(
+                                                        context,
+                                                        listen: false)
+                                                    .removeItem(widget.pro);
+                                                await addToCart(widget.pro.id,
+                                                    _itemcounter);
+                                              },
+                                              child: Icon(
+                                                Icons.remove,
+                                                color: blue,
+                                              ),
+                                            ),
+                                      _itemcounter == 0
+                                          ? Text(
+                                              'ADD',
+                                              style: TextStyle(color: blue),
+                                            )
+                                          : Text(
+                                              _itemcounter.toString(),
+                                              style: TextStyle(color: blue),
+                                            ),
+                                      InkWell(
                                         onTap: () async {
                                           setState(() {
-                                            _itemcounter--;
+                                            _itemcounter++;
                                           });
                                           Provider.of<ProductModel>(context,
                                                   listen: false)
-                                              .removeItem(widget.pro);
-                                          await addToCart(
-                                              widget.pro.id, _itemcounter);
+                                              .addTaskInList(widget.pro);
+
+                                          if (await addToCart(
+                                              widget.pro.id, _itemcounter)) {
+                                            // _scaffoldKey.currentState.showSnackBar(
+                                            //     new SnackBar(
+                                            //         content: new Text(
+                                            //             'Added ${widget.pro.title} to cart')));
+                                          }
                                         },
                                         child: Icon(
-                                          Icons.remove,
+                                          Icons.add,
                                           color: blue,
                                         ),
                                       ),
-                                _itemcounter == 0
-                                    ? Text(
-                                        'ADD',
-                                        style: TextStyle(color: blue),
-                                      )
-                                    : Text(
-                                        _itemcounter.toString(),
-                                        style: TextStyle(color: blue),
-                                      ),
-                                InkWell(
-                                  onTap: () async {
-                                    setState(() {
-                                      _itemcounter++;
-                                    });
-                                    Provider.of<ProductModel>(context,
-                                            listen: false)
-                                        .addTaskInList(widget.pro);
-
-                                    if (await addToCart(
-                                        widget.pro.id, _itemcounter)) {
-                                      // _scaffoldKey.currentState.showSnackBar(
-                                      //     new SnackBar(
-                                      //         content: new Text(
-                                      //             'Added ${widget.pro.title} to cart')));
-                                    }
-                                  },
-                                  child: Icon(
-                                    Icons.add,
-                                    color: blue,
-                                  ),
-                                ),
+                                    ],
+                                  )),
+                                )
                               ],
-                            )),
-                          )
-                        ],
-                      )
+                            )
                     ],
                   ),
                 ),

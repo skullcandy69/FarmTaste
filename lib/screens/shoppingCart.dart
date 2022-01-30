@@ -45,7 +45,6 @@ class _ShoppingCartState extends State<ShoppingCart> {
 
   @override
   Widget build(BuildContext context) {
-    print('object');
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -103,7 +102,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                             Text(
                                                 'Price(${cart.productlist.length} items)'),
                                             Text('₹' +
-                                                cart.tprice.toStringAsFixed(2))
+                                                cart.tprice.toStringAsFixed(1))
                                           ],
                                         ),
                                       ),
@@ -173,7 +172,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                                     onTap: () async {
                                                       setState(() {});
                                                       await http.put(
-                                                          REMOVECOUPON,
+                                                         Uri.parse( REMOVECOUPON),
                                                           headers: {
                                                             "Authorization":
                                                                 token
@@ -181,7 +180,6 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                                       setState(() {
                                                         myCart();
                                                       });
-                                                      // print(res.body);
                                                     },
                                                     child: Container(
                                                       child: Text(
@@ -233,7 +231,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                                         myitem.data
                                                             .deliveryCharge -
                                                         myitem.data.discount)
-                                                    .toStringAsFixed(2))
+                                                    .toStringAsFixed(1))
                                           ],
                                         ),
                                       ),
@@ -245,7 +243,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                   child: Container(
                                     height: 500,
                                     child: Image.asset(
-                                      'images/emptycart.png',
+                                      'images/emptycart.jpeg',
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -283,7 +281,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                                           myitem.data
                                                               .deliveryCharge -
                                                           myitem.data.discount)
-                                                      .toStringAsFixed(2),
+                                                      .toStringAsFixed(1),
                                               style: TextStyle(
                                                   color: black,
                                                   fontSize: 20,
@@ -305,7 +303,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                                             .deliveryCharge -
                                                         myitem.data.discount),
                                                     amount: cart.tprice
-                                                        .toStringAsFixed(3)));
+                                                        .toStringAsFixed(1)));
                                           },
                                           child: Center(
                                             child: Text(
@@ -395,7 +393,7 @@ class _BuildCartState extends State<BuildCart> {
                               widget.order.baseQuantity.toString(),
                               overflow: TextOverflow.ellipsis,
                             ),
-                            Text("₹" + getGstPrice(widget.order))
+                            Text("₹" + widget.order.gstAmount.toString())
                           ],
                         ),
                       ),
@@ -406,7 +404,6 @@ class _BuildCartState extends State<BuildCart> {
                             color: red,
                             icon: Icon(Icons.delete),
                             onPressed: () {
-                              // print(widget.order.id);
                               Provider.of<ProductModel>(context, listen: false)
                                   .removeProduct(widget.order);
                               setState(() {
@@ -464,7 +461,6 @@ class _BuildCartState extends State<BuildCart> {
                               GestureDetector(
                                 behavior: HitTestBehavior.opaque,
                                 onTap: () {
-                                  print('add');
 
                                   Provider.of<ProductModel>(context,
                                           listen: false)

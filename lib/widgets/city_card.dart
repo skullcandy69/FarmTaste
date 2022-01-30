@@ -12,7 +12,7 @@ class City extends StatefulWidget {
 }
 
 Future<List<dynamic>> getCity() async {
-  http.Response response = await http.get(CITIES);
+  http.Response response = await http.get(Uri.parse(CITIES));
   Map<String, dynamic> decodedCategories = json.decode(response.body);
   return decodedCategories['data'];
 }

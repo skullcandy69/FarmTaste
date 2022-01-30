@@ -5,7 +5,6 @@ import 'package:grocery/models/products.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:grocery/provider/addcart.dart';
 
 CartItem cartItemFromJson(String str) => CartItem.fromJson(json.decode(str));
 
@@ -20,7 +19,8 @@ class CartItem {
   CartItem.fromJson(Map<String, dynamic> json) {
     data = json['data'] != null ? new CartData.fromJson(json['data']) : null;
     if (json['extra'] != null) {
-      extra = new List<ProductData>();
+      // extra = new List<ProductData>();
+      extra = [];
       json['extra'].forEach((v) {
         extra.add(new ProductData.fromJson(v));
       });
@@ -70,7 +70,8 @@ class CartData {
   CartData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     if (json['products'] != null) {
-      products = new List<CartProducts>();
+      // products = new List<CartProducts>();
+      products = [];
       json['products'].forEach((v) {
         products.add(new CartProducts.fromJson(v));
       });
@@ -151,7 +152,6 @@ class ProductModel extends ChangeNotifier {
   List<ProductData> productlist = [];
 
   List<ProductData> getProductList() {
-    print(productlist.toSet().toList().length.toString() + "hello");
     return productlist.toSet().toList();
   }
 
@@ -159,7 +159,7 @@ class ProductModel extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
     if (token != null) {
-      var response = await http.get(MYCART, headers: {"Authorization": token});
+      var response = await http.get(Uri.parse(MYCART), headers: {"Authorization": token});
       CartItem cartItem = CartItem.fromJson(json.decode(response.body));
       productlist.clear();
       for (int i = 0; i < cartItem.extra.length; i++) {
@@ -173,12 +173,12 @@ class ProductModel extends ChangeNotifier {
 
   removeItem(ProductData product) {
     productlist.remove(product);
-    print('removed len' + productlist.length.toString());
     notifyListeners();
   }
 
   void removeProduct(ProductData product) {
     productlist.removeWhere((p) => p == product);
+    totalprice();
     notifyListeners();
   }
 
@@ -197,28 +197,10 @@ class ProductModel extends ChangeNotifier {
       tprice = 0;
     } else {
       for (int i = 0; i < productlist.length; i++) {
-        tprice = tprice + double.parse(getGstPrice(productlist[i]));
-        // if (productlist[i].rate[0].discountedAmount == null ||
-        //     productlist[i].rate[0].discountedAmount == 0) {
-        //   if (productlist[i].isUnderGst == true) {
-        //     dynamic gstrate = productlist[i].rate[0].baseAmount +
-        //         (productlist[i].rate[0].baseAmount * productlist[i].gstRate) /
-        //             100;
-        //     tprice += gstrate;
-        //   } else {
-        //     tprice += productlist[i].rate[0].baseAmount;
-        //   }
-        // } else {
-        //   if (productlist[i].isUnderGst == true) {
-        //     dynamic gstrate = productlist[i].rate[0].discountedAmount +
-        //         (productlist[i].rate[0].discountedAmount *
-        //                 productlist[i].gstRate) /
-        //             100;
-        //     tprice += gstrate;
-        //   } else {
-        //     tprice += productlist[i].rate[0].discountedAmount;
-        //   }
-        // }
+      //  var p = getGstPrice(productlist[i]);
+      //  print(p+"this");
+        tprice = tprice + productlist[i].gstAmount;
+       
       }
     }
     // notifyListeners();

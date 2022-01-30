@@ -7,7 +7,8 @@ class Subscriptions {
 
   Subscriptions.fromJson(Map<String, dynamic> json) {
     if (json['data'] != null) {
-      data = new List<SubscriptionData>();
+      // data = new List<SubscriptionData>();
+      data = [];
       json['data'].forEach((v) {
         data.add(new SubscriptionData.fromJson(v));
       });

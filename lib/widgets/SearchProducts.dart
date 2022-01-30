@@ -22,7 +22,7 @@ class _SearchProductState extends State<SearchProduct> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
     var response = await http
-        .get(SEARCHPRODUCTS + search, headers: {"Authorization": token});
+        .get(Uri.parse(SEARCHPRODUCTS + search), headers: {"Authorization": token});
     Products products = Products.fromJson(json.decode(response.body));
     return products.data;
   }
@@ -162,7 +162,8 @@ class _DetailScreenState extends State<DetailScreen> {
           .getQuanity(widget.pro.id);
     });
   }
- void _showDialog(ProductData product) {
+
+  void _showDialog(ProductData product) {
     slideDialog.showSlideDialog(
       context: context,
       child: RecurringOrder(
@@ -172,183 +173,219 @@ class _DetailScreenState extends State<DetailScreen> {
       backgroundColor: white,
     );
   }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Container(
-          height: 80,
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 5.0,
-                color: Colors.grey[350],
-                offset: Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Row(
-                    // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      GestureDetector(onTap: () => _showDialog(widget.pro),
-                                              child: ClipRRect(
+    return GestureDetector(
+      // onTap: () => widget.pro.inStock
+      //     ? _showDialog(widget.pro)
+      //     : Scaffold.of(context).showSnackBar(SnackBar(
+      //         content: Text("OUT OF STOCK"),
+      //         backgroundColor: red,
+      //       )),
+      child: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Container(
+            height: 80,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 5.0,
+                  color: Colors.grey[350],
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 8),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Row(
+                      // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        ClipRRect(
                           borderRadius: BorderRadius.circular(5),
                           child: Container(
                             height: 80,
                             width: 80,
                             child: Image.network(widget.pro.imageUrl) == null
                                 ? CircularProgressIndicator()
-                                : Image.network(
-                                    widget.pro.imageUrl,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (BuildContext context,
-                                        Widget child,
-                                        ImageChunkEvent loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return Center(child: Loader());
-                                    },
+                                : Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      Image.network(
+                                        widget.pro.imageUrl,
+                                        fit: BoxFit.cover,
+                                        loadingBuilder: (BuildContext context,
+                                            Widget child,
+                                            ImageChunkEvent loadingProgress) {
+                                          if (loadingProgress == null)
+                                            return child;
+                                          return Center(child: Loader());
+                                        },
+                                      ),
+                                      widget.pro.inStock
+                                          ? Container()
+                                          : Image.asset(
+                                              'images/outofstock.png',
+                                              fit: BoxFit.contain,
+                                              // color: Colors.white,
+                                              // colorBlendMode: BlendMode.darken,
+                                            )
+                                    ],
                                   ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          margin: EdgeInsets.all(12.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              AutoSizeText(
-                                widget.pro.title.toString().toUpperCase(),
-                                maxLines: 1,
-                                // overflow: TextOverflow.ellipsis,
-                              ),
-                              AutoSizeText(
-                                widget.pro.baseQuantity.toString(),maxLines: 1,
-                                // overflow: TextOverflow.ellipsis,
-                              ),
-                               RichText(
-                                text: TextSpan(
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                      text: "₹" + getGstPrice(widget.pro),
-                                     
-                                      style: TextStyle(
-                                        color: black,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                        text: widget.pro.mrp.toString(),
-                                        style: TextStyle(
-                                            color: grey,
-                                            decoration:
-                                                TextDecoration.lineThrough)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          GestureDetector(
-                            onTap: () {
-                              Provider.of<ProductModel>(context, listen: false)
-                                  .removeProduct(widget.pro);
-                              setState(() {
-                                _itemcounter = 0;
-                                deletCartItem(widget.pro.id.toString());
-                              });
-                            },
-                            child: Container(
-                                // color: white,
-                                decoration: BoxDecoration(
-                                    color: white,
-                                    borderRadius: BorderRadius.circular(50)),
-                                child: Icon(
-                                  Icons.replay,
-                                  color: blue,
-                                )),
-                          ),
-                          Container(
-                            height: 30,
-                            width: 75,
-                            decoration: BoxDecoration(
-                                color: white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: blue)),
-                            child: Center(
-                                child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.all(12.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                _itemcounter == 0
-                                    ? Container()
-                                    : InkWell(
-                                        onTap: () async {
-                                          setState(() {
-                                            _itemcounter--;
-                                          });
-                                          Provider.of<ProductModel>(context,
-                                                  listen: false)
-                                              .removeItem(widget.pro);
-                                          await addToCart(
-                                              widget.pro.id, _itemcounter);
-                                        },
-                                        child: Icon(
-                                          Icons.remove,
-                                          color: blue,
+                                AutoSizeText(
+                                  widget.pro.title.toString().toUpperCase(),
+                                  maxLines: 1,
+                                  // overflow: TextOverflow.ellipsis,
+                                ),
+                                AutoSizeText(
+                                  widget.pro.baseQuantity.toString(),
+                                  maxLines: 1,
+                                  // overflow: TextOverflow.ellipsis,
+                                ),
+                                RichText(
+                                  text: TextSpan(
+                                    children: <TextSpan>[
+                                      TextSpan(
+                                        text: "₹" + widget.pro.gstAmount.toString(),
+                                        style: TextStyle(
+                                          color: black,
                                         ),
                                       ),
-                                _itemcounter == 0
-                                    ? Text(
-                                        'ADD',
-                                        style: TextStyle(color: blue),
-                                      )
-                                    : Text(
-                                        _itemcounter.toString(),
-                                        style: TextStyle(color: blue),
-                                      ),
-                                InkWell(
-                                  onTap: () async {
-                                    setState(() {
-                                      _itemcounter++;
-                                    });
-                                    Provider.of<ProductModel>(context,
-                                            listen: false)
-                                        .addTaskInList(widget.pro);
-
-                                    if (await addToCart(
-                                        widget.pro.id, _itemcounter)) {
-                                      // _scaffoldKey.currentState.showSnackBar(
-                                      //     new SnackBar(
-                                      //         content: new Text(
-                                      //             'Added ${widget.pro.title} to cart')));
-                                    }
-                                  },
-                                  child: Icon(
-                                    Icons.add,
-                                    color: blue,
+                                      TextSpan(
+                                          text:
+                                              widget.pro.mrp.toStringAsFixed(1),
+                                          style: TextStyle(
+                                              color: grey,
+                                              decoration:
+                                                  TextDecoration.lineThrough)),
+                                    ],
                                   ),
                                 ),
                               ],
-                            )),
-                          )
-                        ],
-                      )
-                    ],
+                            ),
+                          ),
+                        ),
+                        widget.pro.inStock == false
+                            ? Container()
+                            : Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: <Widget>[
+                                  GestureDetector(
+                                    // onTap: () {
+                                    //   Provider.of<ProductModel>(context,
+                                    //           listen: false)
+                                    //       .removeProduct(widget.pro);
+                                    //   setState(() {
+                                    //     _itemcounter = 0;
+                                    //     deletCartItem(widget.pro.id.toString());
+                                    //   });
+                                    // },
+                                    onTap: () => widget.pro.inStock
+                                        ? _showDialog(widget.pro)
+                                        : Scaffold.of(context)
+                                            .showSnackBar(SnackBar(
+                                            content: Text("OUT OF STOCK"),
+                                            backgroundColor: red,
+                                          )),
+                                    child: Container(
+                                        // color: white,
+                                        decoration: BoxDecoration(
+                                            color: white,
+                                            borderRadius:
+                                                BorderRadius.circular(50)),
+                                        child: Icon(
+                                          Icons.replay,
+                                          color: blue,
+                                        )),
+                                  ),
+                                  Container(
+                                    height: 30,
+                                    width: 75,
+                                    decoration: BoxDecoration(
+                                        color: white,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: blue)),
+                                    child: Center(
+                                        child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: <Widget>[
+                                        _itemcounter == 0
+                                            ? Container()
+                                            : InkWell(
+                                                onTap: () async {
+                                                  setState(() {
+                                                    _itemcounter--;
+                                                  });
+                                                  Provider.of<ProductModel>(
+                                                          context,
+                                                          listen: false)
+                                                      .removeItem(widget.pro);
+                                                  await addToCart(widget.pro.id,
+                                                      _itemcounter);
+                                                },
+                                                child: Icon(
+                                                  Icons.remove,
+                                                  color: blue,
+                                                ),
+                                              ),
+                                        _itemcounter == 0
+                                            ? Text(
+                                                'ADD',
+                                                style: TextStyle(color: blue),
+                                              )
+                                            : Text(
+                                                _itemcounter.toString(),
+                                                style: TextStyle(color: blue),
+                                              ),
+                                        InkWell(
+                                          onTap: () async {
+                                            setState(() {
+                                              _itemcounter++;
+                                            });
+                                            Provider.of<ProductModel>(context,
+                                                    listen: false)
+                                                .addTaskInList(widget.pro);
+
+                                            if (await addToCart(
+                                                widget.pro.id, _itemcounter)) {
+                                              // _scaffoldKey.currentState.showSnackBar(
+                                              //     new SnackBar(
+                                              //         content: new Text(
+                                              //             'Added ${widget.pro.title} to cart')));
+                                            }
+                                          },
+                                          child: Icon(
+                                            Icons.add,
+                                            color: blue,
+                                          ),
+                                        ),
+                                      ],
+                                    )),
+                                  )
+                                ],
+                              )
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

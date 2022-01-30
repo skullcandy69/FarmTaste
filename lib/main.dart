@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/helpers/navigation.dart';
@@ -10,7 +12,8 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:shimmer/shimmer.dart';
-// import 'package:smartlook/smartlook.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,26 +30,66 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  getVersion() async {
+    var res = await http.get(Uri.parse(GETVERSION));
+    print(res.body);
+    return int.parse(res.body);
+  }
+
+  _showVersionDialog(context) async {
+    await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        String title = "New Update Available";
+        String message =
+            "There is a newer version of app available please update it now.";
+        String btnLabel = "Update Now";
+        String btnLabelCancel = "Later";
+        return new CupertinoAlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text(btnLabel),
+              onPressed: () => launch(
+                  'https://play.google.com/store/apps/details?id=com.farmtaste.grocery'),
+            ),
+            TextButton(
+              child: Text(btnLabelCancel),
+              onPressed: () => SystemNavigator.pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  int cversion = 5;
+  int gversion;
   @override
   void initState() {
     super.initState();
     setupnotification();
-
+    getVersion().then((v){
+       Timer(Duration(seconds: 2), () {
+      if (v == cversion) {
+        changeScreenRepacement(context, SController());
+      } else {
+        _showVersionDialog(context);
+      }
+    });
+    });
     Provider.of<ProductModel>(context, listen: false).fetchProducts();
 
-    Timer(Duration(seconds: 3),
-        () => changeScreenRepacement(context, SController()));
+    
 
     // Smartlook.setupAndStartRecording(
     //     '0f0fe4ac9b7614a8e3480fbcfc7d30e00024b450');
   }
 
   Future<void> setupnotification() async {
-    await OneSignal.shared.init("d7af44a8-42d2-4f40-809c-fe50ada70a7a",
-        iOSSettings: {
-          OSiOSSettings.autoPrompt: false,
-          OSiOSSettings.inAppLaunchUrl: false
-        });
+    await OneSignal.shared.setAppId("d7af44a8-42d2-4f40-809c-fe50ada70a7a");
   }
 
   @override
@@ -72,7 +115,7 @@ class _SplashScreenState extends State<SplashScreen> {
                           height: 170,
                           child: ClipRRect(
                               borderRadius: BorderRadius.circular(100),
-                              child: Image.asset('images/appstore.png'))),
+                              child: Image.asset('images/appstore.jpg'))),
                       Padding(
                         padding: EdgeInsets.only(top: 10.0),
                       ),

@@ -10,12 +10,10 @@ import 'package:grocery/models/products.dart';
 import 'package:shimmer/shimmer.dart';
 
 Future<List<ProductSubCategoryData>> productsubcatlist(String id) async {
-  var response = await http.get(GETPARTICULARPRODUCATCAT + id);
-  // print('hello');
+  var response = await http.get(Uri.parse(GETPARTICULARPRODUCATCAT + id));
 
   ProductSubCategory productSubCategory =
       ProductSubCategory.fromJson(json.decode(response.body));
-  // print(productSubCategory.data[1].title);
   return productSubCategory.data;
 }
 

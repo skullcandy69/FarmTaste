@@ -16,8 +16,8 @@ Future<void> share(code) async {
   await FlutterShare.share(
     title: 'Refer and Earn',
     text:
-        'Join me on FarmTaste, a secure app for buying daily needs . Enter my code $code to earn ₹51 in your FarmTaste wallet back on your first payment!',
-    linkUrl: 'http://farmtaste.in/',
+        'Join me on FarmTaste, a secure app for buying daily needs . Enter my code ${code.toUpperCase()} to earn upto ₹150 in your FarmTaste wallet back on your first order!',
+    linkUrl: 'https://play.google.com/store/apps/details?id=com.farmtaste.grocery',
   );
 }
 
@@ -125,7 +125,7 @@ class _ReferAndEarnState extends State<ReferAndEarn> {
                     child: Text(
                         widget.res.user.referralCode == null
                             ? ''
-                            : widget.res.user.referralCode,
+                            : widget.res.user.referralCode.toUpperCase(),
                         style: TextStyle(
                             color: black,
                             fontWeight: FontWeight.bold,

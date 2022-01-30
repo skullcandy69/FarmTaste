@@ -86,14 +86,14 @@ class _RecurringOrderState extends State<RecurringOrder> {
                                     text: TextSpan(
                                       children: <TextSpan>[
                                         TextSpan(
-                                          text: "₹" + getGstPrice(widget.pro),
+                                          text: "₹" + widget.pro.gstAmount.toString()+" ",
                                          
                                           style: TextStyle(
                                             color: black,
                                           ),
                                         ),
                                         TextSpan(
-                                            text: widget.pro.mrp.toString(),
+                                            text: widget.pro.mrp.toStringAsFixed(1),
                                             style: TextStyle(
                                                 color: grey,
                                                 decoration: TextDecoration
@@ -355,12 +355,7 @@ class _RecurringOrderState extends State<RecurringOrder> {
                   child: FlatButton(
                       color: Colors.green[50],
                       onPressed: () async {
-                        print(DateFormat('yyyy-MM-dd')
-                            .format(_startDate)
-                            .toString());
-                        print(
-                          DateFormat('yyyy-MM-dd').format(_endDate).toString(),
-                        );
+                       
                         String s = await recurringOrder(
                             widget.pro.id.toString(),
                             _itemcounter.toString(),

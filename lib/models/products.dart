@@ -7,7 +7,8 @@ class ProductsCategories {
 
   ProductsCategories.fromJson(Map<String, dynamic> json) {
     if (json['data'] != null) {
-      data = new List<ProductCategoryData>();
+      // data = new List<ProductCategoryData>();
+      data = [];
       json['data'].forEach((v) {
         data.add(new ProductCategoryData.fromJson(v));
       });
@@ -67,7 +68,8 @@ class ProductSubCategory {
 
   ProductSubCategory.fromJson(Map<String, dynamic> json) {
     if (json['data'] != null) {
-      data = new List<ProductSubCategoryData>();
+      // data = new List<ProductSubCategoryData>();
+      data = [];
       json['data'].forEach((v) {
         data.add(new ProductSubCategoryData.fromJson(v));
       });
@@ -135,7 +137,8 @@ class Products {
 
   Products.fromJson(Map<String, dynamic> json) {
     if (json['data'] != null) {
-      data = new List<ProductData>();
+      // data = new List<ProductData>();
+      data =[];
       json['data'].forEach((v) {
         data.add(new ProductData.fromJson(v));
       });
@@ -151,7 +154,7 @@ class Products {
   }
 }
 
-class ProductData extends Equatable {
+class ProductData extends Equatable{
   String sType;
   int id;
   String title;
@@ -159,15 +162,16 @@ class ProductData extends Equatable {
   String imageUrl;
   bool isUnderGst;
   String baseQuantity;
-  dynamic mrp;
-  dynamic sellingPrice;
+  int mrp;
+  int sellingPrice;
   int cityId;
   dynamic gstRate;
+  dynamic gstAmount;
   bool isActive;
+  bool inStock;
   String slug;
   String createdAt;
   String updatedAt;
-  dynamic deletedAt;
 
   ProductData(
       {this.sType,
@@ -181,11 +185,12 @@ class ProductData extends Equatable {
       this.sellingPrice,
       this.cityId,
       this.gstRate,
+      this.gstAmount,
       this.isActive,
+      this.inStock,
       this.slug,
       this.createdAt,
-      this.updatedAt,
-      this.deletedAt});
+      this.updatedAt});
 
   ProductData.fromJson(Map<String, dynamic> json) {
     sType = json['__type'];
@@ -199,11 +204,12 @@ class ProductData extends Equatable {
     sellingPrice = json['selling_price'];
     cityId = json['city_id'];
     gstRate = json['gst_rate'];
+    gstAmount = json['gst_amount'];
     isActive = json['is_active'];
+    inStock = json['in_stock'];
     slug = json['slug'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    deletedAt = json['deleted_at'];
   }
 
   Map<String, dynamic> toJson() {
@@ -219,13 +225,15 @@ class ProductData extends Equatable {
     data['selling_price'] = this.sellingPrice;
     data['city_id'] = this.cityId;
     data['gst_rate'] = this.gstRate;
+    data['gst_amount']=this.gstAmount;
     data['is_active'] = this.isActive;
+    data['in_stock'] = this.inStock;
     data['slug'] = this.slug;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
-    data['deleted_at'] = this.deletedAt;
     return data;
   }
-   @override
+  
+ @override
   List<Object> get props => [id];
 }

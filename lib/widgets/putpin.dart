@@ -37,12 +37,11 @@ final RoundedLoadingButtonController _resend =
       child: PinPut(
         key: _formKey,
         fieldsCount: 5,
-        autoValidate: false,
+        // autoValidate: false,
         textStyle: TextStyle(fontSize: 25, color: Colors.black),
         eachFieldWidth: 45,
         eachFieldHeight: 55,
         onSubmit: (String pin) {
-          print(pin);
           FocusScope.of(context).unfocus();
         },
         validator: (val) {
@@ -68,7 +67,6 @@ final RoundedLoadingButtonController _resend =
 
   @override
   Widget build(BuildContext context) {
-    print(widget.otp);
     final authprovider = Provider.of<AuthProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
@@ -130,7 +128,6 @@ final RoundedLoadingButtonController _resend =
                     controller: _resend,
                     color: green,
                     onPressed: () async {
-                      print(widget.signup);
                       if (widget.signup == false) {
                           String message = await authprovider.genOtplogin();
                           if (message == 'Kindly Register First') {
@@ -143,7 +140,6 @@ final RoundedLoadingButtonController _resend =
                              _resend.success();
                             
                           }
-                          print(message);
                         } else {
                           String message = await authprovider.genOtpSignup();
                           if (message == 'Already Registered, Please Login') {
@@ -156,7 +152,6 @@ final RoundedLoadingButtonController _resend =
                              _resend.success();
                            
                           }
-                          print(message);
                         }
                     },
                     width: 200,

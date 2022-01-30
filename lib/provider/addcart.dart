@@ -8,17 +8,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<bool> addToCart(id, unit) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  var response = await http.put(ADDTOCART, headers: {
+  var response = await http.put(Uri.parse(ADDTOCART), headers: {
     "Authorization": token,
   }, body: {
     "product_id": id.toString(),
     "no_of_units": unit.toString()
   });
-  print('Response status: ${response.statusCode}');
   if (response.statusCode == 200) {
     return true;
   } else {
-    print('failed');
     return false;
   }
 }
@@ -26,7 +24,7 @@ Future<bool> addToCart(id, unit) async {
 Future<bool> updateCart(id, unit) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  var response = await http.put(ADDTOCART, headers: {
+  var response = await http.put(Uri.parse(ADDTOCART), headers: {
     "Authorization": token,
   }, body: {
     "no_of_units": unit.toString(),
@@ -36,7 +34,6 @@ Future<bool> updateCart(id, unit) async {
   if (response.statusCode == 200) {
     return true;
   } else {
-    print('failed');
     return false;
   }
 }
@@ -44,17 +41,15 @@ Future<bool> updateCart(id, unit) async {
 Future<bool> deletCartItem(id) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  var response = await http.put(ADDTOCART, headers: {
+  var response = await http.put(Uri.parse(ADDTOCART), headers: {
     "Authorization": token,
   }, body: {
     "no_of_units": "0",
     "product_id": id
   });
   if (response.statusCode == 200) {
-    print('deleted');
     return true;
   } else {
-    print('failed');
     return false;
   }
 }
@@ -62,41 +57,40 @@ Future<bool> deletCartItem(id) async {
 Future<CartItem> myCart() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  var response = await http.get(MYCART, headers: {"Authorization": token});
-  // print(response.body);
+  var response = await http.get(Uri.parse(MYCART), headers: {"Authorization": token});
   CartItem cartItem = CartItem.fromJson(json.decode(response.body));
-  // print(cartItem.data.amount);
   return cartItem;
 }
 
-Future<String> createOrder(cartId, mode, amount, address) async {
+Future<String> createOrder(cartId, mode, amount, address,slot) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  print(cartId);
-  var response = await http.post(ORDERS, headers: {
+  print(amount);
+  var response = await http.post(Uri.parse(ORDERS), headers: {
     "Authorization": token
   }, body: {
     "cart_id": cartId.toString(),
     "payment_mode": mode,
     "amount": amount,
+    "slot_time":slot.startTime+' - '+slot.endTime
   });
-  var res = json.decode(response.body);
   print(response.body);
+  var res = json.decode(response.body);
+  print(res);
   return res['data']['id'].toString();
 }
 
-Future<void> updateOrder(status, id) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String token = prefs.getString('token');
-  var response = await http.put(ORDERS + "\id",
-      headers: {"Authorization": token}, body: {"payment_status": status});
-  print(response.body);
-}
+// Future<void> updateOrder(status, id) async {
+//   SharedPreferences prefs = await SharedPreferences.getInstance();
+//   String token = prefs.getString('token');
+//    await http.put(ORDERS + "\id",
+//       headers: {"Authorization": token}, body: {"payment_status": status});
+// }
 
 Future<String> recurringOrder(String id, nou, sdate, edate, subtype) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  var response = await http.post(RECURRINGORDER, headers: {
+  var response = await http.post(Uri.parse(RECURRINGORDER), headers: {
     "Authorization": token
   }, body: {
     "product_id": id,
@@ -105,7 +99,6 @@ Future<String> recurringOrder(String id, nou, sdate, edate, subtype) async {
     "end_date": edate,
     "subscription_type": subtype
   });
-  print(response.body);
   if (response.statusCode == 200) {
     return 'Success';
   } else if (json.decode(response.body)['code'] == 107) {
@@ -121,9 +114,13 @@ String getGstPrice(ProductData product) {
   if (product.isUnderGst == true) {
     dynamic gstrate =
         product.sellingPrice + (product.sellingPrice * product.gstRate) / 100;
+        gstrate *=10;
+        gstrate = gstrate.ceilToDouble();
+        gstrate/=10;
     return gstrate.toString();
   } else {
-    return product.sellingPrice.toString();
+    
+    return product.sellingPrice.toString() ;
   }
   // } else {
   // if (product.isUnderGst == true) {

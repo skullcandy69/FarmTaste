@@ -19,10 +19,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token');
     var response = await http.get(
-      GETSUBS,
+      Uri.parse(GETSUBS),
       headers: {"Authorization": token},
     );
-    print(response.body);
     Subscriptions subscriptions =
         Subscriptions.fromJson(json.decode(response.body));
     setState(() {
@@ -66,9 +65,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             : list.length == 0
                 ? Container(
                     height: MediaQuery.of(context).size.height,
+                    color: white,
                     child: Image.asset(
-                      'images/emptycart.png',
-                      fit: BoxFit.cover,
+                      'images/emptycart.jpeg',
+                      fit: BoxFit.contain,
                     ))
                 : ListView.builder(
                     itemCount: list.length,
@@ -91,18 +91,16 @@ class OrderShow extends StatefulWidget {
 
 class _OrderShowState extends State<OrderShow> {
   bool isLoading = false;
-  int _itemcounter;
-  final RoundedLoadingButtonController _btnController =
+    final RoundedLoadingButtonController _btnController =
       RoundedLoadingButtonController();
   String message = 'Cancel';
   Future<void> updateOrder(id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
     var response = await http.delete(
-      BASE_URL + "/subscription/" + "$id",
+     Uri.parse( BASE_URL + "/subscription/" + "$id"),
       headers: {"Authorization": token},
     );
-    print(response.body);
     if (response.statusCode == 200) {
       _btnController.success();
     } else {
@@ -113,11 +111,7 @@ class _OrderShowState extends State<OrderShow> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _itemcounter = widget.data.product.noOfUnits;
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +155,7 @@ class _OrderShowState extends State<OrderShow> {
                         text: TextSpan(
                           children: <TextSpan>[
                             TextSpan(
-                              text: "₹" + widget.data.amount.toString(),
+                              text: "₹" + widget.data.amount.toStringAsFixed(1),
                               style: TextStyle(
                                 color: black,
                               ),
@@ -177,54 +171,7 @@ class _OrderShowState extends State<OrderShow> {
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
-                        // Container(
-                        //   height: 30,
-                        //   width: 75,
-                        //   decoration: BoxDecoration(
-                        //       color: white,
-                        //       borderRadius: BorderRadius.circular(8),
-                        //       border: Border.all(color: blue)),
-                        //   child: Center(
-                        //       child: Row(
-                        //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        //     children: <Widget>[
-                        //       _itemcounter == 0
-                        //           ? Container()
-                        //           : InkWell(
-                        //               onTap: () async {
-                        //                 setState(() {
-                        //                   _itemcounter--;
-                        //                 });
-                        //               },
-                        //               child: Icon(
-                        //                 Icons.remove,
-                        //                 color: blue,
-                        //               ),
-                        //             ),
-                        //       _itemcounter == 0
-                        //           ? Text(
-                        //               'ADD',
-                        //               style: TextStyle(color: blue),
-                        //             )
-                        //           : Text(
-                        //               _itemcounter.toString(),
-                        //               style: TextStyle(color: blue),
-                        //             ),
-                        //       InkWell(
-                        //         onTap: () {
-                        //           print('inc');
-                        //           setState(() {
-                        //             _itemcounter++;
-                        //           });
-                        //         },
-                        //         child: Icon(
-                        //           Icons.add,
-                        //           color: blue,
-                        //         ),
-                        //       ),
-                        //     ],
-                        //   )),
-                        // ),
+                       
                         RoundedLoadingButton(
                           height: 30,
                           width: 60,
@@ -245,7 +192,7 @@ class _OrderShowState extends State<OrderShow> {
                   ? Container()
                   : Align(
                       alignment: Alignment.topRight,
-                      child: FlatButton(
+                      child: TextButton(
                         child: isLoading ? Text("Save") : Text('Edit'),
                         onPressed: () => setState(() {
                           isLoading = !isLoading;

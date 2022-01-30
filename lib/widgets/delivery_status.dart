@@ -49,35 +49,8 @@ class _DeliveryStatusState extends State<DeliveryStatus> {
                       ])),
                 ],
               ),
-              Text('Code\n'+widget.codes.toUpperCase())
-              // Container(
-              //   width: 100,
-              //   child: DropdownButtonFormField(
-              //     // autovalidate: true,
-              //     items: widget.codes.map((Codes code) {
-              //       return DropdownMenuItem<Codes>(
-              //           value: code,
-              //           child: AutoSizeText(
-              //               code.orderId.toString().toUpperCase(),maxLines: 1,
-              //               style: TextStyle(fontSize: 15)));
-              //     }).toList(),
-              //     value: selectedValue,
-              //     onChanged: (value) {
-              //       setState(() {
-              //         selectedValue = value;
-              //         print('changed' + selectedValue.orderId.toString());
-              //         // areaid = selectedValue.id.toString();
-              //       });
-              //     },
-              //     validator: (value) {
-              //       if (value == null) {
-              //         return 'please select a location';
-              //       }
-              //       return null;
-              //     },
-              //     isExpanded: true,
-              //   ),
-              // ),
+              // Text('Code\n'+widget.codes.toUpperCase())
+             
             ],
           ),
         ),

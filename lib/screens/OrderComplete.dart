@@ -153,7 +153,7 @@ class _OrderSuccessState extends State<OrderSuccess> {
                                           Theme.of(context).textTheme.bodyText1,
                                     ),
                                   ),
-                                  Text("₹" +  pro.tprice.toStringAsFixed(3))
+                                  Text("₹" +  pro.tprice.toStringAsFixed(1))
                                 ],
                               ),
                               SizedBox(height: 3),
@@ -192,7 +192,7 @@ class _OrderSuccessState extends State<OrderSuccess> {
                                           Theme.of(context).textTheme.headline6,
                                     ),
                                   ),
-                                  Text("₹" +( pro.tprice + widget.deliveryCharge - widget.discount ).toStringAsFixed(3))
+                                  Text("₹" +( pro.tprice + widget.deliveryCharge - widget.discount ).toStringAsFixed(1))
                                 ],
                               ),
                               SizedBox(height: 20),
@@ -205,7 +205,7 @@ class _OrderSuccessState extends State<OrderSuccess> {
                                         await SharedPreferences.getInstance();
                                    String token = prefs.getString('token');
                                     pro.clearList();
-                                    await http.delete(EMPTYCART,
+                                    await http.delete(Uri.parse( EMPTYCART),
                                         headers: {"Authorization": token});
                                     changeScreenRepacement(context, HomePage());
                                   },

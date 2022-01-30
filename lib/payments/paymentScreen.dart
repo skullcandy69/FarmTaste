@@ -3,13 +3,12 @@ import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery/helpers/commons.dart';
 import 'package:grocery/helpers/navigation.dart';
-import 'package:grocery/models/CartModel.dart';
+import 'package:grocery/models/slots.dart';
 import 'package:grocery/models/user_model.dart';
 import 'package:grocery/provider/addcart.dart';
 import 'package:grocery/screens/OrderComplete.dart';
 import 'package:grocery/widgets/Loader.dart';
 import 'package:grocery/widgets/paymentbanner.dart';
-import 'package:provider/provider.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:rounded_loading_button/rounded_loading_button.dart';
@@ -19,7 +18,8 @@ class PaymentScreen extends StatefulWidget {
   final dynamic cart;
   final dynamic totalamount;
   final dynamic amount;
-  PaymentScreen({this.cart, this.totalamount, this.amount});
+  final SlotData slot;
+  PaymentScreen({this.cart, this.totalamount, this.amount, this.slot});
   @override
   _PaymentScreenState createState() => _PaymentScreenState();
 }
@@ -29,6 +29,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool isLoading = true;
   @override
   void initState() {
+    print( widget.slot.startTime+'-'+widget.slot.endTime);
     super.initState();
     getUser();
     netamountpay = widget.totalamount;
@@ -68,16 +69,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
         netamountpay = widget.totalamount;
       });
     }
-    print(netamountpay);
-    print(walletamount);
   }
 
   void openCheckout(paymethod, method, wallet, res) async {
-    print(widget.amount);
+    // print(widget.amount.toStringAsFixed(1));
     cartid = await createOrder(
-        widget.cart.id, method, widget.amount, res.user.address);
+        widget.cart.id, method, widget.amount, res.user.address,widget.slot);
+    if (useWallet == true) {
+      var r = await http.post(Uri.parse(UPDATEWALLET),
+          headers: {"Authorization": token},
+          body: {"type": "subtract", "amount": walletamount.toString()});
+      print("this is wallet"+r.body);
+    }
     var options = {
-      'key': TESTKEY,
+      'key': LIVEKEY,
       'amount': (netamountpay * 100).toInt(),
       'name': 'farmtaste',
       'description': 'Order Payment',
@@ -87,9 +92,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'email': res.user.email,
         'method': paymethod
       },
-      "image":
-          'https://merriam-webster.com/assets/mw/images/article/art-wap-landing-mp-lg/meanwhile-2453-cc63cdb89c527209296a3ec7ffd9ee59@1x.jpg',
-      'external': {
+        'external': {
         'wallet': ['paytm']
       },
       "currency": "INR",
@@ -108,15 +111,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
-    print(response.paymentId);
-    var r = await http.put(UPDATEORDERS + cartid, headers: {
+    print(token);
+    print(widget.slot.startTime+'-'+widget.slot.endTime);
+    await http.put(Uri.parse(UPDATEORDERS + cartid), headers: {
       "Authorization": token
     }, body: {
       "payment_status": "success",
       "transaction_id": response.paymentId,
-      "transacted_at": DateTime.now().toString()
+      "transacted_at": DateTime.now().toString(),
+      
     });
-    print(r.body);
     changeScreenRepacement(
         context,
         OrderSuccess(
@@ -126,18 +130,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) async {
-    print('fail ' + response.message);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
-    var res = await http.put(UPDATEORDERS + cartid,
+    await http.put(Uri.parse(UPDATEORDERS + cartid),
         headers: {"Authorization": token}, body: {"payment_status": 'failure'});
-    print(res.body);
     _basicContentEasyDialog(context);
   }
 
-  void _handlePaymentWallet(ExternalWalletResponse response) {
-    print('wallet ' + response.walletName);
-  }
+  void _handlePaymentWallet(ExternalWalletResponse response) {}
 
   void _basicContentEasyDialog(BuildContext context) {
     EasyDialog(
@@ -150,7 +150,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             width: MediaQuery.of(context).size.width,
             color: green,
             height: 50,
-            child: FlatButton(
+            child: TextButton(
                 onPressed: () => Navigator.pop(context), child: Text('Retry')),
           )
         ]).show(context);
@@ -162,11 +162,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
     var response = await http.get(
-      ME,
+     Uri.parse( ME),
       headers: {"Authorization": token},
     );
     Result result = Result.fromJson(json.decode(response.body));
-    print('new user' + result.user.address);
     setState(() {
       res = result;
       isLoading = false;
@@ -175,7 +174,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authprovider = Provider.of<ProductModel>(context);
     return Scaffold(
         appBar: AppBar(
           title: Text('Payments'),
@@ -215,9 +213,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () async {
-                        print(widget.amount);
                         await createOrder(widget.cart.id, 'cod', widget.amount,
-                            res.user.address);
+                            res.user.address,widget.slot);
 
                         changeScreenRepacement(
                             context,
@@ -298,7 +295,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   ),
                                 ),
                                 Text(
-                                  "₹" + widget.cart.baseAmount.toString(),
+                                  "₹" +
+                                      widget.cart.baseAmount.toStringAsFixed(1),
                                   style: TextStyle(
                                       color: grey,
                                       decoration: TextDecoration.lineThrough),
@@ -315,7 +313,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   'Selling Price',
                                   style: TextStyle(fontSize: 15),
                                 ),
-                                Text("₹" + widget.cart.amount.toString())
+                                Text(
+                                    "₹" + widget.cart.amount.toStringAsFixed(1))
                               ],
                             ),
                             // SizedBox(
@@ -346,7 +345,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                         style: TextStyle(fontSize: 15),
                                       ),
                                       Text("- ₹" +
-                                          widget.cart.discount.toString())
+                                          widget.cart.discount
+                                              .toStringAsFixed(1))
                                     ],
                                   ),
                             // SizedBox(
@@ -357,7 +357,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text('Payable amount'),
-                                Text("₹" + netamountpay.toStringAsFixed(3)),
+                                Text("₹" + netamountpay.toStringAsFixed(1)),
                               ],
                             ),
                             SizedBox(
@@ -382,13 +382,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   ),
                                   onPressed: () async {
                                     // authprovider.clearList();
-                                    cartid = await createOrder(widget.cart.id,
-                                        'cod', widget.amount, res.user.address);
+                                    cartid = await createOrder(
+                                        widget.cart.id,
+                                        'wallet',
+                                        widget.amount,
+                                        res.user.address,widget.slot);
                                     await http.put(
-                                        UPDATEORDERS + cartid.toString(),
+                                        Uri.parse(UPDATEORDERS + cartid.toString()),
                                         headers: {"Authorization": token},
                                         body: {"payment_status": "success"});
-                                    await http.post(UPDATEWALLET, headers: {
+                                    await http.post(Uri.parse(UPDATEWALLET), headers: {
                                       "Authorization": token
                                     }, body: {
                                       "type": "subtract",
@@ -404,7 +407,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                               widget.cart.deliveryCharge,
                                           discount: widget.cart.discount,
                                         ));
-                                 
                                   },
                                 ),
                               ],
