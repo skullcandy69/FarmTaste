@@ -209,7 +209,7 @@ class _OrderSuccessState extends State<OrderSuccess> {
                                         headers: {"Authorization": token});
                                     changeScreenRepacement(context, HomePage());
                                   },
-                                  color: green,
+                                  color: pcolor,
                                   child: Text(
                                     "Continue Shopping",
                                     overflow: TextOverflow.ellipsis,

@@ -29,7 +29,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool isLoading = true;
   @override
   void initState() {
-    print( widget.slot.startTime+'-'+widget.slot.endTime);
+    print(widget.slot.startTime + '-' + widget.slot.endTime);
     super.initState();
     getUser();
     netamountpay = widget.totalamount;
@@ -74,17 +74,17 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void openCheckout(paymethod, method, wallet, res) async {
     // print(widget.amount.toStringAsFixed(1));
     cartid = await createOrder(
-        widget.cart.id, method, widget.amount, res.user.address,widget.slot);
+        widget.cart.id, method, widget.amount, res.user.address, widget.slot);
     if (useWallet == true) {
       var r = await http.post(Uri.parse(UPDATEWALLET),
           headers: {"Authorization": token},
           body: {"type": "subtract", "amount": walletamount.toString()});
-      print("this is wallet"+r.body);
+      print("this is wallet" + r.body);
     }
     var options = {
       'key': LIVEKEY,
       'amount': (netamountpay * 100).toInt(),
-      'name': 'farmtaste',
+      'name': 'Expecto',
       'description': 'Order Payment',
       'prefill': {
         "name": res.user.name,
@@ -92,12 +92,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'email': res.user.email,
         'method': paymethod
       },
-        'external': {
+      'external': {
         'wallet': ['paytm']
       },
       "currency": "INR",
       "payment_capture": 1,
-      "theme": {"color": "#32cd32"}
+      "theme": {"color": "#000000"}
     };
 
     try {
@@ -111,15 +111,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
-    print(token);
-    print(widget.slot.startTime+'-'+widget.slot.endTime);
+    // print(token);
+    print(widget.slot.startTime + '-' + widget.slot.endTime);
     await http.put(Uri.parse(UPDATEORDERS + cartid), headers: {
       "Authorization": token
     }, body: {
       "payment_status": "success",
       "transaction_id": response.paymentId,
       "transacted_at": DateTime.now().toString(),
-      
     });
     changeScreenRepacement(
         context,
@@ -134,25 +133,29 @@ class _PaymentScreenState extends State<PaymentScreen> {
     token = prefs.getString('token');
     await http.put(Uri.parse(UPDATEORDERS + cartid),
         headers: {"Authorization": token}, body: {"payment_status": 'failure'});
-    _basicContentEasyDialog(context);
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  static const snackBar = SnackBar(
+    content: Text('Payment Failed Please Try again'),
+    backgroundColor: red,
+  );
   void _handlePaymentWallet(ExternalWalletResponse response) {}
 
   void _basicContentEasyDialog(BuildContext context) {
     EasyDialog(
         topImage: NetworkImage(
-            'https://mk0travelvisaboo9h0g.kinstacdn.com/wp-content/uploads/2017/09/payment_failed.jpg'),
-        height: 210,
+            'https://www.digitalpaymentguru.com/wp-content/uploads/2019/08/Transaction-Failed.png'),
+        height: 300,
         closeButton: true,
         contentList: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            color: green,
-            height: 50,
-            child: TextButton(
-                onPressed: () => Navigator.pop(context), child: Text('Retry')),
-          )
+          // Container(
+          //   width: MediaQuery.of(context).size.width,
+          //   // color: pcolor,
+          //   height: 50,
+          ElevatedButton(
+              onPressed: () => Navigator.pop(context), child: Text('Retry')),
+          // )
         ]).show(context);
   }
 
@@ -162,7 +165,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
     var response = await http.get(
-     Uri.parse( ME),
+      Uri.parse(ME),
       headers: {"Authorization": token},
     );
     Result result = Result.fromJson(json.decode(response.body));
@@ -214,7 +217,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       trailing: Icon(Icons.arrow_forward_ios),
                       onTap: () async {
                         await createOrder(widget.cart.id, 'cod', widget.amount,
-                            res.user.address,widget.slot);
+                            res.user.address, widget.slot);
 
                         changeScreenRepacement(
                             context,
@@ -374,7 +377,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 RoundedLoadingButton(
-                                  color: green,
+                                  color: pcolor,
                                   controller: _btnController,
                                   child: Text(
                                     'Place Order',
@@ -386,17 +389,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                         widget.cart.id,
                                         'wallet',
                                         widget.amount,
-                                        res.user.address,widget.slot);
+                                        res.user.address,
+                                        widget.slot);
                                     await http.put(
-                                        Uri.parse(UPDATEORDERS + cartid.toString()),
+                                        Uri.parse(
+                                            UPDATEORDERS + cartid.toString()),
                                         headers: {"Authorization": token},
                                         body: {"payment_status": "success"});
-                                    await http.post(Uri.parse(UPDATEWALLET), headers: {
-                                      "Authorization": token
-                                    }, body: {
-                                      "type": "subtract",
-                                      "amount": walletamount.toString()
-                                    });
+                                    await http.post(Uri.parse(UPDATEWALLET),
+                                        headers: {
+                                          "Authorization": token
+                                        },
+                                        body: {
+                                          "type": "subtract",
+                                          "amount": walletamount.toString()
+                                        });
                                     // await http.delete(EMPTYCART,
                                     //     headers: {"Authorization": token});
                                     _btnController.success();

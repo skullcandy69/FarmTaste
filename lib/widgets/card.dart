@@ -41,9 +41,6 @@ class _CardwidgetState extends State<Cardwidget> {
     return CarouselSlider.builder(
         options: CarouselOptions(
           height: 200,
-          aspectRatio: 16 / 9,
-          viewportFraction: 0.8,
-          initialPage: 0,
           enableInfiniteScroll: true,
           reverse: false,
           autoPlay: true,
@@ -54,7 +51,7 @@ class _CardwidgetState extends State<Cardwidget> {
           scrollDirection: Axis.horizontal,
         ),
         itemCount: isLoading ? 0 : list.length,
-        itemBuilder: (context, i, index) {
+        itemBuilder: (context, index, i) {
           if (isLoading == true || list.length == 0) {
             return Card(
               child: Container(

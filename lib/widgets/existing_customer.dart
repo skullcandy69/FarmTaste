@@ -130,7 +130,7 @@ class _ExistingCustomerState extends State<ExistingCustomer> {
                           },
                           child: Text(
                             widget.signup == true ? 'Enter referral code?' : '',
-                            style: TextStyle(color: blue),
+                            // style: TextStyle(color: blue),
                           )),
                   SizedBox(
                     height: 10,
@@ -139,7 +139,7 @@ class _ExistingCustomerState extends State<ExistingCustomer> {
                     child: Text('Send OTP!',
                         style: TextStyle(color: Colors.white)),
                     controller: _btnController,
-                    color: green,
+                    color: pcolor,
                     onPressed: () async {
                       if (_formKey.currentState.validate()) {
                         if (widget.signup == false) {

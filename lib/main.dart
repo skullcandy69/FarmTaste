@@ -99,7 +99,7 @@ class _SplashScreenState extends State<SplashScreen> {
         fit: StackFit.expand,
         children: <Widget>[
           Container(
-            decoration: BoxDecoration(color: Colors.green[400]),
+            decoration: BoxDecoration(color: pcolor),
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -115,13 +115,13 @@ class _SplashScreenState extends State<SplashScreen> {
                           height: 170,
                           child: ClipRRect(
                               borderRadius: BorderRadius.circular(100),
-                              child: Image.asset('images/appstore.jpg'))),
+                              child: Image.asset('images/LOGO.png'))),
                       Padding(
                         padding: EdgeInsets.only(top: 10.0),
                       ),
                       Shimmer.fromColors(
                           child: Text(
-                            "Farm Taste",
+                            "Expecto",
                             style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -186,12 +186,12 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Expecto',
       theme: ThemeData(
         textTheme: GoogleFonts.latoTextTheme(
           Theme.of(context).textTheme,
         ),
-        primarySwatch: Colors.green,
+        primarySwatch: pcolor,
       ),
       home: SplashScreen(),
     );

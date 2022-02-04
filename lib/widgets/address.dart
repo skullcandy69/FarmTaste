@@ -41,7 +41,7 @@ class _AddressState extends State<Address> {
   bool editaddress = false;
   bool nameedit = false;
   String address;
-   TextEditingController pincode = TextEditingController();
+   TextEditingController pincode = TextEditingController(text: "");
   final _formkey = GlobalKey<FormState>();
   FocusNode focusaddress = FocusNode();
   final RoundedLoadingButtonController _btnController =
@@ -108,7 +108,7 @@ class _AddressState extends State<Address> {
                                   enabled: editaddress,
                                   focusNode: focusaddress,
                                   maxLines: 3,
-                                  initialValue: res.user.address,
+                                  initialValue: res.user.address??"",
                                   decoration: InputDecoration(
                                       labelText: 'Address',
                                       hintText: 'Enter your Address',
@@ -135,7 +135,7 @@ class _AddressState extends State<Address> {
                                   keyboardType: TextInputType.number,
                                   enabled: editaddress,
                                   controller: pincode,
-                                  initialValue: res.user.pincode,
+                                  // initialValue: res.user.pincode??"",
                                   validator: (value) {
                                     if (value.isEmpty) {
                                       return 'cannot be empty';
@@ -168,7 +168,7 @@ class _AddressState extends State<Address> {
                             style: TextStyle(color: white),
                           ),
                           controller: _btnController,
-                          color: green,
+                          color: pcolor,
                           onPressed: () async {
                             if (_formkey.currentState.validate()) {
                               _formkey.currentState.save();

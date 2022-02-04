@@ -225,7 +225,7 @@ class _ViewBillState extends State<ViewBill> {
                     text: 'UPCOMING ORDERS',
                   ),
                   Tab(text: 'HISTORY')
-                ], labelColor: green),
+                ], labelColor: pcolor),
                 Container(
                   height: MediaQuery.of(context).size.height * 0.8,
                   padding: EdgeInsets.symmetric(horizontal: 15),

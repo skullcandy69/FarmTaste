@@ -172,7 +172,7 @@ class ProductData extends Equatable{
   String slug;
   String createdAt;
   String updatedAt;
-
+  dynamic rating;
   ProductData(
       {this.sType,
       this.id,
@@ -185,6 +185,7 @@ class ProductData extends Equatable{
       this.sellingPrice,
       this.cityId,
       this.gstRate,
+      this.rating,
       this.gstAmount,
       this.isActive,
       this.inStock,
@@ -204,6 +205,7 @@ class ProductData extends Equatable{
     sellingPrice = json['selling_price'];
     cityId = json['city_id'];
     gstRate = json['gst_rate'];
+    rating = json['rating'];
     gstAmount = json['gst_amount'];
     isActive = json['is_active'];
     inStock = json['in_stock'];

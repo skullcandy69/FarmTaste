@@ -55,7 +55,7 @@ class _WalletState extends State<Wallet> {
                           walletDetails(snapshot.data.user),
                        ListTile(leading: Text(
                                 'ALL TRANSACTIONS',
-                                style: TextStyle(color: green),
+                                // style: TextStyle(color: green),
                               ),),
                           Expanded(
                             child: Container(
@@ -148,7 +148,7 @@ class _WalletState extends State<Wallet> {
                         user.mobileNo,
                         style: TextStyle(color: Colors.black),
                       ),
-                      FlatButton(
+                      ElevatedButton(
                         onPressed: () {
                           showDialog(
                               context: context,
@@ -161,8 +161,6 @@ class _WalletState extends State<Wallet> {
                                 );
                               });
                         },
-                        color: blue,
-                        textColor: white,
                         child: Text(
                           "Add money to wallet",
                         ),
@@ -191,11 +189,12 @@ class _WalletState extends State<Wallet> {
   Future<List<TransactionData>> getOrders() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token');
+    // debugPrint(token);
     var response =
         await http.get(Uri.parse(TRANSACTIONS), headers: {"Authorization": token});
     // print(response.body);
     Transactions trans = Transactions.fromJson(json.decode(response.body));
-    // print(trans.data);
+    print(trans);
     return trans.data.reversed.toList();
   }
 
@@ -464,7 +463,7 @@ class _RequestMoneyDialogState extends State<RequestMoneyDialog> {
                 'ADD TO WALLET',
                 style: TextStyle(color: white),
               ),
-              color: green,
+              color: pcolor,
             ),
           ),
         )

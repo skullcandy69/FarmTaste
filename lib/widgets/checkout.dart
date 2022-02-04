@@ -331,85 +331,85 @@ class _CheckoutState extends State<Checkout> {
                         SizedBox(
                           height: 20,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10.0, right: 10, top: 10),
-                          child: Row(
-                            children: <Widget>[
-                              Text('Select Slot*'),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          // height: 300,
-                          width: MediaQuery.of(context).size.width,
-                          // padding: EdgeInsets.all(20),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: GridView.builder(
-                              itemCount: slots.length,
-                              shrinkWrap: true,
-                              physics: ScrollPhysics(),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      childAspectRatio: 3,
-                                      crossAxisSpacing: 5,
-                                      mainAxisSpacing: 10),
-                              itemBuilder: (BuildContext context, int index) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(2.0),
-                                  child: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        slot = slots[index];
-                                      });
-                                      print(slots[index].startTime +
-                                          '-' +
-                                          slots[index].endTime);
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(50),
-                                        color: slot.id == slots[index].id
-                                            ? grey
-                                            : white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey,
-                                            offset: Offset(0.0, 1.0), //(x,y)
-                                            blurRadius: 5.0,
-                                          ),
-                                        ],
-                                      ),
-                                      alignment: Alignment.center,
-                                      padding: EdgeInsets.all(5),
-                                      height: 70,
-                                      child: Text(
-                                        slots[index].startTime +
-                                            '-' +
-                                            slots[index].endTime,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            color: slot.id == slots[index].id
-                                                ? white
-                                                : black),
-                                        maxLines: 2,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
+                        // Padding(
+                        //   padding: const EdgeInsets.only(
+                        //       left: 10.0, right: 10, top: 10),
+                        //   child: Row(
+                        //     children: <Widget>[
+                        //       Text('Select Slot*'),
+                        //     ],
+                        //   ),
+                        // ),
+                        // Container(
+                        //   // height: 300,
+                        //   width: MediaQuery.of(context).size.width,
+                        //   // padding: EdgeInsets.all(20),
+                        //   child: Padding(
+                        //     padding: const EdgeInsets.all(8.0),
+                        //     child: GridView.builder(
+                        //       itemCount: slots.length,
+                        //       shrinkWrap: true,
+                        //       physics: ScrollPhysics(),
+                        //       gridDelegate:
+                        //           SliverGridDelegateWithFixedCrossAxisCount(
+                        //               crossAxisCount: 2,
+                        //               childAspectRatio: 3,
+                        //               crossAxisSpacing: 5,
+                        //               mainAxisSpacing: 10),
+                        //       itemBuilder: (BuildContext context, int index) {
+                        //         return Padding(
+                        //           padding: const EdgeInsets.all(2.0),
+                        //           child: InkWell(
+                        //             onTap: () {
+                        //               setState(() {
+                        //                 slot = slots[index];
+                        //               });
+                        //               print(slots[index].startTime +
+                        //                   '-' +
+                        //                   slots[index].endTime);
+                        //             },
+                        //             child: Container(
+                        //               decoration: BoxDecoration(
+                        //                 borderRadius: BorderRadius.circular(50),
+                        //                 color: slot.id == slots[index].id
+                        //                     ? grey
+                        //                     : white,
+                        //                 boxShadow: [
+                        //                   BoxShadow(
+                        //                     color: Colors.grey,
+                        //                     offset: Offset(0.0, 1.0), //(x,y)
+                        //                     blurRadius: 5.0,
+                        //                   ),
+                        //                 ],
+                        //               ),
+                        //               alignment: Alignment.center,
+                        //               padding: EdgeInsets.all(5),
+                        //               height: 70,
+                        //               child: Text(
+                        //                 slots[index].startTime +
+                        //                     '-' +
+                        //                     slots[index].endTime,
+                        //                 overflow: TextOverflow.ellipsis,
+                        //                 style: TextStyle(
+                        //                     color: slot.id == slots[index].id
+                        //                         ? white
+                        //                         : black),
+                        //                 maxLines: 2,
+                        //               ),
+                        //             ),
+                        //           ),
+                        //         );
+                        //       },
+                        //     ),
+                        //   ),
+                        // ),
+                        // SizedBox(
+                        //   height: 20,
+                        // ),
                         SizedBox(
                           width: 200,
                           child: RoundedLoadingButton(
-                            color: green,
+                            color: pcolor,
                             controller: _btnController,
                             onPressed: () async {
                               if (_formKey.currentState.validate()) {

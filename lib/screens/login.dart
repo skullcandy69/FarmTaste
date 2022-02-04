@@ -58,16 +58,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     height: 30,
                   ),
-                  RaisedButton(
+                  ElevatedButton(
+
                     onPressed: () {
                       changeScreen(context, City());
                     },
-                    color: Colors.blue,
-                    child: Text('              New Customer          '),
-                    textColor: Colors.white,
-                    elevation: 5,
+                    child: Text('New Customer'),
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                     onPressed: () {
                       changeScreenRepacement(
                           context,
@@ -76,10 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             title: 'LOGIN',
                           ));
                     },
-                    color: Colors.white,
-                    child: Text('          Existing Customer        '),
-                    textColor: Colors.blue,
-                    elevation: 5,
+                    child: Text('Existing Customer'),
                   ),
                 ],
               ),

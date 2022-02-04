@@ -9,9 +9,24 @@ const Color white = Colors.white;
 const Color purple = Colors.purple;
 const Color pink = Colors.pink;
 const Color grey = Colors.grey;
-Color pcolor = Color(0xff32cd32);
-
-const BASE_URL ="http://ec2-34-236-227-232.compute-1.amazonaws.com:3000";
+// Color pcolor = Color(0xff32cd32);
+const MaterialColor pcolor = MaterialColor(
+  _blackPrimaryValue,
+  <int, Color>{
+    50: Color(0xFF000000),
+    100: Color(0xFF000000),
+    200: Color(0xFF000000),
+    300: Color(0xFF000000),
+    400: Color(0xFF000000),
+    500: Color(_blackPrimaryValue),
+    600: Color(0xFF000000),
+    700: Color(0xFF000000),
+    800: Color(0xFF000000),
+    900: Color(0xFF000000),
+  },
+);
+const int _blackPrimaryValue = 0xFF000000;
+const BASE_URL = "http://ec2-34-236-227-232.compute-1.amazonaws.com:3000";
 // "http://ec2-3-7-184-113.ap-south-1.compute.amazonaws.com:3000";
 //list of endpoints:
 
@@ -51,7 +66,9 @@ const GETPARTICULARPRODUCATCAT = BASE_URL +
     "/productSubCategories/"; // (get request to see all sub categories of a particular category)
 const GETSUBPRODUCATCAT = BASE_URL +
     "/products/"; // (get request to see all products of a particular subCategory)
+const GETPRODUCTREVIEW = BASE_URL + "/product/";
 
+const POSTREVIEW = BASE_URL +"/product/review";
 //V) PRODUCT RELATED FOR ADMIN =>
 
 const POSTPRODUCAT = BASE_URL +
@@ -84,7 +101,7 @@ const REMOVEFROMCART = BASE_URL +
 const MYCART =
     BASE_URL + "/my-cart"; //(get request to view products of my cart)
 const EMPTYCART = BASE_URL + "/empty-cart"; //(delete request to empty my cart)
-const SLOTS = BASE_URL + "/slots"; 
+const SLOTS = BASE_URL + "/slots";
 //orders
 const ORDERS = BASE_URL + "/orders";
 const UPDATEORDERS = BASE_URL + "/orders/";

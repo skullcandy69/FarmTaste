@@ -126,7 +126,7 @@ final RoundedLoadingButtonController _resend =
                     child: Text('Resend OTP!',
                         style: TextStyle(color: Colors.white)),
                     controller: _resend,
-                    color: green,
+                    color: pcolor,
                     onPressed: () async {
                       if (widget.signup == false) {
                           String message = await authprovider.genOtplogin();
@@ -167,7 +167,7 @@ final RoundedLoadingButtonController _resend =
                           style: TextStyle(color: Colors.white)),
                       controller: _btnController,
                       width: MediaQuery.of(context).size.width * 0.5,
-                      color: green,
+                      color: pcolor,
                       onPressed: () async {
                         if (widget.signup == true) {
                           if (await authprovider.signup(widget.cityId.toString(),

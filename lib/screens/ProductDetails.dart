@@ -6,6 +6,7 @@ import 'package:grocery/helpers/navigation.dart';
 import 'package:grocery/models/CartModel.dart';
 import 'package:grocery/models/products.dart';
 import 'package:grocery/provider/addcart.dart';
+import 'package:grocery/screens/Product.dart';
 import 'package:grocery/screens/shoppingCart.dart';
 import 'package:grocery/widgets/Loader.dart';
 import 'package:grocery/widgets/RecurringOrder.dart';
@@ -15,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ProductDetails extends StatefulWidget {
   final int id;
@@ -29,9 +31,9 @@ class ProductDetails extends StatefulWidget {
 Future<List<ProductData>> productcatlist(String id) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token');
-  var response =
-      await http.get(Uri.parse(GETSUBPRODUCATCAT + id), headers: {"Authorization": token});
-  print(response.body);
+  var response = await http.get(Uri.parse(GETSUBPRODUCATCAT + id),
+      headers: {"Authorization": token});
+  // print(token);
   Products products = Products.fromJson(json.decode(response.body));
   return products.data;
 }
@@ -223,7 +225,8 @@ class _ProductDetailsState extends State<ProductDetails> {
                                               MainAxisAlignment.spaceBetween,
                                           children: <Widget>[
                                             RichText(
-                                              text: TextSpan(children: <TextSpan>[
+                                              text:
+                                                  TextSpan(children: <TextSpan>[
                                                 TextSpan(
                                                     text: 'Total Amount: ',
                                                     style: TextStyle(
@@ -243,7 +246,8 @@ class _ProductDetailsState extends State<ProductDetails> {
                                               ]),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsets.all(8.0),
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
                                               child: FlatButton(
                                                 onPressed: () async {
                                                   // _timer.cancel();
@@ -337,7 +341,7 @@ class _DetailScreenState extends State<DetailScreen> {
       child: Padding(
         padding: const EdgeInsets.all(5.0),
         child: Container(
-          height: 90,
+          height: 100,
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
@@ -357,35 +361,40 @@ class _DetailScreenState extends State<DetailScreen> {
                     children: <Widget>[
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          height: 80,
-                          width: 80,
-                          child: Image.network(widget.pro.imageUrl) == null
-                              ? CircularProgressIndicator()
-                              : Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    Image.network(
-                                      widget.pro.imageUrl,
-                                      fit: BoxFit.cover,
-                                      loadingBuilder: (BuildContext context,
-                                          Widget child,
-                                          ImageChunkEvent loadingProgress) {
-                                        if (loadingProgress == null)
-                                          return child;
-                                        return Center(child: Loader());
-                                      },
-                                    ),
-                                    widget.pro.inStock
-                                        ? Container()
-                                        : Image.asset(
-                                            'images/outofstock.png',
-                                            fit: BoxFit.contain,
-                                            // color: Colors.white,
-                                            // colorBlendMode: BlendMode.darken,
-                                          )
-                                  ],
-                                ),
+                        child: GestureDetector(
+                          onTap: () {
+                            changeScreen(context, ProductDisplay(widget.pro));
+                          },
+                          child: Container(
+                            height: 80,
+                            width: 80,
+                            child: Image.network(widget.pro.imageUrl) == null
+                                ? CircularProgressIndicator()
+                                : Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      Image.network(
+                                        widget.pro.imageUrl,
+                                        fit: BoxFit.cover,
+                                        loadingBuilder: (BuildContext context,
+                                            Widget child,
+                                            ImageChunkEvent loadingProgress) {
+                                          if (loadingProgress == null)
+                                            return child;
+                                          return Center(child: Loader());
+                                        },
+                                      ),
+                                      widget.pro.inStock
+                                          ? Container()
+                                          : Image.asset(
+                                              'images/outofstock.png',
+                                              fit: BoxFit.contain,
+                                              // color: Colors.white,
+                                              // colorBlendMode: BlendMode.darken,
+                                            )
+                                    ],
+                                  ),
+                          ),
                         ),
                       ),
                       Expanded(
@@ -409,12 +418,9 @@ class _DetailScreenState extends State<DetailScreen> {
                                 text: TextSpan(
                                   children: <TextSpan>[
                                     TextSpan(
-                                      text: "₹" +widget.pro.gstAmount.toString() + ' ',
-                                      // text: widget.pro.rate[0]
-                                      //             .discountedAmount !=
-                                      //         null
-                                      //     ? "₹${widget.pro.rate[0].discountedAmount.toString()}\t"
-                                      //     : "₹${widget.pro.rate[0].baseAmount.toString()}\t",
+                                      text: "₹" +
+                                          widget.pro.gstAmount.toString() +
+                                          ' ',
                                       style: TextStyle(
                                         color: black,
                                       ),
@@ -428,6 +434,18 @@ class _DetailScreenState extends State<DetailScreen> {
                                   ],
                                 ),
                               ),
+                              RatingBarIndicator(
+                                rating:
+                                    double.parse(widget.pro.rating.toString()),
+                                itemBuilder: (context, index) => Icon(
+                                  Icons.star,
+                                  color: pcolor,
+                                ),
+                                itemCount: 5,
+                                itemSize: 15.0,
+                                unratedColor: Colors.black12,
+                                direction: Axis.horizontal,
+                              ),
                             ],
                           ),
                         ),
@@ -437,31 +455,31 @@ class _DetailScreenState extends State<DetailScreen> {
                           : Column(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: <Widget>[
-                                GestureDetector(
-                                  onTap: () => widget.pro.inStock
-                                      ? _showDialog(widget.pro)
-                                      : Scaffold.of(context)
-                                          .showSnackBar(SnackBar(
-                                          content: Text("OUT OF STOCK"),
-                                          backgroundColor: red,
-                                        )),
-                                  child: Container(
-                                      decoration: BoxDecoration(
-                                          color: white,
-                                          borderRadius:
-                                              BorderRadius.circular(50)),
-                                      child: Icon(
-                                        Icons.replay,
-                                        color: blue,
-                                      )),
-                                ),
+                                // GestureDetector(
+                                //   onTap: () => widget.pro.inStock
+                                //       ? _showDialog(widget.pro)
+                                //       : Scaffold.of(context)
+                                //           .showSnackBar(SnackBar(
+                                //           content: Text("OUT OF STOCK"),
+                                //           backgroundColor: red,
+                                //         )),
+                                //   child: Container(
+                                //       decoration: BoxDecoration(
+                                //           color: white,
+                                //           borderRadius:
+                                //               BorderRadius.circular(50)),
+                                //       child: Icon(
+                                //         Icons.replay,
+                                //         color: blue,
+                                //       )),
+                                // ),
                                 Container(
                                   height: 30,
                                   width: 75,
                                   decoration: BoxDecoration(
                                       color: white,
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: blue)),
+                                      border: Border.all(color: pcolor)),
                                   child: Center(
                                       child: Row(
                                     mainAxisAlignment:
@@ -483,17 +501,17 @@ class _DetailScreenState extends State<DetailScreen> {
                                               },
                                               child: Icon(
                                                 Icons.remove,
-                                                color: blue,
+                                                color: pcolor,
                                               ),
                                             ),
                                       _itemcounter == 0
                                           ? Text(
                                               'ADD',
-                                              style: TextStyle(color: blue),
+                                              style: TextStyle(color: pcolor),
                                             )
                                           : Text(
                                               _itemcounter.toString(),
-                                              style: TextStyle(color: blue),
+                                              style: TextStyle(color: pcolor),
                                             ),
                                       InkWell(
                                         onTap: () async {
@@ -514,7 +532,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                         },
                                         child: Icon(
                                           Icons.add,
-                                          color: blue,
+                                          color: pcolor,
                                         ),
                                       ),
                                     ],

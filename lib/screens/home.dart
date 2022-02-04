@@ -198,19 +198,19 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
 
-                  ListTile(
-                    leading: FittedBox(
-                        fit: BoxFit.cover,
-                        child: Hero(
-                          tag: 'plan',
-                          child: Container(
-                              height: 45,
-                              width: 45,
-                              child: Image.asset('images/plan.png')),
-                        )),
-                    title: Text('Plan'),
-                    onTap: () => changeScreen(context, SubscriptionScreen()),
-                  ),
+                  // ListTile(
+                  //   leading: FittedBox(
+                  //       fit: BoxFit.cover,
+                  //       child: Hero(
+                  //         tag: 'plan',
+                  //         child: Container(
+                  //             height: 45,
+                  //             width: 45,
+                  //             child: Image.asset('images/plan.png')),
+                  //       )),
+                  //   title: Text('Plan'),
+                  //   onTap: () => changeScreen(context, SubscriptionScreen()),
+                  // ),
                   ListTile(
                     leading: FittedBox(
                         fit: BoxFit.fill,
@@ -341,7 +341,7 @@ class _HomePageState extends State<HomePage> {
 I have issue/query regarding my order"""),
               backgroundColor: pcolor,
               child: AutoSizeText(
-                'help',
+                'Help',
                 maxLines: 1,
               ),
             ));
